@@ -23,6 +23,9 @@ echo "install filebroswer "
 sudo curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash 
 #sudo filebrowser -r /home/pi/RetroPie/
 
+echo "init db"
+sudo filebrowser config init
+
 echo "allow ip sinon"
 sudo filebrowser -d filebrowser.db config set --address 0.0.0.0
 
