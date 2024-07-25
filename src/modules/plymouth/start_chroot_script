@@ -61,7 +61,9 @@ smartpad_install_theme() {
 }
 
 pushd "/home/${BASE_USER}" &>/dev/null
+echo "download git plymouth"
 sudo -u "${BASE_USER}" git clone "${SMARTPAD_PLYMOUTH_REPO}"
+echo "install plymouth"
 smartpad_install_theme
 popd &>/dev/null
 
