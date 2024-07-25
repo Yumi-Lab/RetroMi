@@ -55,9 +55,9 @@ EOF
 
 sudo systemctl daemon-reload
 sudo systemctl enable filebrowser.service
-sudo systemctl start filebrowser.service
+#sudo systemctl start filebrowser.service
 
 sudo chmod 777 -R /home/pi/RetroPie/
-unpack /home/pi/RetroPie/retropiemenu
+unpack /filesystem/home/pi/RetroPie/retropiemenu /home/pi/RetroPie/retropiemenu
 
 echo_green "install filebroswer...(DONE)"
