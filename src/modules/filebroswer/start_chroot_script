@@ -21,7 +21,7 @@ install_cleanup_trap
 echo_green "install filebroswer..."
 echo "install filebroswer "
 sudo curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash 
-sudo filebrowser -r /home/pi/RetroPie/
+#sudo filebrowser -r /home/pi/RetroPie/
 
 echo "allow ip sinon"
 sudo filebrowser -d filebrowser.db config set --address 0.0.0.0
