@@ -50,6 +50,19 @@ if [[ -z "${SMARTPAD_PLYMOUTH_REPO}" ]]; then
     exit 1
 fi
 pushd "/home/${BASE_USER}" &>/dev/null
+
+# Path to the directory to check and delete
+DIR="/home/pi/plymouth-themes"
+
+# Check if the directory exists
+if [ -d "$DIR" ]; then
+    # Delete the directory and all its contents
+    rm -rf "$DIR"
+    echo "The directory $DIR has been successfully deleted."
+else
+    echo "The directory $DIR does not exist."
+fi
+
 echo "download git plymouth ${SMARTPAD_PLYMOUTH_REPO}"
 sudo -u "${BASE_USER}" git clone "${SMARTPAD_PLYMOUTH_REPO}"
 sudo -u "${BASE_USER}" git clone "${SMARTPAD_PLYMOUTH_REPO}"
