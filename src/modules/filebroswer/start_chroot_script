@@ -1,0 +1,60 @@
+#!/usr/bin/env bash
+#### Smartpad Specific Tweaks for armbian images
+####
+#### Written by Stephan Wendel aka KwadFan <me@stephanwe.de>
+#### Copyright 2023 - till today
+#### https://github.com/KwadFan
+####
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+# Source error handling, leave this in place
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+
+echo_green "install filebroswer..."
+echo "install filebroswer "
+sudo curl -fsSL https://raw.githubusercontent.com/filebrowser/get/master/get.sh | bash 
+sudo filebrowser -r /home/pi/RetroPie/
+
+echo "allow ip sinon"
+sudo filebrowser -d filebrowser.db config set --address 0.0.0.0
+
+echo "script service"
+cat << EOF | sudo tee /usr/local/bin/start_filebrowser.sh
+#!/bin/bash
+filebrowser -d filebrowser.db config set --address 0.0.0.0
+sudo filebrowser -r /home/pi/RetroPie/
+EOF
+
+sudo chmod +x /usr/local/bin/start_filebrowser.sh
+
+cat << EOF | sudo tee /etc/systemd/system/filebrowser.service
+[Unit]
+Description=FileBrowser Service
+After=network.target
+
+[Service]
+ExecStart=/usr/local/bin/start_filebrowser.sh
+Restart=always
+User=root
+Group=root
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable filebrowser.service
+sudo systemctl start filebrowser.service
+
+sudo chmod 777 -R /home/pi/RetroPie/
+unpack /home/pi/RetroPie/retropiemenu
+
+echo_green "install filebroswer...(DONE)"
