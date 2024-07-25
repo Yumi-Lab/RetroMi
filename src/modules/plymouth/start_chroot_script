@@ -17,9 +17,9 @@ set -Ee
 source /common.sh
 install_cleanup_trap
 
-[[ -n "$SMARTPAD_CONFIG_TXT_FILE" ]] || SMARTPAD_CONFIG_TXT_FILE="/boot/armbianEnv.txt"
-[[ -n "$SMARTPAD_PLYMOUTH_REPO" ]] || SMARTPAD_PLYMOUTH_REPO="https://github.com/Yumi-Lab/plymouth-themes.git"
-[[ -n "$SMARTPAD_PLYMOUTH_THEME" ]] || SMARTPAD_PLYMOUTH_THEME="pixels"
+[[ -n "${SMARTPAD_CONFIG_TXT_FILE}" ]] || SMARTPAD_CONFIG_TXT_FILE="/boot/armbianEnv.txt"
+[[ -n "${SMARTPAD_PLYMOUTH_REPO}" ]] || SMARTPAD_PLYMOUTH_REPO="https://github.com/Yumi-Lab/plymouth-themes.git"
+[[ -n "${SMARTPAD_PLYMOUTH_THEME}" ]] || SMARTPAD_PLYMOUTH_THEME="pixels"
 
 ### Helper func
 is_board_type() {
@@ -41,7 +41,6 @@ fi
 
 echo_green "Apply SmartPad specific patches... [DONE]"
 
-
 ### Install plymouth theme and install yumi Plymouth repository
 echo_green "Install Yumi Lab Plymouth theme on SmartPad..."
 # Vérifier que la variable SMARTPAD_PLYMOUTH_REPO est définie
@@ -55,23 +54,21 @@ pushd "/home/${BASE_USER}" &>/dev/null
 DIR="/home/pi/plymouth-themes"
 
 # Check if the directory exists
-if [ -d "$DIR" ]; then
+if [[ -d "${DIR}" ]]; then
     # Delete the directory and all its contents
-    rm -rf "$DIR"
-    echo "The directory $DIR has been successfully deleted."
+    rm -rf "${DIR}"
+    echo "The directory ${DIR} has been successfully deleted."
 else
-    echo "The directory $DIR does not exist."
+    echo "The directory ${DIR} does not exist."
 fi
 
 echo "download git plymouth ${SMARTPAD_PLYMOUTH_REPO}"
-sudo -u "${BASE_USER}" git clone "${SMARTPAD_PLYMOUTH_REPO}"
-sudo -u "${BASE_USER}" git clone "${SMARTPAD_PLYMOUTH_REPO}"
-if [[ $? -ne 0 ]]; then
+if ! sudo -u "${BASE_USER}" git clone "${SMARTPAD_PLYMOUTH_REPO}"; then
     echo_red "Clone error. Check URL: ${SMARTPAD_PLYMOUTH_REPO}"
     exit 1
 fi
+
 echo "install plymouth"
-local src dest
 dest="/usr/share/plymouth/themes/"
 src="/home/${BASE_USER}/$(basename "${SMARTPAD_PLYMOUTH_REPO/.git/}")"
 src="${src}/pack_3/pixels"
@@ -86,4 +83,3 @@ echo_green "Install Yumi Lab Plymouth theme on SmartPad... [DONE]"
 
 echo_green "Enable first boot service..."
 systemctl_if_exists enable firstboot.service
-
