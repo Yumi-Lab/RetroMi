@@ -28,11 +28,13 @@ sudo filebrowser config init
 
 echo "allow ip sinon"
 sudo filebrowser -d filebrowser.db config set --address 0.0.0.0
+sudo filebrowser -d filebrowser.db config set --port 80
 
 echo "script service"
 cat << EOF | sudo tee /usr/local/bin/start_filebrowser.sh
 #!/bin/bash
 filebrowser -d filebrowser.db config set --address 0.0.0.0
+filebrowser -d filebrowser.db config set --port 80
 sudo filebrowser -r /home/pi/RetroPie/
 EOF
 
