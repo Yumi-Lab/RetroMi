@@ -10,7 +10,7 @@ DOWNLOAD_URL_CHECKSUM="${DOWNLOAD_BASE_URL}/yumi-smartpione-retropie-light.img.x
 DOWNLOAD_URL_IMAGE="${DOWNLOAD_BASE_URL}/yumi-smartpione-retropie-light.img.xz"
 
 BASE_IMAGE_ENLARGEROOT=6000
-MODULES="base(pkgupgrade,udev_fix,armbian(armbian_net,yumios,is_req_preinstall,filebroswer))"
+MODULES="base(pkgupgrade,udev_fix,armbian(armbian_net,yumios,filebroswer))"
 
 # export Variables
 export BASE_ARCH
