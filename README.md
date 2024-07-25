@@ -46,7 +46,9 @@ Nous avons intégré un outil pratique de gestion de fichiers pour vous permettr
 
 - Ouvrez votre navigateur web et entrez l'URL suivante : http://your_ip:8080 (remplacez your_ip par l'adresse IP de votre SmartPi1).
 - Connectez-vous avec les identifiants suivants :
+- 
     Nom d'utilisateur : admin
+  
     Mot de passe : admin
 - Naviguez vers le dossier des ROMs et téléchargez vos fichiers de jeux.
 
