@@ -4,7 +4,7 @@ If you are reading this document right now, you are probably considering contrib
 than it is today. Thank you for taking that initiative! Before submitting your contribution, please take a moment and
 make sure to read through our contribution guidelines:
 
--   [Code of Conduct](https://github.com/Yumi-Lab/RetroMi/blob/develop/.github/CODE_OF_CONDUCT.md)
+-   [Code of Conduct](https://github.com/Yumi-Lab/RetroMi/blob/main/.github/CODE_OF_CONDUCT.md)
 -   [Question or Problem?](#question)
 -   [Issues and Bugs](#issue)
 -   [Feature Requests](#feature)
@@ -47,7 +47,7 @@ Before you work on a PR and submit it, please pay attention to the following gui
 1. Search the [pull requests](https://github.com/Yumi-Lab/RetroMi/pulls) for an open or closed PR related to your submission.
     - You don't want to duplicate existing efforts or work on something unlikely to be merged into the project.
 2. Do not submit PRs against the `master` branch. PRs need to be submitted against the `develop` branch.
-3. Follow our Code Layout definded via [editorconfig](https://github.com/Yumi-Lab/RetroMi/blob/develop/.editorconfig).
+3. Follow our Code Layout definded via [editorconfig](https://github.com/Yumi-Lab/RetroMi/blob/main/.editorconfig).
 4. If there is an issue describing the problem you're fixing or a discussion of a feature you are implementing, make sure to link it in the PRs body.
 
     - You can also add `fix #<id>` or `fixes #<id>` in the PR body where `<id>` is the issue id.
@@ -69,7 +69,7 @@ Before you work on a PR and submit it, please pay attention to the following gui
     - Upon merging, we will squash all commits of the PR into a single commit for a clean history and release changelogs.
 7. Please sign off each commit and your PR. It must contain your real name and a current email address (see example in item 4).
     - The sign-off should follow this pattern: `Signed-off-by: My Name <myemail@example.org>`
-    - The sign-off certifies that you agree with the [developer certificate of origin](https://github.com/Yumi-Lab/RetroMi/blob/develop/.github/DEVELOPER_CERTIFICATE_OF_ORIGIN.md).
+    - The sign-off certifies that you agree with the [developer certificate of origin](https://github.com/Yumi-Lab/RetroMi/blob/main/.github/DEVELOPER_CERTIFICATE_OF_ORIGIN.md).
     - If you provide a translation, a sign-off is not necessarily required.
 8. When opening a pull request, keep `Allow edits and access to secrets by maintainers` **enabled**.
 9. Your pull request has to pass our automated Test Chain
