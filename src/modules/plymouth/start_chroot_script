@@ -87,4 +87,5 @@ echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ...(DONE)"
 echo_green "Install Yumi Lab Plymouth theme on SmartPad... [DONE]"
 
 echo_green "Enable first boot service..."
+sudo chmod +x /usr/local/bin/firstboot
 systemctl_if_exists enable firstboot.service
