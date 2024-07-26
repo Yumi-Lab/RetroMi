@@ -21,6 +21,9 @@ install_cleanup_trap
 [[ -n "${SMARTPAD_PLYMOUTH_REPO}" ]] || SMARTPAD_PLYMOUTH_REPO="https://github.com/Yumi-Lab/plymouth-themes.git"
 [[ -n "${SMARTPAD_PLYMOUTH_THEME}" ]] || SMARTPAD_PLYMOUTH_THEME="pixels"
 
+sudo apt-get update
+sudo apt-get install plymouth -y
+
 ### Helper func
 is_board_type() {
     local board releasefile
@@ -78,6 +81,7 @@ fi
 echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ..."
 #sudo plymouth-set-default-theme "${SMARTPAD_PLYMOUTH_THEME}"
 sudo plymouth-set-default-theme -R pixels
+sudo update-initramfs -u
 popd &>/dev/null
 echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ...(DONE)"
 echo_green "Install Yumi Lab Plymouth theme on SmartPad... [DONE]"
