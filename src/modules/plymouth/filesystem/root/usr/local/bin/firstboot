@@ -28,8 +28,8 @@ fi
 
 welcome_msg() {
     cat << EOF
-Hello dear YUMI SmartPad One user,
-Please be patient, we have to prepare your first start of your Smartpad!
+Hello dear YUMI RetroMi One user,
+Please be patient, we have to prepare your first start of your RetroBox!
 
     *** DO NOT UNPLUG DEVICE OR DISRUPT THIS PROCESS! ***
     *** THIS WILL HARM YOUR OS! ***
@@ -45,7 +45,7 @@ reboot_msg() {
 Your device will be restarted in 5 seconds...
 
 Thank you for being patient and have fun with your new
-    *** YUMI SmartPad One ***
+    *** YUMI RetroMi ***
 
 EOF
 }
@@ -54,9 +54,9 @@ gen_initramfs() {
     update-initramfs -u &>/dev/null
 }
 
-enable_ks() {
-    systemctl --quiet enable KlipperScreen.service &>/dev/null
-}
+#enable_ks() {
+#    systemctl --quiet enable KlipperScreen.service &>/dev/null
+#}
 
 disable_firstboot() {
     systemctl --quiet disable firstboot.service &>/dev/null
@@ -78,7 +78,7 @@ fi
 gen_initramfs | "${DIALOG[@]}" --clear --gauge "Generate Initial RAM filesystem ..." "${RESOLUTION[@]}" 20
 
 # enable KlipperScreen
-enable_ks | "${DIALOG[@]}" --clear --gauge "Enable KLipperScreen ..." "${RESOLUTION[@]}" 80
+#enable_ks | "${DIALOG[@]}" --clear --gauge "Enable KLipperScreen ..." "${RESOLUTION[@]}" 80
 
 # disable firstboot service
 disable_firstboot | "${DIALOG[@]}" --clear --gauge "Disable firstboot service ..." "${RESOLUTION[@]}" 90
