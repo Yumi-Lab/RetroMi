@@ -28,6 +28,14 @@ Pour installer RetroPie sur votre Nano Computer SmartPi1, suivez ces étapes :
 
 Après l'installation, vous pouvez configurer vos contrôleurs de jeu, ajouter des ROMs et personnaliser l'interface utilisateur selon vos préférences. Consultez la documentation officielle de RetroPie pour des instructions détaillées sur la configuration et l'utilisation.
 
+## Système
+
+Pour ce connecter au système, utiliser l'identifiant suivant:
+  
+    Nom d'utilisateur : pi
+  
+    Mot de passe : yumi
+
 ## Connexion Wi-Fi
 
 Pour connecter votre SmartPi1 à un réseau Wi-Fi, suivez la même procédure que pour une distribution Armbian :
@@ -47,9 +55,9 @@ Nous avons intégré un outil pratique de gestion de fichiers pour vous permettr
 - Ouvrez votre navigateur web et entrez l'URL suivante : http://your_ip:8080 (remplacez your_ip par l'adresse IP de votre SmartPi1).
 - Connectez-vous avec les identifiants suivants :
   
-    Nom d'utilisateur : admin
+    Nom d'utilisateur : pi
   
-    Mot de passe : admin
+    Mot de passe : yumi
   
 - Naviguez vers le dossier des ROMs et téléchargez vos fichiers de jeux.
 
