@@ -69,6 +69,10 @@ if [[ -f /boot/armbianEnv.txt ]]; then
     "${DIALOG[@]}" --clear --gauge "Firstboot preperation ..." "${RESOLUTION[@]}" 10
 fi
 
+#Disable emulastation
+script="/opt/retropie/configs/all/autostart.sh"
+sed -i '/#auto/d' "$script"
+
 # Update initramfs
 gen_initramfs | "${DIALOG[@]}" --clear --gauge "Generate Initial RAM filesystem ..." "${RESOLUTION[@]}" 20
 
@@ -77,6 +81,12 @@ disable_firstboot | "${DIALOG[@]}" --clear --gauge "Disable firstboot service ..
 
 # Show fake finish
 sleep 2 | "${DIALOG[@]}" --clear --gauge "Finalize Firstboot ..." "${RESOLUTION[@]}" 100
+
+
+#Enable Emulastation
+sed -i '$a\' "$script"
+echo "emulationstation #auto" >>"$script"
+chown $user:$user "$script"
 
 # Show reboot screen
 "${DIALOG[@]}" --clear --title "Firstboot preperation" \
