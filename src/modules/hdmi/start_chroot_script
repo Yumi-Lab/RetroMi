@@ -32,8 +32,7 @@ if [ ! -f "${FILE}" ]; then
 fi
 
 # Vérifier si la ligne existe déjà dans le fichier
-grep -qF "${LINE}" "${FILE}"
-if [ $? -eq 0 ]; then
+if grep -qF "${LINE}" "${FILE}"; then
     echo "La ligne existe déjà dans le fichier."
     exit 0
 fi
@@ -42,4 +41,3 @@ fi
 echo "${LINE}" >> "${FILE}"
 echo "La ligne a été ajoutée au fichier."
 echo_green "Enable HDMI résolution...(DONE)"
-
