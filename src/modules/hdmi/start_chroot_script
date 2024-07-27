@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#### Smartpad Specific Tweaks for armbian images
+####
+#### Written by Stephan Wendel aka KwadFan <me@stephanwe.de>
+#### Copyright 2023 - till today
+#### https://github.com/KwadFan
+####
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+# Source error handling, leave this in place
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+
+echo_green "Enable HDMI résolution..."
+# Chemin du fichier à modifier
+FILE="/boot/armbianEnv.txt"
+
+# La ligne à vérifier/ajouter
+LINE="extraargs=video=HDMI-A-1:1280x720-32@60 hdmi.audio=1 cma=128"
+
+# Vérifier si le fichier existe
+if [ ! -f "$FILE" ]; then
+    echo "Le fichier $FILE n'existe pas."
+    exit 1
+fi
+
+# Vérifier si la ligne existe déjà dans le fichier
+grep -qF "$LINE" "$FILE"
+if [ $? -eq 0 ]; then
+    echo "La ligne existe déjà dans le fichier."
+    exit 0
+fi
+
+# Ajouter la ligne à la fin du fichier
+echo "$LINE" >> "$FILE"
+echo "La ligne a été ajoutée au fichier."
+echo_green "Enable HDMI résolution...(DONE)"
+

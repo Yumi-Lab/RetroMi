@@ -34,5 +34,6 @@ chmod +x setup.sh
 ./setup.sh 
 #Set access all
 sudo chmod 777 -R /filesystem/home/pi/RetroPie
+sudo chmod 777 -R /opt/retropie
 
 echo_green "Add Music..."
