@@ -17,75 +17,22 @@ set -Ee
 source /common.sh
 install_cleanup_trap
 
-[[ -n "${SMARTPAD_CONFIG_TXT_FILE}" ]] || SMARTPAD_CONFIG_TXT_FILE="/boot/armbianEnv.txt"
-[[ -n "${SMARTPAD_PLYMOUTH_REPO}" ]] || SMARTPAD_PLYMOUTH_REPO="https://github.com/Yumi-Lab/plymouth-themes.git"
-[[ -n "${SMARTPAD_PLYMOUTH_THEME}" ]] || SMARTPAD_PLYMOUTH_THEME="pixels"
 
-sudo apt-get update
-sudo apt-get install plymouth -y
 
-### Helper func
-is_board_type() {
-    local board releasefile
-    board=""
-    releasefile="/etc/armbian-release"
-    if [[ -f "${releasefile}" ]]; then
-        board="$(grep "BOARD=" "${releasefile}" | cut -d'=' -f2)"
-    fi
-    echo "${board}"
-}
+echo_green "Add Music..."
 
-echo_green "Apply SmartPad specific patches..."
+unpack /filesystem/home/pi/RetroPie/roms/music /
+#Now we need to download the file. Enter the following command into the terminal:
+wget https://installtekz.com/downloads/musicpi/music_setup.tar.gz 
+#Next we need to uncompress the file with the following command:
+tar -xvzf music_setup.tar.gz 
+#Once the file is uncompressed, we need to move in to the “music_setup” directory with the next command:
+cd music_setup 
+#Now we need to make the setup script executable:
+chmod +x setup.sh 
+#And finally, run the script:
+./setup.sh 
+#Set access all
+sudo chmod 777 -R /filesystem/home/pi/RetroPie
 
-unpack /filesystem/root /
-if [[ -f /etc/X11/xorg.conf.d/03-smartpad-rotate-touch.conf ]]; then
-    rm -fv /etc/X11/xorg.conf.d/03-smartpad-rotate-touch.conf
-fi
-
-echo_green "Apply SmartPad specific patches... [DONE]"
-
-### Install plymouth theme and install yumi Plymouth repository
-echo_green "Install Yumi Lab Plymouth theme on SmartPad..."
-# Vérifier que la variable SMARTPAD_PLYMOUTH_REPO est définie
-if [[ -z "${SMARTPAD_PLYMOUTH_REPO}" ]]; then
-    echo_red "La variable SMARTPAD_PLYMOUTH_REPO n'est pas définie. Annulation."
-    exit 1
-fi
-pushd "/home/${BASE_USER}" &>/dev/null
-
-# Path to the directory to check and delete
-DIR="/home/pi/plymouth-themes"
-
-# Check if the directory exists
-if [[ -d "${DIR}" ]]; then
-    # Delete the directory and all its contents
-    rm -rf "${DIR}"
-    echo "The directory ${DIR} has been successfully deleted."
-else
-    echo "The directory ${DIR} does not exist."
-fi
-
-echo "download git plymouth ${SMARTPAD_PLYMOUTH_REPO}"
-if ! sudo -u "${BASE_USER}" git clone "${SMARTPAD_PLYMOUTH_REPO}"; then
-    echo_red "Clone error. Check URL: ${SMARTPAD_PLYMOUTH_REPO}"
-    exit 1
-fi
-
-echo "install plymouth"
-dest="/usr/share/plymouth/themes/"
-src="/home/${BASE_USER}/$(basename "${SMARTPAD_PLYMOUTH_REPO/.git/}")"
-src="${src}/pack_3/pixels"
-if [[ -d "${src}" ]]; then
-    sudo cp -vr "${src}" "${dest}"
-fi
-echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ..."
-#sudo plymouth-set-default-theme "${SMARTPAD_PLYMOUTH_THEME}"
-sudo plymouth-set-default-theme -R pixels
-sudo update-initramfs -u
-popd &>/dev/null
-echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ...(DONE)"
-echo_green "Install Yumi Lab Plymouth theme on SmartPad... [DONE]"
-
-echo_green "Enable first boot service..."
-sudo chmod +x /usr/local/bin/firstboot
-systemctl_if_exists enable firstboot.service
+echo_green "Add Music..."
