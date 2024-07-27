@@ -1,0 +1,45 @@
+#!/usr/bin/env bash
+#### Smartpad Specific Tweaks for armbian images
+####
+#### Written by Stephan Wendel aka KwadFan <me@stephanwe.de>
+#### Copyright 2023 - till today
+#### https://github.com/KwadFan
+####
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+# Source error handling, leave this in place
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+
+
+echo_green "Add Lightgun..."
+
+wget -P /home/pi/RetroPie-Setup/ext/dev_philcomm/scriptmodules/supplementary/ "https://raw.githubusercontent.com/OfficialPhilcomm/retropie-music/master/retropie-music.sh"
+
+unpack /filesystem/home/pi/Lightgun /home/pi/Lightgun
+
+cd /home/pi/Lightgun
+
+# Chemin à vérifier
+CHEMIN="/home/pi/Lightgun"
+# Vérifiez si le chemin existe
+if [ ! -d "${CHEMIN}" ]; then
+  echo "Le chemin ${CHEMIN} n'existe pas."
+  exit 1
+fi
+# Trouver tous les fichiers .sh et les rendre exécutables
+echo "Rendre tous les fichiers .sh dans ${CHEMIN} et les sous-répertoires exécutables..."
+sudo find "${CHEMIN}" -type f -name "*.sh" -exec chmod +x {} \;
+echo "Tous les fichiers .sh sont maintenant exécutables."
+
+sudo ./setup-lightgun.sh
+sudo ./setup-retropie.sh
+
+echo_green "Add Lightgun...(DONE)"

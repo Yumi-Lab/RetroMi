@@ -25,4 +25,4 @@ wget -P /home/pi/RetroPie-Setup/ext/dev_philcomm/scriptmodules/supplementary/ "h
 unpack /filesystem/home/pi/RetroPie/roms/music /home/pi/RetroPie/roms/music
 chmod 777 -R /home/pi/RetroPie/roms/music
 
-echo_green "Add Music..."
+echo_green "Add Music...(DONE)"
