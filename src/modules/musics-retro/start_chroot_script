@@ -21,19 +21,8 @@ install_cleanup_trap
 
 echo_green "Add Music..."
 
-unpack /filesystem/home/pi/RetroPie/music /home/pi/RetroPie/music
-#Now we need to download the file. Enter the following command into the terminal:
-wget https://installtekz.com/downloads/musicpi/music_setup.tar.gz 
-#Next we need to uncompress the file with the following command:
-tar -xvzf music_setup.tar.gz 
-#Once the file is uncompressed, we need to move in to the “music_setup” directory with the next command:
-cd music_setup 
-#Now we need to make the setup script executable:
-chmod +x setup.sh 
-#And finally, run the script:
-./setup.sh 
-#Set access all
-sudo chmod 777 -R /filesystem/home/pi/RetroPie
-sudo chmod 777 -R /opt/retropie
+wget -P /home/pi/RetroPie-Setup/ext/dev_philcomm/scriptmodules/supplementary/ "https://raw.githubusercontent.com/OfficialPhilcomm/retropie-music/master/retropie-music.sh"
+unpack /filesystem/home/pi/RetroPie/roms/music /home/pi/RetroPie/roms/music
+chmod 777 -R /home/pi/RetroPie/roms/music
 
 echo_green "Add Music..."

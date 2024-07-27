@@ -26,20 +26,20 @@ FILE="/boot/armbianEnv.txt"
 LINE="extraargs=video=HDMI-A-1:1280x720-32@60 hdmi.audio=1 cma=128"
 
 # Vérifier si le fichier existe
-if [ ! -f "$FILE" ]; then
-    echo "Le fichier $FILE n'existe pas."
+if [ ! -f "${FILE}" ]; then
+    echo "Le fichier ${FILE} n'existe pas."
     exit 1
 fi
 
 # Vérifier si la ligne existe déjà dans le fichier
-grep -qF "$LINE" "$FILE"
+grep -qF "${LINE}" "${FILE}"
 if [ $? -eq 0 ]; then
     echo "La ligne existe déjà dans le fichier."
     exit 0
 fi
 
 # Ajouter la ligne à la fin du fichier
-echo "$LINE" >> "$FILE"
+echo "${LINE}" >> "${FILE}"
 echo "La ligne a été ajoutée au fichier."
 echo_green "Enable HDMI résolution...(DONE)"
 
