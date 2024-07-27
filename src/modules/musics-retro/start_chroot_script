@@ -21,7 +21,7 @@ install_cleanup_trap
 
 echo_green "Add Music..."
 
-unpack /filesystem/home/pi/RetroPie/roms/music /home/pi/RetroPie/roms/music
+unpack /filesystem/home/pi/RetroPie/music /home/pi/RetroPie/music
 #Now we need to download the file. Enter the following command into the terminal:
 wget https://installtekz.com/downloads/musicpi/music_setup.tar.gz 
 #Next we need to uncompress the file with the following command:
