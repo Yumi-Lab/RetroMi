@@ -19,13 +19,16 @@ install_cleanup_trap
 
 
 echo_green "Update RetroArch..."
+#unpack fix retroarch
+unpack /home/pi /home/pi
+cd /home/pi
+sudo unzip Retroarch-fix.zip -d /opt/retropie/emulators/
 
-unpack /opt/retropie/emulators /opt/retropie/emulators
-
+#create symbolic links
 ln -s "/opt/retropie/configs/all/retroarch/overlay" "/opt/retropie/emulators/retroarch/overlays"
 ln -s "/opt/retropie/configs/all/retroarch/assets" "/opt/retropie/emulators/retroarch/assets"
 ln -s "/opt/retropie/configs/all/retroarch/shaders" "/opt/retropie/emulators/retroarch/shader"
-
+#set access
 chmod 777 -R /home/pi/RetroPie/
 
 echo_green "Enable RetroArch...(DONE)"
