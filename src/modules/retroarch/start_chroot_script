@@ -22,7 +22,12 @@ echo_green "Update RetroArch..."
 #unpack fix retroarch
 unpack /filesystem/home/pi /home/pi
 cd /home/pi
-sudo unzip Retroarch-fix.zip -d /opt/retropie/emulators/
+mkdir retroarch
+sudo unzip Retroarch-fix.zip -d /home/pi/retroarch
+# create emulators folder
+sudo mkdir -p /opt/retropie/emulators
+# copy
+sudo cp -r /home/pi/retroarch/opt/retropie/emulators/* /opt/retropie/emulators/
 
 #create symbolic links
 ln -s "/opt/retropie/configs/all/retroarch/overlay" "/opt/retropie/emulators/retroarch/overlays"
