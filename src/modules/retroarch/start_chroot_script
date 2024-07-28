@@ -19,7 +19,14 @@ install_cleanup_trap
 
 
 echo_green "Update RetroArch..."
-cd /home/pi/Retropie-smartpi/
-sudo ./retropie_packages.sh setup basic_install retroarch
+
+unpack /opt/retropie/emulators /opt/retropie/emulators
+
+ln -s "/opt/retropie/configs/all/retroarch/overlay" "/opt/retropie/emulators/retroarch/overlays"
+ln -s "/opt/retropie/configs/all/retroarch/assets" "/opt/retropie/emulators/retroarch/assets"
+ln -s "/opt/retropie/configs/all/retroarch/shaders" "/opt/retropie/emulators/retroarch/shader"
+
+chmod 777 -R /home/pi/RetroPie/
+
 echo_green "Enable RetroArch...(DONE)"
 
