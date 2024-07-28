@@ -23,7 +23,7 @@ echo_green "Enable HDMI résolution..."
 FILE="/boot/armbianEnv.txt"
 
 # La ligne à vérifier/ajouter
-LINE="extraargs=video=HDMI-A-1:1280x720-32@60 hdmi.audio=1 cma=128"
+LINE="extraargs=video=HDMI-A-1:1280x720-32@60 hdmi.audio=1"
 
 # Vérifier si le fichier existe
 if [ ! -f "${FILE}" ]; then
