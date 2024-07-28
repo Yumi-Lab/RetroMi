@@ -20,7 +20,7 @@ install_cleanup_trap
 
 echo_green "Update RetroArch..."
 #unpack fix retroarch
-unpack /home/pi /home/pi
+unpack /filesystem/home/pi /home/pi
 cd /home/pi
 sudo unzip Retroarch-fix.zip -d /opt/retropie/emulators/
 
