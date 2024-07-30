@@ -21,9 +21,12 @@ install_cleanup_trap
 
 echo_green "Add Music..."
 
-wget -P /home/pi/RetroPie-Setup/ext/dev_philcomm/scriptmodules/supplementary/ "https://raw.githubusercontent.com/OfficialPhilcomm/retropie-music/master/retropie-music.sh"
+wget -P /home/pi/Retropie-smartpi/ext/dev_philcomm/scriptmodules/supplementary/ "https://raw.githubusercontent.com/OfficialPhilcomm/retropie-music/master/retropie-music.sh"
 unpack /filesystem/home/pi/RetroPie/roms/music /home/pi/RetroPie/roms/music
 chmod 777 -R /home/pi/RetroPie/roms/music
+chmod +x /home/pi/Retropie-smartpi/ext/dev_philcomm/scriptmodules/supplementary/retropie-music.sh
+cd /home/pi/Retropie-smartpi/ext/dev_philcomm/scriptmodules/supplementary
+sudo ./retropie-music.sh
 #cd /home/pi/RetroPie-Setup/ext/dev_philcomm/scriptmodules/supplementary
 #sudo ./retropie-music.sh
 
