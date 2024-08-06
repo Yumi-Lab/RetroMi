@@ -19,7 +19,7 @@ install_cleanup_trap
 
 [[ -n "${SMARTPAD_CONFIG_TXT_FILE}" ]] || SMARTPAD_CONFIG_TXT_FILE="/boot/armbianEnv.txt"
 [[ -n "${SMARTPAD_PLYMOUTH_REPO}" ]] || SMARTPAD_PLYMOUTH_REPO="https://github.com/Yumi-Lab/plymouth-themes.git"
-[[ -n "${SMARTPAD_PLYMOUTH_THEME}" ]] || SMARTPAD_PLYMOUTH_THEME="pixels"
+[[ -n "${SMARTPAD_PLYMOUTH_THEME}" ]] || SMARTPAD_PLYMOUTH_THEME="retromi"
 
 sudo apt-get update
 sudo apt-get install plymouth -y
@@ -74,13 +74,13 @@ fi
 echo "install plymouth"
 dest="/usr/share/plymouth/themes/"
 src="/home/${BASE_USER}/$(basename "${SMARTPAD_PLYMOUTH_REPO/.git/}")"
-src="${src}/pack_3/pixels"
+src="${src}/pack_yumi/retromi"
 if [[ -d "${src}" ]]; then
     sudo cp -vr "${src}" "${dest}"
 fi
 echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ..."
 #sudo plymouth-set-default-theme "${SMARTPAD_PLYMOUTH_THEME}"
-sudo plymouth-set-default-theme -R pixels
+sudo plymouth-set-default-theme -R retromi
 sudo update-initramfs -u
 popd &>/dev/null
 echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ...(DONE)"
