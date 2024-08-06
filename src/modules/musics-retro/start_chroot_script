@@ -24,6 +24,7 @@ unpack /filesystem/home/pi/music_setup /home/pi/music_setup
 cd /home/pi/music_setup 
 chmod +x setup.sh 
 sudo ./setup.sh 
+rm /home/pi/RetroPie/music/*
 unpack /filesystem/home/pi/RetroPie/music /home/pi/RetroPie/music/
 chmod 777 -R /home/pi/RetroPie/music/
 echo_green "Add Music...(DONE)"
