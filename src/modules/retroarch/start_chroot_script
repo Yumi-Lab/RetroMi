@@ -26,6 +26,8 @@ mkdir retroarch
 sudo unzip Retroarch-fix.zip -d /home/pi/retroarch
 # create emulators folder
 sudo mkdir -p /opt/retropie/emulators
+sudo mkdir -p /opt/retropie/configs/all/retroarch-joypads
+unpack /filesystem/opt/retropie/configs/all/retroarch-joypads /opt/retropie/configs/all/retroarch-joypads
 # copy
 sudo cp -r /home/pi/retroarch/opt/retropie/emulators/* /opt/retropie/emulators/
 
@@ -35,6 +37,6 @@ ln -s "/opt/retropie/configs/all/retroarch/assets" "/opt/retropie/emulators/retr
 ln -s "/opt/retropie/configs/all/retroarch/shaders" "/opt/retropie/emulators/retroarch/shader"
 #set access
 chmod 777 -R /home/pi/RetroPie/
-
+#sudo apt-get install xpad
 echo_green "Enable RetroArch...(DONE)"
 
