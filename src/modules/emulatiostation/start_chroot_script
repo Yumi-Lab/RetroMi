@@ -31,6 +31,11 @@ echo_green "Emulationstation Menu... (DONE)"
 
 echo_green "Emulationstation Theme Epic-Cody..."
 cd /etc/emulationstation/themes
-git clone https://github.com/c64-dev/es-epicnoir.git --branch master
+sudo git clone https://github.com/CodyV59/es-theme-epic-cody-RG351V.git --branch master
 echo_green "Emulationstation Theme Epic-Cody... (DONE)"
+
+echo_green "Emulationstation Theme Epicnoir..."
+cd /etc/emulationstation/themes
+sudo git clone https://github.com/c64-dev/es-epicnoir.git --branch master
+echo_green "Emulationstation Theme Epicnoir... (DONE)"
 
