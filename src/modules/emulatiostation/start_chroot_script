@@ -39,3 +39,5 @@ cd /etc/emulationstation/themes
 sudo git clone https://github.com/c64-dev/es-epicnoir.git --branch master
 echo_green "Emulationstation Theme Epicnoir... (DONE)"
 
+unpack /filesystem/etc/emulationstation/themes/ /etc/emulationstation/themes/
+sudo chmod 777 -R /etc/emulationstation/themes/
