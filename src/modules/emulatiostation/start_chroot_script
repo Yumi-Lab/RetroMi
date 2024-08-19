@@ -35,5 +35,6 @@ echo_green "Emulationstation Menu... (DONE)"
 
 unpack /filesystem/etc/emulationstation/themes/ /etc/emulationstation/themes/
 7z x /etc/emulationstation/themes/themes.zip.001
-rm /etc/emulationstation/themes/themes*.zip
+cd /etc/emulationstation/themes/
+rm themes.zip*
 sudo chmod 777 -R /etc/emulationstation/themes/
