@@ -34,6 +34,6 @@ echo_green "Emulationstation Menu... (DONE)"
 #echo_green "Emulationstation Theme Epicnoir... (DONE)"
 
 unpack /filesystem/etc/emulationstation/themes/ /etc/emulationstation/themes/
-7z e /etc/emulationstation/themes/themes.zip.001 -d /etc/emulationstation/themes/
+7z x /etc/emulationstation/themes/themes.zip.001
 rm /etc/emulationstation/themes/themes*.zip
 sudo chmod 777 -R /etc/emulationstation/themes/
