@@ -1,0 +1,25 @@
+#!/usr/bin/env bash
+#### Smartpad Specific Tweaks for armbian images
+####
+#### Written by Stephan Wendel aka KwadFan <me@stephanwe.de>
+#### Copyright 2023 - till today
+#### https://github.com/KwadFan
+####
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+# Source error handling, leave this in place
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+
+echo_green "Enable USB Auto Mount..."
+git clone https://github.com/Maxime3d77/auto-mount-retromi.git
+cd auto-mount-retromi/
+sudo ./CONFIGURE.sh
+echo_green "Enable USB Auto Mount...(DONE)"
