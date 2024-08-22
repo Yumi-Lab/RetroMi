@@ -21,5 +21,6 @@ install_cleanup_trap
 echo_green "Enable USB Auto Mount..."
 git clone https://github.com/Maxime3d77/auto-mount-retromi.git
 cd auto-mount-retromi/
+sudo chmod +x sudo ./CONFIGURE.sh
 sudo ./CONFIGURE.sh
 echo_green "Enable USB Auto Mount...(DONE)"
