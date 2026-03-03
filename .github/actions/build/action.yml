@@ -8,11 +8,11 @@ inputs:
   custompios-repository:
     description: "Repository for CustomPiOS"
     required: false
-    default: "guysoft/CustomPiOS"
+    default: "Yumi-Lab/CustomPiOS-Yumi"
   custompios-ref:
     description: "Branch / Tag / SHA to checkout CustomPiOS"
     required: false
-    default: "devel"
+    default: "1.5.0"
 outputs:
   type:
     description: SBC type (raspberry/armbian/...)
