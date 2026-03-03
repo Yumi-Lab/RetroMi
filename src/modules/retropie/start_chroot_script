@@ -1,0 +1,33 @@
+#!/usr/bin/env bash
+#### RetroPie — Install RetroPie on clean Armbian Bookworm image
+# shellcheck enable=require-variable-braces
+
+set -Ee
+export LC_ALL=C
+export DEBIAN_FRONTEND=noninteractive
+
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+echo_green "Installing RetroPie..."
+
+# Install prerequisites
+apt-get update
+check_install_pkgs ${RETROPIE_DEPS}
+
+# Clone Yumi-Lab/Retropie-smartpi installer
+pushd "/home/${BASE_USER}" &>/dev/null || exit 1
+gitclone RETROPIE_REPO Retropie-Setup
+popd &>/dev/null || exit 1
+
+# Run the installer
+pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
+chmod +x ./install.sh
+./install.sh
+popd &>/dev/null || exit 1
+
+# Fix ownership
+chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
+
+echo_green "Installing RetroPie... [DONE]"
