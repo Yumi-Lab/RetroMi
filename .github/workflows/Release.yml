@@ -50,7 +50,7 @@ jobs:
         with:
           github_token: ${{ secrets.PAT }}
           source_ref: "develop"
-          target_branch: "master"
+          target_branch: "main"
           commit_message_template: "[Automated] Merged {source_ref} into target {target_branch}"
 
   release:
@@ -64,7 +64,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: main
           fetch-depth: 0
 
       - name: Get latest tag
@@ -108,7 +108,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: main
 
       - name: Create Matrix
         id: set-matrix
@@ -131,7 +131,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@v4
         with:
-          ref: master
+          ref: main
           path: repository
           submodules: true
 
