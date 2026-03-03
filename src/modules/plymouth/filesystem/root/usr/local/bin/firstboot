@@ -86,7 +86,7 @@ sleep 2 | "${DIALOG[@]}" --clear --gauge "Finalize Firstboot ..." "${RESOLUTION[
 #Enable Emulastation
 sed -i '$a\' "$script"
 echo "emulationstation #auto" >>"$script"
-chown $user:$user "$script"
+chown "${BASE_USER}":"${BASE_USER}" "$script"
 
 # Show reboot screen
 "${DIALOG[@]}" --clear --title "Firstboot preperation" \
