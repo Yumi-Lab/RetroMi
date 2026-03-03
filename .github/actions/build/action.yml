@@ -108,7 +108,14 @@ runs:
       shell: bash
       run: |
         cd repository/src/image
-        sha256sum -b ${{ steps.checksum.outputs.FILENAME }}
+        IMAGE_FILE=$(basename "${{ steps.config.outputs.DOWNLOAD_URL_IMAGE }}")
+        EXPECTED="${{ steps.checksum.outputs.CHECKSUM }}"
+        ACTUAL=$(sha256sum -b "${IMAGE_FILE}" | cut -d' ' -f1)
+        if [ "${EXPECTED}" != "${ACTUAL}" ]; then
+          echo "Checksum mismatch! expected=${EXPECTED} actual=${ACTUAL}"
+          exit 1
+        fi
+        echo "Checksum OK: ${ACTUAL}"
 
     - name: Update CustomPiOS Paths
       shell: bash
