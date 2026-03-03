@@ -1,3 +1,4 @@
+# shellcheck disable=all
 #disables/enables adult music
 if [ $(cat /home/pi/music_settings/adult_songs/onoff.flag) == "0" ]
 then

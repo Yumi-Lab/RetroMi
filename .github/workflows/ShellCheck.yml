@@ -36,7 +36,7 @@ jobs:
         with:
           scandir: "./src"
           additional_files: "config start_chroot_script end_chroot_script"
-          ignore_paths: "./version ./image ./src/modules/musics-retro/filesystem ./src/modules/Lightgun/filesystem ./src/modules/emulatiostation/filesystem ./src/modules/retroarch/filesystem"
+          ignore_paths: "*/musics-retro/filesystem/* */Lightgun/filesystem/* */emulatiostation/filesystem/* */retroarch/filesystem/*"
           format: tty
 
       - name: Failure Summary

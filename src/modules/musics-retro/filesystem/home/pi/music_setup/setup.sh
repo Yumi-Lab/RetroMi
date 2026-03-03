@@ -1,4 +1,5 @@
 #!/bin/bash
+# shellcheck disable=all
 
 
 standard_setup()
