@@ -12,6 +12,9 @@ BASE_IMAGE_ENLARGEROOT=8000
 
 MODULES="base(pkgupgrade,udev_fix,armbian(armbian_net,retropie,yumios,plymouth,filebroswer,hdmi,emulatiostation,usb-mount))"
 
+# SmartPi One — AllWinner H3 — ARMv7 32-bit
+BASE_ARCH="armhf"
+
 # export Variables
 export BASE_ARCH
 export DOWNLOAD_URL_CHECKSUM
