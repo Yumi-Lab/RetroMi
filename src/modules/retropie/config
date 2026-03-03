@@ -2,6 +2,6 @@
 # shellcheck enable=require-variable-braces
 # shellcheck disable=SC2034
 
-[ -n "${RETROPIE_REPO_SHIP}" ]   || RETROPIE_REPO_SHIP="https://github.com/Yumi-Lab/Retropie-smartpi.git"
-[ -n "${RETROPIE_REPO_BRANCH}" ] || RETROPIE_REPO_BRANCH="master"
+[ -n "${RETROPIE_REPO_SHIP}" ]   || RETROPIE_REPO_SHIP="https://github.com/Yumi-Lab/YUMI-RETROPIE.git"
+[ -n "${RETROPIE_REPO_BRANCH}" ] || RETROPIE_REPO_BRANCH="main"
 [ -n "${RETROPIE_DEPS}" ]        || RETROPIE_DEPS="git curl wget"
