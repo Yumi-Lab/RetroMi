@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-#### RetroPie — Install RetroPie on clean Armbian Bookworm image
+#### RetroPie — Install pre-compiled packages from RetroMi-packages
 # shellcheck enable=require-variable-braces
 
 set -Ee
@@ -10,24 +10,40 @@ export DEBIAN_FRONTEND=noninteractive
 source /common.sh
 install_cleanup_trap
 
-echo_green "Installing RetroPie..."
+echo_green "Installing RetroPie (pre-compiled packages)..."
 
-# Install prerequisites
+# Runtime dependencies (no compiler needed)
 apt-get update
 check_install_pkgs ${RETROPIE_DEPS}
 
-# Clone Yumi-Lab/Retropie-smartpi installer
+# Download and extract each pre-compiled package group
+mkdir -p /opt/retropie
+
+for group in ${RETROPIE_PACKAGE_GROUPS}; do
+    echo_green "Downloading ${group} packages..."
+    wget -q --show-progress \
+        -O "/tmp/packages-${group}-armhf.tar.gz" \
+        "${RETROPIE_PACKAGES_URL}/packages-${group}-armhf.tar.gz"
+
+    echo_green "Extracting ${group} packages..."
+    tar -xzf "/tmp/packages-${group}-armhf.tar.gz" -C /
+    rm -f "/tmp/packages-${group}-armhf.tar.gz"
+done
+
+# Clone YUMI-RETROPIE for post-install configuration only (no compilation)
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
 popd &>/dev/null || exit 1
 
-# Run the installer
+# Run post-install steps: Bluetooth, USB ROM service, EmulationStation autostart
 pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
-chmod +x ./install.sh
-./install.sh
+bash retropie_packages.sh bluetooth depends
+bash retropie_packages.sh usbromservice
+bash autostartES.sh
 popd &>/dev/null || exit 1
 
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
+chown -R "${BASE_USER}:${BASE_USER}" "/opt/retropie/configs" 2>/dev/null || true
 
-echo_green "Installing RetroPie... [DONE]"
+echo_green "Installing RetroPie (pre-compiled packages)... [DONE]"
