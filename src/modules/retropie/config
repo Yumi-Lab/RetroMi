@@ -8,7 +8,7 @@
 
 # Pre-compiled packages from RetroMi-packages (armhf, Debian Bookworm)
 [ -n "${RETROPIE_PACKAGES_URL}" ] || RETROPIE_PACKAGES_URL="https://github.com/Yumi-Lab/RetroMi-packages/releases/latest/download"
-[ -n "${RETROPIE_PACKAGE_GROUPS}" ] || RETROPIE_PACKAGE_GROUPS="retroarch arcade nintendo sega sony"
+[ -n "${RETROPIE_PACKAGE_GROUPS}" ] || RETROPIE_PACKAGE_GROUPS="retroarch arcade nintendo sega sony misc computers heavy"
 
 # Runtime dependencies only (no build tools — packages are pre-compiled)
 [ -n "${RETROPIE_DEPS}" ]        || RETROPIE_DEPS="wget ca-certificates dialog xmlstarlet git"
