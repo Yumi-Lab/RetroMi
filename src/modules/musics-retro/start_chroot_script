@@ -1,15 +1,8 @@
 #!/usr/bin/env bash
-#### Smartpad Specific Tweaks for armbian images
-####
-#### Written by Stephan Wendel aka KwadFan <me@stephanwe.de>
-#### Copyright 2023 - till today
-#### https://github.com/KwadFan
-####
-#### This File is distributed under GPLv3
-####
+#### RetroMi — Background music for EmulationStation (mpg123 + bundled MP3)
+#### Volume fixed at gain 40 (independent of system ALSA volume) via mpg123 -g flag
 
 # shellcheck enable=require-variable-braces
-# Source error handling, leave this in place
 set -Ee
 
 # Source CustomPIOS common.sh
@@ -17,14 +10,25 @@ set -Ee
 source /common.sh
 install_cleanup_trap
 
+echo_green "Setting up retro background music..."
 
+# Install mpg123 (background music player)
+apt-get install -y --no-install-recommends mpg123
 
-echo_green "Add Music..."
-unpack /filesystem/home/pi/music_setup /home/pi/music_setup
-cd /home/pi/music_setup 
-chmod +x setup.sh 
-sudo ./setup.sh 
-rm /home/pi/RetroPie/music/*
-unpack /filesystem/home/pi/RetroPie/music /home/pi/RetroPie/music/
-chmod 777 -R /home/pi/RetroPie/music/
-echo_green "Add Music...(DONE)"
+# Deploy music files + setup scripts
+unpack /filesystem/home/pi /home/pi
+
+# Run setup (deploys autostart.sh, runcommand hooks, RetroPie menu shortcuts)
+cd /home/pi/music_setup
+chmod +x setup.sh
+./setup.sh
+
+# Deploy bundled MP3 tracks (arcade-party-173553.mp3 already in /home/pi/RetroPie/music)
+# Additional MP3s can be placed in /home/pi/RetroPie/music/ at any time
+
+# Fix ownership
+chown -R pi:pi /home/pi/RetroPie/music
+chown -R pi:pi /home/pi/music_settings
+chmod 755 /home/pi/RetroPie/music
+
+echo_green "Background music setup complete. Volume: gain 40 (adjustable via mpg123 -g). (DONE)"

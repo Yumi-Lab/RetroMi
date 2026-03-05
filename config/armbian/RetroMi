@@ -10,7 +10,7 @@ DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/downloa
 # Extra space needed: server base (~2GB) + RetroPie full stack + ROMs space
 BASE_IMAGE_ENLARGEROOT=8000
 
-MODULES="base(pkgupgrade,udev_fix,armbian(armbian_net,retropie,retroarch,yumios,plymouth,filebroswer,hdmi,emulatiostation,usb-mount))"
+MODULES="base(pkgupgrade,udev_fix,armbian(armbian_net,retropie,retroarch,yumios,plymouth,filebroswer,musics-retro,hdmi,emulatiostation,usb-mount))"
 
 # SmartPi One — AllWinner H3 — ARMv7 32-bit
 BASE_ARCH="armhf"

@@ -4,25 +4,17 @@
 
 standard_setup()
 {
-        # check for an internet connection
-        wget -q --spider http://google.com
-        if [ $? -eq 0 ]; then
-                if [ ! -d /home/pi/RetroPie/music ]; then
-                    mkdir /home/pi/RetroPie/music
-                fi
-                if [ ! -d /home/pi/RetroPie/music-adult ]; then
-                    mkdir /home/pi/RetroPie/music-adult
-                fi
-                mkdir /home/pi/music_settings
-                mkdir /home/pi/music_settings/adult_songs
-                mkdir /home/pi/music_settings/music_over_games
-                mkdir /home/pi/music_settings/user_switch
+                mkdir -p /home/pi/RetroPie/music
+                mkdir -p /home/pi/RetroPie/music-adult
+                mkdir -p /home/pi/music_settings/adult_songs
+                mkdir -p /home/pi/music_settings/music_over_games
+                mkdir -p /home/pi/music_settings/user_switch
 
                 echo "1" > /home/pi/music_settings/onoff.flag
                 echo "1" > /home/pi/music_settings/adult_songs/onoff.flag
                 echo "0" > /home/pi/music_settings/music_over_games/onoff.flag
                 echo "1" > /home/pi/music_settings/user_switch/onoff.flag
-    
+
                 # create a backup of autostart.sh
                 if [ ! -f /opt/retropie/configs/all/autostart.sh.orig ] && [ -f /opt/retropie/configs/all/autostart.sh ]; then
                     mv /opt/retropie/configs/all/autostart.sh /opt/retropie/configs/all/autostart.sh.orig
@@ -47,30 +39,13 @@ standard_setup()
                 if [ ! -f /opt/retropie/configs/all/runcommand-onend.sh.orig ]; then
                     mv /opt/retropie/configs/all/runcommand-onend.sh /opt/retropie/configs/all/runcommand-onend.sh.orig 2>/dev/null
                 fi
-                
-                
+
                 cp music_files/runcommand-onstart.sh /opt/retropie/configs/all/
                 cp music_files/runcommand-onend.sh /opt/retropie/configs/all/
-    
-                sudo apt-get -y install mpg123
-                
-                echo
+
                 echo
                 echo -e "${GREEN}"
-    
-                # if 2x mp3's are not present then get them
-                if [ ! -f /home/pi/RetroPie/music/ADULT-Da\ Shootaz\ \-\ Grand\ Theft\ Auto_PSX.mp3 ]; then
-                    echo "Downloading a song for testing.."
-                    wget http://installtekz.com/downloads/musicpi/ADULT-Da\ Shootaz\ \-\ Grand\ Theft\ Auto_PSX.mp3 2>/dev/null
-                    mv ADULT-Da\ Shootaz\ \-\ Grand\ Theft\ Auto_PSX.mp3 /home/pi/RetroPie/music 2>/dev/null
-                fi
-    
-                if [ ! -f /home/pi/RetroPie/music/aftershocks.mp3 ]; then
-                    echo "Downloading a song for testing.."
-                    wget http://installtekz.com/downloads/musicpi/aftershocks.mp3 2>/dev/null
-                    mv aftershocks.mp3 /home/pi/RetroPie/music 2>/dev/null
-                fi
-    
+
                 # Hide Menu items
                 mv /home/pi/RetroPie/retropiemenu/audiosettings.rp /home/pi/RetroPie/retropiemenu/audiosettings.rp.1
                 #mv /home/pi/RetroPie/retropiemenu/bluetooth.rp /home/pi/RetroPie/retropiemenu/bluetooth.rp.1
