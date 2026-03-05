@@ -1,15 +1,9 @@
 #!/usr/bin/env bash
-#### Smartpad Specific Tweaks for armbian images
-####
-#### Written by Stephan Wendel aka KwadFan <me@stephanwe.de>
-#### Copyright 2023 - till today
-#### https://github.com/KwadFan
-####
-#### This File is distributed under GPLv3
-####
+#### RetroMi — RetroArch config deployment
+#### Deploys pre-baked retroarch.cfg (H3/Mali-400 optimized) + joypad configs.
+#### RetroArch itself is installed by the retropie module via RetroMi-packages.
 
 # shellcheck enable=require-variable-braces
-# Source error handling, leave this in place
 set -Ee
 
 # Source CustomPIOS common.sh
@@ -17,26 +11,19 @@ set -Ee
 source /common.sh
 install_cleanup_trap
 
+echo_green "Deploying RetroArch config (H3/Mali-400 optimized)..."
 
-echo_green "Update RetroArch..."
-#unpack fix retroarch
-unpack /filesystem/home/pi /home/pi
-cd /home/pi
-mkdir retroarch
-sudo unzip Retroarch-fix.zip -d /home/pi/retroarch
-# create emulators folder
-sudo mkdir -p /opt/retropie/emulators
-sudo mkdir -p /opt/retropie/configs/all/retroarch-joypads
-unpack /filesystem/opt/retropie/configs/all/retroarch-joypads /opt/retropie/configs/all/retroarch-joypads
-# copy
-sudo cp -r /home/pi/retroarch/opt/retropie/emulators/* /opt/retropie/emulators/
+# Create required directories
+mkdir -p /opt/retropie/configs/all/retroarch-joypads
+mkdir -p /home/pi/RetroPie/saves
+mkdir -p /home/pi/RetroPie/savestates
+mkdir -p /home/pi/RetroPie/screenshots
 
-#create symbolic links
-ln -s "/opt/retropie/configs/all/retroarch/overlay" "/opt/retropie/emulators/retroarch/overlays"
-ln -s "/opt/retropie/configs/all/retroarch/assets" "/opt/retropie/emulators/retroarch/assets"
-ln -s "/opt/retropie/configs/all/retroarch/shaders" "/opt/retropie/emulators/retroarch/shader"
-#set access
-chmod 777 -R /home/pi/RetroPie/
-#sudo apt-get install xpad
-echo_green "Enable RetroArch...(DONE)"
+# Deploy retroarch.cfg + joypad configs from filesystem
+unpack /filesystem/opt/retropie/configs/all /opt/retropie/configs/all
 
+# Fix ownership
+chown -R pi:pi /home/pi/RetroPie
+chown -R pi:pi /opt/retropie/configs/all
+
+echo_green "RetroArch config deployed. (DONE)"
