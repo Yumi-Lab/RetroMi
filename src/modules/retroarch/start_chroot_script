@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #### RetroMi — RetroArch config deployment
-#### Deploys pre-baked retroarch.cfg (H3/Mali-400 optimized) + joypad configs.
+#### Deploys pre-baked retroarch.cfg (H3/Mali-400 optimized) + SDL_GameControllerDB.
 #### RetroArch itself is installed by the retropie module via RetroMi-packages.
 
 # shellcheck enable=require-variable-braces
@@ -21,6 +21,13 @@ mkdir -p /home/pi/RetroPie/screenshots
 
 # Deploy retroarch.cfg + joypad configs from filesystem
 unpack /filesystem/opt/retropie/configs/all /opt/retropie/configs/all
+
+# SDL_GameControllerDB — plug & play pour 4000+ manettes
+SDLDB_COMMIT=$(cat /tmp/modules/retroarch/SDLDB_VERSION | tr -d '[:space:]')
+echo_green "Downloading SDL_GameControllerDB (${SDLDB_COMMIT:0:7})..."
+curl -sSL \
+  "https://raw.githubusercontent.com/gabomdq/SDL_GameControllerDB/${SDLDB_COMMIT}/gamecontrollerdb.txt" \
+  -o /opt/retropie/configs/all/gamecontrollerdb.txt
 
 # Fix ownership
 chown -R pi:pi /home/pi/RetroPie
