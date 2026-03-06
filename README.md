@@ -27,6 +27,8 @@ RetroMi is a ready-to-use Armbian Bookworm image for the **SmartPi One** (AllWin
 | 🕹️ **RetroArch** | 80+ libretro cores, Mali-400 optimized config |
 | 📦 **Pre-compiled packages** | 16 groups built for armhf — no compilation on device |
 | 🔫 **Sinden Lightgun** | Full support included |
+| 🎯 **Bezels / Overlays** | Per-system decorative bezels from TheBezelProject |
+| 🎮 **Controller hotplug** | PS4, PS5, Xbox, Switch Pro, 8BitDo — auto-configured via udev |
 | 🌐 **FileBrowser** | Web-based ROM manager on port 80 |
 | 🔌 **USB auto-mount** | Plug a USB drive → ROMs detected automatically |
 | 🎵 **Background music** | Retro ambiance music in EmulationStation |
@@ -136,6 +138,12 @@ Requirements: [CustomPiOS-Yumi](https://github.com/Yumi-Lab/CustomPiOS-Yumi)
 ## 🤝 Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Conventional commits required. DCO sign-off enforced.
+
+---
+
+## 📊 Retrogaming ecosystem
+
+A competitive landscape of 50+ retrogaming projects (Batocera, Lakka, RetroPie, EmuELEC…) is available in [docs/retrogaming-ecosystem.html](docs/retrogaming-ecosystem.html).
 
 ---
 
