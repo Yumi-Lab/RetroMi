@@ -188,10 +188,15 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          gh release upload "${{ github.event.inputs.version }}" \
-            "${{ steps.move-image.outputs.image }}.img.xz" \
-            --repo "${{ github.repository }}" \
-            --clobber
+          IMAGE="${{ steps.move-image.outputs.image }}"
+          # Split into 1900M parts to stay under GitHub's 2GiB release asset limit
+          split -b 1900m "${IMAGE}.img.xz" "${IMAGE}.img.xz.part"
+          for part in "${IMAGE}.img.xz.part"*; do
+            gh release upload "${{ github.event.inputs.version }}" \
+              "${part}" \
+              --repo "${{ github.repository }}" \
+              --clobber
+          done
 
       - name: Calculating checksums
         id: checksums

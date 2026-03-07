@@ -57,11 +57,28 @@ RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One*
 
 ### 1. Download / Télécharger
 
-Download the latest `.img.xz` from the [Releases page](https://github.com/Yumi-Lab/RetroMi/releases).
+Download the image parts (`*.img.xz.partaa`, `*.img.xz.partab`) from the [Releases page](https://github.com/Yumi-Lab/RetroMi/releases).
+
+The image is split into two parts due to GitHub's 2 GiB file size limit. Recombine before flashing:
+
+```bash
+cat *.img.xz.part* > image.img.xz
+xz -d image.img.xz
+```
+
+Or verify integrity first:
+```bash
+sha256sum -c *.img.xz.sha256
+```
 
 ### 2. Flash
 
-Use [Balena Etcher](https://etcher.balena.io/) or `dd` to flash the image to a microSD card (≥ 16 GB recommended).
+Use [Balena Etcher](https://etcher.balena.io/) or `dd` to flash the `.img` to a microSD card (≥ 16 GB recommended):
+
+```bash
+# Linux/macOS
+sudo dd if=*.img of=/dev/sdX bs=4M status=progress
+```
 
 ### 3. Boot
 
