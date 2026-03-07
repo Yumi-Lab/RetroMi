@@ -177,8 +177,11 @@ jobs:
         shell: bash
         run: |
           CPU_COUNT="$(nproc)"
-          echo -e "\e[32mUsing ${CPU_COUNT} Cores for compression...\e[0m"
-          xz -efkvz9T"${CPU_COUNT}" ${{ steps.move-image.outputs.image }}.img || true
+          IMAGE="${{ steps.move-image.outputs.image }}"
+          sudo apt-get install -y p7zip-full
+          echo -e "\e[32mUsing ${CPU_COUNT} Cores for compression (7z split)...\e[0m"
+          # 7z split archive — .001/.002 are natively opened by The Unarchiver (Mac) and 7-Zip (Windows)
+          7z a -v1900m -mx=9 "-mmt=${CPU_COUNT}" "${IMAGE}.img.7z" "${IMAGE}.img"
 
       - name: Upload Compressing Image
         if: success()
@@ -187,9 +190,7 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           IMAGE="${{ steps.move-image.outputs.image }}"
-          # Split into 1900M parts to stay under GitHub's 2GiB release asset limit
-          split -b 1900m "${IMAGE}.img.xz" "${IMAGE}.img.xz.part"
-          for part in "${IMAGE}.img.xz.part"*; do
+          for part in "${IMAGE}.img.7z."*; do
             gh release upload "${{ github.event.inputs.version }}" \
               "${part}" \
               --repo "${{ github.repository }}" \
@@ -200,12 +201,13 @@ jobs:
         id: checksums
         shell: bash
         run: |
-          sha256sum ${{ steps.move-image.outputs.image }}.img > ${{ steps.move-image.outputs.image }}.img.sha256
-          image_checksum=`cat ${{ steps.move-image.outputs.image }}.img.sha256 | awk '{ print $1 }'`
+          IMAGE="${{ steps.move-image.outputs.image }}"
+          sha256sum "${IMAGE}.img" > "${IMAGE}.img.sha256"
+          image_checksum=$(awk '{ print $1 }' "${IMAGE}.img.sha256")
           echo "image=${image_checksum}" >> $GITHUB_OUTPUT
 
-          sha256sum ${{ steps.move-image.outputs.image }}.img.xz > ${{ steps.move-image.outputs.image }}.img.xz.sha256
-          zip_checksum=`cat ${{ steps.move-image.outputs.image }}.img.xz.sha256 | awk '{ print $1 }'`
+          sha256sum "${IMAGE}.img.7z.001" > "${IMAGE}.img.7z.sha256"
+          zip_checksum=$(awk '{ print $1 }' "${IMAGE}.img.7z.sha256")
           echo "zip=${zip_checksum}" >> $GITHUB_OUTPUT
 
       - name: Upload Checksums
@@ -214,9 +216,10 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          IMAGE="${{ steps.move-image.outputs.image }}"
           gh release upload "${{ github.event.inputs.version }}" \
-            "${{ steps.move-image.outputs.image }}.img.sha256" \
-            "${{ steps.move-image.outputs.image }}.img.xz.sha256" \
+            "${IMAGE}.img.sha256" \
+            "${IMAGE}.img.7z.sha256" \
             --repo "${{ github.repository }}" \
             --clobber
 
@@ -224,10 +227,11 @@ jobs:
         id: filesizes
         shell: bash
         run: |
-          image_filesize=`wc -c ${{ steps.move-image.outputs.image }}.img | awk '{print $1}'`
+          IMAGE="${{ steps.move-image.outputs.image }}"
+          image_filesize=$(wc -c "${IMAGE}.img" | awk '{print $1}')
           echo "image=${image_filesize}" >> $GITHUB_OUTPUT
 
-          zip_filesize=`wc -c ${{ steps.move-image.outputs.image }}.img.xz | awk '{print $1}'`
+          zip_filesize=$(wc -c "${IMAGE}.img.7z.001" | awk '{print $1}')
           echo "zip=${zip_filesize}" >> $GITHUB_OUTPUT
 
       - name: Debug output
