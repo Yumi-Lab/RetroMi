@@ -20,6 +20,7 @@ install_cleanup_trap
 apt-get install -y --no-install-recommends p7zip-full
 
 echo_green "Emulationstation Splash Screen..."
+mkdir -p /opt/retropie/supplementary/emulationstation/resources/
 unpack /filesystem/opt/retropie/supplementary/emulationstation/resources/ /opt/retropie/supplementary/emulationstation/resources/
 chmod 777 -R /opt/retropie
 echo_green "Emulationstation Splash Screen...(DONE)"
