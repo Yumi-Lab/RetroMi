@@ -183,6 +183,7 @@ jobs:
         run: |
           gh release upload "${{ github.event.inputs.version }}" \
             "${{ steps.move-image.outputs.image }}.img.xz" \
+            --repo "${{ github.repository }}" \
             --clobber
 
       - name: Calculating checksums
@@ -206,6 +207,7 @@ jobs:
           gh release upload "${{ github.event.inputs.version }}" \
             "${{ steps.move-image.outputs.image }}.img.sha256" \
             "${{ steps.move-image.outputs.image }}.img.xz.sha256" \
+            --repo "${{ github.repository }}" \
             --clobber
 
       - name: Calculating filesizes
