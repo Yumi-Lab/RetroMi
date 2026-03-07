@@ -24,7 +24,8 @@ mkdir -p /home/pi/RetroPie/screenshots
 unpack /filesystem/opt/retropie/configs/all /opt/retropie/configs/all
 
 # SDL_GameControllerDB — plug & play pour 4000+ manettes
-SDLDB_COMMIT=$(cat /tmp/modules/retroarch/SDLDB_VERSION | tr -d '[:space:]')
+# SHA pinned — updated automatically by update-deps.yml workflow
+SDLDB_COMMIT="e0beee4ed92cf4360ff960c1feff17ed895b81bc"
 echo_green "Downloading SDL_GameControllerDB (${SDLDB_COMMIT:0:7})..."
 curl -sSL \
   "https://raw.githubusercontent.com/gabomdq/SDL_GameControllerDB/${SDLDB_COMMIT}/gamecontrollerdb.txt" \
