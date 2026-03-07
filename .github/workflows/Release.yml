@@ -171,9 +171,7 @@ jobs:
       - name: Shrink image
         shell: bash
         run: |
-          wget -q https://raw.githubusercontent.com/Drewsif/PiShrink/master/pishrink.sh
-          chmod +x pishrink.sh
-          sudo ./pishrink.sh ${{ steps.move-image.outputs.image }}.img
+          sudo bash repository/.github/scripts/pishrink.sh ${{ steps.move-image.outputs.image }}.img
 
       - name: Compressing Image
         shell: bash
