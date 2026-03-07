@@ -177,12 +177,13 @@ jobs:
 
       - name: Upload Compressing Image
         if: success()
-        uses: xresloader/upload-to-github-release@v1
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          release_id: ${{ needs.release.outputs.id }}
-          file: ${{ steps.move-image.outputs.image }}.img.xz
+        run: |
+          gh release upload "${{ github.event.inputs.version }}" \
+            "${{ steps.move-image.outputs.image }}.img.xz" \
+            --clobber
 
       - name: Calculating checksums
         id: checksums
@@ -198,12 +199,14 @@ jobs:
 
       - name: Upload Checksums
         if: success()
-        uses: xresloader/upload-to-github-release@v1
+        shell: bash
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          release_id: ${{ needs.release.outputs.id }}
-          file: ${{ steps.move-image.outputs.image }}.img.sha256;${{ steps.move-image.outputs.image }}.img.xz.sha256
+        run: |
+          gh release upload "${{ github.event.inputs.version }}" \
+            "${{ steps.move-image.outputs.image }}.img.sha256" \
+            "${{ steps.move-image.outputs.image }}.img.xz.sha256" \
+            --clobber
 
       - name: Calculating filesizes
         id: filesizes
