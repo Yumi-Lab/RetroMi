@@ -1,7 +1,3 @@
-<p align="center">
-  <img src="https://raw.githubusercontent.com/Yumi-Lab/RetroMi/develop/src/modules/emulatiostation/filesystem/home/pi/.emulationstation/themes/retromi/art/retromi-logo.png" style="width:50%" onerror="this.style.display='none'">
-</p>
-
 <h1 align="center">RetroMi</h1>
 <p align="center"><strong>Retrogaming image for SmartPi One — AllWinner H3 / ARMv7</strong></p>
 
@@ -13,9 +9,9 @@
 
 ---
 
-RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One** (AllWinner H3 — ARMv7 32-bit), transformant votre nano-ordinateur en station de retrogaming complète avec EmulationStation, RetroArch et plus de **80 émulateurs** pré-compilés.
-
 RetroMi is a ready-to-use Armbian Bookworm image for the **SmartPi One** (AllWinner H3 — ARMv7 32-bit), turning your nano-computer into a full retrogaming station with EmulationStation, RetroArch and over **80 pre-compiled emulators**.
+
+RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One** (AllWinner H3 — ARMv7 32-bit), transformant votre nano-ordinateur en station de retrogaming complète avec EmulationStation, RetroArch et plus de **80 émulateurs** pré-compilés.
 
 ---
 
