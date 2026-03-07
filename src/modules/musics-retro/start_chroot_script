@@ -18,37 +18,10 @@ apt-get install -y --no-install-recommends mpg123
 # Deploy music files + setup scripts
 unpack /filesystem/home/pi /home/pi
 
-# Run setup inline (replaces interactive setup.sh — standard_setup() equivalent)
+# Run non-interactive install (same code path as manual user install)
 cd /home/pi/music_setup
-
-mkdir -p /home/pi/RetroPie/music
-mkdir -p /home/pi/RetroPie/music-adult
-mkdir -p /home/pi/music_settings/adult_songs
-mkdir -p /home/pi/music_settings/music_over_games
-mkdir -p /home/pi/music_settings/user_switch
-
-echo "1" > /home/pi/music_settings/onoff.flag
-echo "1" > /home/pi/music_settings/adult_songs/onoff.flag
-echo "0" > /home/pi/music_settings/music_over_games/onoff.flag
-echo "1" > /home/pi/music_settings/user_switch/onoff.flag
-
-cp music_files/autostart.sh /opt/retropie/configs/all/
-cp music_files/runcommand-onstart.sh /opt/retropie/configs/all/
-cp music_files/runcommand-onend.sh /opt/retropie/configs/all/
-
-mkdir -p /home/pi/RetroPie/retropiemenu
-cp "music_files/Startup With Music On.sh" /home/pi/RetroPie/retropiemenu/
-cp "music_files/Startup With Music Off.sh" /home/pi/RetroPie/retropiemenu/
-cp "music_files/Music Stop.sh" /home/pi/RetroPie/retropiemenu/
-cp "music_files/Music Start.sh" /home/pi/RetroPie/retropiemenu/
-cp music_files/info.sh /home/pi/RetroPie/retropiemenu/
-cp "music_files/continue music over game on.sh" /home/pi/RetroPie/retropiemenu/
-cp "music_files/continue music over game off.sh" /home/pi/RetroPie/retropiemenu/
-cp "music_files/Adult Music On (Requires Reboot).sh" /home/pi/RetroPie/retropiemenu/
-cp "music_files/Adult Music Off (Requires Reboot).sh" /home/pi/RetroPie/retropiemenu/
-
-# Deploy bundled MP3 tracks (arcade-party-173553.mp3 already in /home/pi/RetroPie/music)
-# Additional MP3s can be placed in /home/pi/RetroPie/music/ at any time
+chmod +x setup.sh
+./setup.sh --install
 
 # Fix ownership
 chown -R pi:pi /home/pi/RetroPie/music
