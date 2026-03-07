@@ -21,7 +21,7 @@ mkdir -p /opt/retropie
 
 for group in ${RETROPIE_PACKAGE_GROUPS}; do
     echo_green "Downloading ${group} packages..."
-    wget -q --show-progress \
+    wget --tries=3 --waitretry=10 --timeout=60 --show-progress \
         -O "/tmp/packages-${group}-armhf.tar.gz" \
         "${RETROPIE_PACKAGES_URL}/packages-${group}-armhf.tar.gz"
 
