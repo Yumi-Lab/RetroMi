@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+#### RetroMi — Bezels module
+#### Downloads one generic system bezel per console from TheBezelProject.
+#### Activates overlay in each system retroarch.cfg automatically.
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+BASE_URL="https://raw.githubusercontent.com/thebezelproject"
+OVERLAY_DIR="/opt/retropie/configs/all/retroarch/overlay"
+CONFIGS_DIR="/opt/retropie/configs"
+
+echo_green "Installing system bezels (TheBezelProject)..."
+
+mkdir -p "${OVERLAY_DIR}"
+
+# Format: "retropie_system|bezel_repo|bezel_name"
+BEZELS=(
+  "snes|bezelproject-SNES|Super-Nintendo-Entertainment-System"
+  "nes|bezelproject-NES|Nintendo-Entertainment-System"
+  "megadrive|bezelproject-MegaDrive|Sega-Mega-Drive"
+  "gba|bezelproject-GBA|Nintendo-Game-Boy-Advance"
+  "gb|bezelproject-GB|Nintendo-Game-Boy"
+  "gbc|bezelproject-GBC|Nintendo-Game-Boy-Color"
+  "n64|bezelproject-N64|Nintendo-64"
+  "psx|bezelproject-PSX|Sony-PlayStation"
+  "gamegear|bezelproject-GameGear|Sega-Game-Gear"
+  "mastersystem|bezelproject-MasterSystem|Sega-Master-System"
+  "saturn|bezelproject-Saturn|Sega-Saturn"
+  "pcengine|bezelproject-PCEngine|NEC-PC-Engine"
+  "amiga|bezelproject-Amiga|Commodore-Amiga"
+  "dreamcast|bezelproject-Dreamcast|Dreamcast"
+  "nds|bezelproject-NDS|Nintendo-DS"
+  "atari2600|bezelproject-Atari2600|Atari-2600"
+  "sg-1000|bezelproject-SG-1000|Sega-SG-1000"
+  "sega32x|bezelproject-Sega32X|Sega-32X"
+  "segacd|bezelproject-SegaCD|Sega-CD"
+  "famicom|bezelproject-Famicom|Nintendo-Famicom"
+)
+
+for entry in "${BEZELS[@]}"; do
+  IFS='|' read -r system repo name <<< "${entry}"
+
+  echo_green "  → ${system}: ${name}"
+
+  # Download PNG + CFG (relative path in cfg → same directory, no change needed)
+  curl -sSL \
+    "${BASE_URL}/${repo}/master/retroarch/overlay/${name}.png" \
+    -o "${OVERLAY_DIR}/${name}.png"
+  curl -sSL \
+    "${BASE_URL}/${repo}/master/retroarch/overlay/${name}.cfg" \
+    -o "${OVERLAY_DIR}/${name}.cfg"
+
+  # Enable overlay in system-specific retroarch.cfg
+  SYSTEM_CFG="${CONFIGS_DIR}/${system}/retroarch.cfg"
+  mkdir -p "${CONFIGS_DIR}/${system}"
+  [[ ! -f "${SYSTEM_CFG}" ]] && touch "${SYSTEM_CFG}"
+
+  if ! grep -q "input_overlay" "${SYSTEM_CFG}"; then
+    cat >> "${SYSTEM_CFG}" <<EOF
+input_overlay = "/opt/retropie/configs/all/retroarch/overlay/${name}.cfg"
+input_overlay_enable = "true"
+input_overlay_opacity = "1.0"
+EOF
+  fi
+done
+
+# Fix ownership
+chown -R pi:pi "${OVERLAY_DIR}"
+chown -R pi:pi "${CONFIGS_DIR}"
+
+echo_green "Bezels installed for ${#BEZELS[@]} systems. (DONE)"

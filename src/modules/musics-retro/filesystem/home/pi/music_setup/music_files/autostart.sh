@@ -11,9 +11,8 @@ fi
 echo "1" > /home/pi/music_settings/user_switch/onoff.flag
 
 #init play music
-while pgrep omxplayer > /dev/null; do sleep 1; done
 sleep 2
-mpg123 -Z /home/pi/RetroPie/music/*.mp3 > /dev/null 2>&1 &
+mpg123 -Z -g 40 /home/pi/RetroPie/music/*.mp3 > /dev/null 2>&1 &
 
 #If "music off at bootup" is selected then disable it
 if [ $(cat /home/pi/music_settings/onoff.flag) == "0" ]

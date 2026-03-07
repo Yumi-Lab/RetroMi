@@ -1,0 +1,46 @@
+# RetroMi — Controller udev rules
+# Plug & play access for common gamepads (no root, no config needed).
+# Group "input" is used — pi user is added to this group by the controllers module.
+
+# --- Sony PlayStation ---
+# PS3 DualShock 3
+SUBSYSTEM=="input", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0268", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# PS4 DualShock 4 v1
+SUBSYSTEM=="input", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="05c4", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# PS4 DualShock 4 v2
+SUBSYSTEM=="input", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="09cc", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# PS5 DualSense
+SUBSYSTEM=="input", ATTRS{idVendor}=="054c", ATTRS{idProduct}=="0ce6", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+
+# --- Microsoft Xbox ---
+# Xbox 360 Wired
+SUBSYSTEM=="input", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="028e", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# Xbox 360 Wireless receiver
+SUBSYSTEM=="input", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="0719", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# Xbox One controller
+SUBSYSTEM=="input", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02d1", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# Xbox One S
+SUBSYSTEM=="input", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="02ea", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# Xbox Series X|S
+SUBSYSTEM=="input", ATTRS{idVendor}=="045e", ATTRS{idProduct}=="0b12", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+
+# --- Nintendo ---
+# Switch Pro Controller
+SUBSYSTEM=="input", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2009", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# Joy-Con (L)
+SUBSYSTEM=="input", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2006", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# Joy-Con (R)
+SUBSYSTEM=="input", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="2007", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+# Wii U Pro Controller
+SUBSYSTEM=="input", ATTRS{idVendor}=="057e", ATTRS{idProduct}=="0330", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+
+# --- 8BitDo (tous les produits) ---
+SUBSYSTEM=="input", ATTRS{idVendor}=="2dc8", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+
+# --- Logitech Gamepads ---
+SUBSYSTEM=="input", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c21d", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+SUBSYSTEM=="input", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c21e", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+SUBSYSTEM=="input", ATTRS{idVendor}=="046d", ATTRS{idProduct}=="c21f", MODE="0660", GROUP="input", ENV{ID_INPUT_JOYSTICK}="1"
+
+# --- Generic fallback — tout joystick USB ---
+SUBSYSTEM=="input", ENV{ID_INPUT_JOYSTICK}=="1", MODE="0660", GROUP="input"

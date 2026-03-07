@@ -1,73 +1,156 @@
 <p align="center">
-<img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/c3/RetroPie-Logo.svg/2560px-RetroPie-Logo.svg.png" style="width:50%" >
+  <img src="https://raw.githubusercontent.com/Yumi-Lab/RetroMi/develop/src/modules/emulatiostation/filesystem/home/pi/.emulationstation/themes/retromi/art/retromi-logo.png" style="width:50%" onerror="this.style.display='none'">
 </p>
 
-# RetroPie pour Nano Computer SmartPi1
-Bienvenue dans le projet RetroPie pour Nano Computer SmartPi1 ! Cette distribution est spécialement adaptée pour fonctionner de manière optimale sur la carte SmartPi1, vous offrant une expérience de jeu rétro fluide et agréable.
+<h1 align="center">RetroMi</h1>
+<p align="center"><strong>Retrogaming image for SmartPi One — AllWinner H3 / ARMv7</strong></p>
 
-## À propos de RetroPie
-RetroPie est une distribution populaire pour le rétro-gaming, basée sur Raspbian, qui vous permet d'émuler une large gamme de consoles de jeux vidéo classiques sur votre Raspberry Pi ou tout autre matériel compatible. Avec RetroPie, vous pouvez transformer votre Nano Computer SmartPi1 en une machine de jeu rétro puissante et polyvalente.
+<p align="center">
+  <a href="https://github.com/Yumi-Lab/RetroMi/releases"><img alt="GitHub release" src="https://img.shields.io/github/v/release/Yumi-Lab/RetroMi"></a>
+  <a href="https://github.com/Yumi-Lab/RetroMi/actions"><img alt="Build" src="https://img.shields.io/github/actions/workflow/status/Yumi-Lab/RetroMi/Release.yml?branch=develop"></a>
+  <img alt="License" src="https://img.shields.io/github/license/Yumi-Lab/RetroMi">
+</p>
 
-## Caractéristiques de la distribution
-- Optimisation matérielle : Configurations spécifiques pour tirer le meilleur parti de la carte SmartPi1.
-- Facilité d'installation : Un processus d'installation simplifié pour vous permettre de démarrer rapidement.
-- Support étendu des émulateurs : Prise en charge de nombreux émulateurs de consoles classiques comme NES, SNES, Sega Genesis, PlayStation et bien d'autres.
-- Interface utilisateur intuitive : Interface conviviale pour naviguer facilement entre les jeux et les émulateurs.
-- Personnalisation avancée : Options de personnalisation pour ajuster l'apparence et les performances selon vos préférences.
+---
 
+RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One** (AllWinner H3 — ARMv7 32-bit), transformant votre nano-ordinateur en station de retrogaming complète avec EmulationStation, RetroArch et plus de **80 émulateurs** pré-compilés.
 
-## Installation
-Pour installer RetroPie sur votre Nano Computer SmartPi1, suivez ces étapes :
+RetroMi is a ready-to-use Armbian Bookworm image for the **SmartPi One** (AllWinner H3 — ARMv7 32-bit), turning your nano-computer into a full retrogaming station with EmulationStation, RetroArch and over **80 pre-compiled emulators**.
 
-- Télécharger l'image : Téléchargez l'image RetroPie spécialement adaptée pour SmartPi1 depuis le lien de téléchargement.
-- Flasher l'image : Utilisez un outil comme Etcher pour flasher l'image sur une carte microSD.
-- Insérer la carte microSD : Insérez la carte microSD dans votre SmartPi1.
-- Démarrer le système : Allumez votre SmartPi1 et suivez les instructions à l'écran pour terminer l'installation et la configuration initiale.
+---
 
-## Configuration et Utilisation
+## ✨ Features / Fonctionnalités
 
-Après l'installation, vous pouvez configurer vos contrôleurs de jeu, ajouter des ROMs et personnaliser l'interface utilisateur selon vos préférences. Consultez la documentation officielle de RetroPie pour des instructions détaillées sur la configuration et l'utilisation.
+| Feature | Details |
+|---------|---------|
+| 🎮 **EmulationStation** | Custom RetroMi theme, pre-configured |
+| 🕹️ **RetroArch** | 80+ libretro cores, Mali-400 optimized config |
+| 📦 **Pre-compiled packages** | 16 groups built for armhf — no compilation on device |
+| 🔫 **Sinden Lightgun** | Full support included |
+| 🎯 **Bezels / Overlays** | Per-system decorative bezels from TheBezelProject |
+| 🎮 **Controller hotplug** | PS4, PS5, Xbox, Switch Pro, 8BitDo — auto-configured via udev |
+| 🌐 **FileBrowser** | Web-based ROM manager on port 80 |
+| 🔌 **USB auto-mount** | Plug a USB drive → ROMs detected automatically |
+| 🎵 **Background music** | Retro ambiance music in EmulationStation |
+| ⚡ **Fast boot** | ~15 min build, RetroMi-packages pre-compiled separately |
 
-## Système
+### Supported systems (80+ cores across 16 groups)
 
-Pour ce connecter au système, utiliser l'identifiant suivant:
-  
-    Nom d'utilisateur : pi
-  
-    Mot de passe : yumi
+| Group | Systems |
+|-------|---------|
+| `retroarch` | RetroArch frontend |
+| `arcade` | FBNeo |
+| `arcade-compat` | MAME 2000/2003/2003+/2010, FBAlpha2012 |
+| `nintendo` | NES, SNES, GB/GBC, GBA (13 cores) |
+| `n64` | N64, PC Engine / TurboGrafx (5 cores) |
+| `sega` | Mega Drive, Sega CD, 32X, Master System, Game Gear, Neo Geo CD |
+| `sony` | PlayStation 1 |
+| `psp` | PlayStation Portable (PPSSPP) |
+| `misc` | Doom, Quake, Atari 2600, Pico-8, WASM-4, EasyRPG, Cave Story… |
+| `scummvm` | ScummVM — 250+ point & click adventures |
+| `dosbox` | DOSBox Pure |
+| `portables` | NGP, Lynx, VB, WonderSwan, Pokémon Mini, Arduboy… |
+| `computers` | C64, MSX, Atari 8-bit, ZX Spectrum, Amstrad CPC, Atari ST, Apple II, BBC Micro, Enterprise 128 |
+| `amiga` | Amiga (uae4arm, PUAE) |
+| `japan-computers` | PC-98, PC-88, X68000, Sharp X1 |
+| `heavy` | DS, Dreamcast, Saturn, 3DO, Jaguar |
 
-## Connexion Wi-Fi
+---
 
-Pour connecter votre SmartPi1 à un réseau Wi-Fi, suivez la même procédure que pour une distribution Armbian :
+## 📥 Installation
 
-- Ouvrez un terminal sur votre SmartPi1.
-- Lancez l'outil de configuration Armbian en entrant la commande suivante :
+### 1. Download / Télécharger
+
+Download the latest `.img.xz` from the [Releases page](https://github.com/Yumi-Lab/RetroMi/releases).
+
+### 2. Flash
+
+Use [Balena Etcher](https://etcher.balena.io/) or `dd` to flash the image to a microSD card (≥ 16 GB recommended).
+
+### 3. Boot
+
+Insert the card into your SmartPi One and power on. First boot takes 2–3 minutes (initial setup).
+
+---
+
+## 🔑 Default credentials
+
+| | Value |
+|-|-------|
+| **Username** | `pi` |
+| **Password** | `yumi` |
+
+---
+
+## 🌐 Adding ROMs — FileBrowser
+
+Access the web file manager at **`http://<device-ip>/`** (port 80):
+
+- Login: `admin` / `admin` *(change after first login)*
+- Navigate to `pi/RetroPie/roms/<system>/` and upload your ROM files
+- Restart EmulationStation to refresh the game list
+
+---
+
+## 📡 Wi-Fi setup
+
+From the EmulationStation menu → **Wi-Fi**, or via SSH:
 
 ```bash
 sudo armbian-config
+# → Network → Wi-Fi
 ```
-- Naviguez vers la section Réseau et suivez les instructions à l'écran pour configurer votre connexion Wi-Fi.
 
-## Ajouter des ROMs via File Browser
+---
 
-Nous avons intégré un outil pratique de gestion de fichiers pour vous permettre d'ajouter facilement des ROMs via votre navigateur web. Pour accéder à cet outil, suivez ces étapes :
+## 💾 USB ROMs (plug & play)
 
-- Ouvrez votre navigateur web et entrez l'URL suivante : http://your_ip:8080 (remplacez your_ip par l'adresse IP de votre SmartPi1).
-- Connectez-vous avec les identifiants suivants :
-  
-    Nom d'utilisateur : pi
-  
-    Mot de passe : yumi
-  
-- Naviguez vers le dossier des ROMs et téléchargez vos fichiers de jeux.
+Create a `RetroPie` folder on your USB drive with the standard RetroPie folder structure. Plug it in — ROMs are detected and linked automatically.
 
-Cette fonctionnalité vous offre une méthode simple et rapide pour gérer vos ROMs sans avoir à utiliser des outils de transfert de fichiers séparés.
+---
 
-## Support et Contributions
-Si vous rencontrez des problèmes ou avez des suggestions, n'hésitez pas à ouvrir une issue sur notre page GitHub. Les contributions sont également les bienvenues ! Consultez notre guide de contribution pour plus d'informations.
+## 🏗️ Architecture
 
-## Remerciements
-Nous tenons à remercier la communauté RetroPie pour leur travail exceptionnel et leur dévouement, ainsi que tous les contributeurs qui ont aidé à adapter RetroPie pour le SmartPi1.
+```
+Layer 1 — Yumi-Lab/SmartPi-armbian   : Armbian Bookworm server base (armhf)
+Layer 2 — Yumi-Lab/RetroMi-packages  : 80+ pre-compiled libretro cores (16 groups)
+Layer 3 — Yumi-Lab/RetroMi           : EmulationStation theme, config, modules
+```
 
-## Source
-Thanks https://retropie.org.uk/
+Layer 2 is built separately via QEMU armhf in Docker — no compilation on the device.
+
+---
+
+## 🛠️ Build from source
+
+```bash
+# Trigger a RetroMi image build
+gh workflow run Release.yml --repo Yumi-Lab/RetroMi -f version=X.Y.Z
+
+# Trigger a RetroMi-packages build (emulator cores)
+gh workflow run build.yml --repo Yumi-Lab/RetroMi-packages -f version=X.Y.Z
+```
+
+Requirements: [CustomPiOS-Yumi](https://github.com/Yumi-Lab/CustomPiOS-Yumi)
+
+---
+
+## 🤝 Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Conventional commits required. DCO sign-off enforced.
+
+---
+
+## 📊 Retrogaming ecosystem
+
+A competitive landscape of 50+ retrogaming projects (Batocera, Lakka, RetroPie, EmuELEC…) is available in [docs/retrogaming-ecosystem.html](docs/retrogaming-ecosystem.html).
+
+---
+
+## 📄 License
+
+GPL-3.0 — see [LICENSE](LICENSE).
+
+---
+
+<p align="center">Made with ❤️ by <a href="https://github.com/Yumi-Lab">Yumi Lab</a></p>

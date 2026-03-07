@@ -2,6 +2,13 @@
 # shellcheck enable=require-variable-braces
 # shellcheck disable=SC2034
 
+# YUMI-RETROPIE repo (used for post-install config only — no compilation)
 [ -n "${RETROPIE_REPO_SHIP}" ]   || RETROPIE_REPO_SHIP="https://github.com/Yumi-Lab/YUMI-RETROPIE.git"
 [ -n "${RETROPIE_REPO_BRANCH}" ] || RETROPIE_REPO_BRANCH="main"
-[ -n "${RETROPIE_DEPS}" ]        || RETROPIE_DEPS="git curl wget"
+
+# Pre-compiled packages from RetroMi-packages (armhf, Debian Bookworm)
+[ -n "${RETROPIE_PACKAGES_URL}" ] || RETROPIE_PACKAGES_URL="https://github.com/Yumi-Lab/RetroMi-packages/releases/latest/download"
+[ -n "${RETROPIE_PACKAGE_GROUPS}" ] || RETROPIE_PACKAGE_GROUPS="retroarch arcade arcade-compat nintendo n64 sega sony psp misc scummvm dosbox portables computers amiga japan-computers heavy"
+
+# Runtime dependencies only (no build tools — packages are pre-compiled)
+[ -n "${RETROPIE_DEPS}" ]        || RETROPIE_DEPS="wget ca-certificates dialog xmlstarlet git"

@@ -1,0 +1,22 @@
+#!/usr/bin/env bash
+#### RetroMi — Controller udev rules
+#### Installs plug & play udev rules for PS3/PS4/PS5, Xbox, Switch, 8BitDo.
+#### Users get joystick access without root or config.
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+echo_green "Installing controller udev rules..."
+
+# Deploy rules from filesystem/
+unpack /filesystem/etc/udev/rules.d /etc/udev/rules.d
+
+# Ensure 'pi' user has joystick access
+usermod -aG input pi
+
+echo_green "Controller udev rules installed. (DONE)"
