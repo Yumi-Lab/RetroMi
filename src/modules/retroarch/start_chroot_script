@@ -13,7 +13,8 @@ install_cleanup_trap
 
 echo_green "Deploying RetroArch config (H3/Mali-400 optimized)..."
 
-# Create required directories
+# Create required directories (remove file if retropie installed it as a file instead of a directory)
+rm -f /opt/retropie/configs/all/retroarch-joypads 2>/dev/null || true
 mkdir -p /opt/retropie/configs/all/retroarch-joypads
 mkdir -p /home/pi/RetroPie/saves
 mkdir -p /home/pi/RetroPie/savestates
