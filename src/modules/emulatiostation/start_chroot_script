@@ -17,7 +17,7 @@ set -Ee
 source /common.sh
 install_cleanup_trap
 
-sudo apt-get install p7zip-full
+apt-get install -y --no-install-recommends p7zip-full
 
 echo_green "Emulationstation Splash Screen..."
 unpack /filesystem/opt/retropie/supplementary/emulationstation/resources/ /opt/retropie/supplementary/emulationstation/resources/
