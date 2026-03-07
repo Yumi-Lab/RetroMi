@@ -168,11 +168,6 @@ jobs:
           echo "base_name=${base_name}" >> $GITHUB_OUTPUT
           echo "image=${image}" >> $GITHUB_OUTPUT
 
-      - name: Shrink image
-        shell: bash
-        run: |
-          sudo bash repository/.github/scripts/pishrink.sh ${{ steps.move-image.outputs.image }}.img
-
       - name: Compressing Image
         shell: bash
         run: |
