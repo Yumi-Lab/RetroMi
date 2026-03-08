@@ -69,6 +69,7 @@ export __user="${BASE_USER}"
 # Run post-install steps: EmulationStation, Bluetooth, USB ROM service, autostart
 pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
 bash retropie_packages.sh emulationstation
+bash retropie_packages.sh runcommand
 bash retropie_packages.sh bluetooth depends
 bash retropie_packages.sh usbromservice
 

@@ -36,8 +36,8 @@ cat << EOF | sudo tee /usr/local/bin/start_filebrowser.sh
 sudo filebrowser config init
 sudo filebrowser -d filebrowser.db config set --address 0.0.0.0
 sudo filebrowser -d filebrowser.db config set --port 80
-filebrowser users add  pi yumi --perm.admin
-filebrowser users add  admin admin --perm.admin
+filebrowser users add  pi YumiRetroMi25 --perm.admin
+filebrowser users add  admin RetroMi2026! --perm.admin
 sudo filebrowser -r /home/pi/RetroPie/
 EOF
 

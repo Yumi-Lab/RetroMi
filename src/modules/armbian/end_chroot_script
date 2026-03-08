@@ -44,6 +44,26 @@ sudo passwd -d root
 sudo passwd -l root
 ## END
 
-## Step 5: Remove passwdless sudo
+## Step 5: Replace build-time blanket sudo with targeted NOPASSWD
+# Remove the build-time blanket rule
 sed -i '/'"${BASE_USER}"' ALL=(ALL:ALL) NOPASSWD:ALL/d' /etc/sudoers
+
+# Add targeted NOPASSWD rules for RetroPie menu operations
+# (wifi config, bluetooth, retropie-setup, runcommand, etc.)
+cat > /etc/sudoers.d/retromi-nopasswd << SUDOEOF
+# RetroMi: allow pi to run RetroPie tools without password prompt
+${BASE_USER} ALL=(ALL) NOPASSWD: /home/${BASE_USER}/Retropie-Setup/retropie_setup.sh
+${BASE_USER} ALL=(ALL) NOPASSWD: /home/${BASE_USER}/Retropie-Setup/retropie_packages.sh *
+${BASE_USER} ALL=(ALL) NOPASSWD: /opt/retropie/supplementary/runcommand/runcommand.sh *
+${BASE_USER} ALL=(ALL) NOPASSWD: /sbin/iwlist *
+${BASE_USER} ALL=(ALL) NOPASSWD: /sbin/wpa_cli *
+${BASE_USER} ALL=(ALL) NOPASSWD: /usr/sbin/rfkill *
+${BASE_USER} ALL=(ALL) NOPASSWD: /usr/bin/nmcli *
+${BASE_USER} ALL=(ALL) NOPASSWD: /usr/sbin/nmtui
+${BASE_USER} ALL=(ALL) NOPASSWD: /usr/bin/apt-get *
+${BASE_USER} ALL=(ALL) NOPASSWD: /usr/bin/systemctl *
+${BASE_USER} ALL=(ALL) NOPASSWD: /sbin/shutdown *
+${BASE_USER} ALL=(ALL) NOPASSWD: /sbin/reboot
+SUDOEOF
+chmod 440 /etc/sudoers.d/retromi-nopasswd
 ## END

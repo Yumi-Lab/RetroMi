@@ -22,7 +22,7 @@ apt-get install -y --no-install-recommends p7zip-full
 echo_green "Emulationstation Splash Screen..."
 mkdir -p /opt/retropie/supplementary/emulationstation/resources/
 unpack /filesystem/opt/retropie/supplementary/emulationstation/resources/ /opt/retropie/supplementary/emulationstation/resources/
-chmod 777 -R /opt/retropie
+chmod 755 -R /opt/retropie
 echo_green "Emulationstation Splash Screen...(DONE)"
 
 echo_green "Emulationstation Menu..."
@@ -39,11 +39,42 @@ unpack /filesystem/etc/emulationstation/themes/ /etc/emulationstation/themes/
 cd /etc/emulationstation/themes/
 7z x themes.zip.001
 rm themes.zip*
-sudo chmod 777 -R /etc/emulationstation/themes/
+
+# Install additional community themes
+echo_green "Installing additional community themes..."
+apt-get install -y --no-install-recommends git
+
+git clone --depth 1 https://github.com/anthonycaccese/art-book-next-retropie.git \
+    /etc/emulationstation/themes/art-book-next 2>/dev/null || echo "art-book-next: already exists"
+
+git clone --depth 1 https://github.com/mluizvitor/es-theme-elementerial.git \
+    /etc/emulationstation/themes/es-theme-elementerial 2>/dev/null || echo "elementerial: already exists"
+
+git clone --depth 1 https://github.com/chicueloarcade/es-theme-Chicuelo.git \
+    /etc/emulationstation/themes/es-theme-chicuelo 2>/dev/null || echo "chicuelo: already exists"
+
+git clone --depth 1 https://github.com/hoover900/es-theme-Not-so-Epic.git \
+    /etc/emulationstation/themes/es-theme-not-so-epic 2>/dev/null || echo "not-so-epic: already exists"
+
+git clone --depth 1 https://github.com/prefect421/es-theme-lcars-p42.git \
+    /etc/emulationstation/themes/es-theme-lcars 2>/dev/null || echo "lcars: already exists"
+
+git clone --depth 1 https://github.com/HerbFargus/es-theme-tronkyfran.git \
+    /etc/emulationstation/themes/es-theme-tronkyfran 2>/dev/null || echo "tronkyfran: already exists"
+
+# Remove .git dirs to save space on image
+find /etc/emulationstation/themes/ -name ".git" -type d -exec rm -rf {} + 2>/dev/null || true
+
+chmod 755 -R /etc/emulationstation/themes/
+chown -R pi:pi /etc/emulationstation/themes/
+echo_green "Community themes installed. (DONE)"
 
 # Deploy pre-configured ES settings (theme selection + defaults)
-echo_green "Setting default EmulationStation theme (Switch_Black_v2)..."
+# IMPORTANT: only copy es_settings.cfg — do NOT overwrite the whole directory,
+# because the controllers module already deployed es_input.cfg (235+ gamepads)
+echo_green "Setting default EmulationStation theme (epicnoir)..."
 mkdir -p /opt/retropie/configs/all/emulationstation
-unpack /filesystem/opt/retropie/configs/all/emulationstation /opt/retropie/configs/all/emulationstation
+cp /filesystem/opt/retropie/configs/all/emulationstation/es_settings.cfg \
+    /opt/retropie/configs/all/emulationstation/es_settings.cfg
 chown -R pi:pi /opt/retropie/configs/all/emulationstation
 echo_green "Default ES theme configured. (DONE)"
