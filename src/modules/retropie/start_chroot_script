@@ -61,6 +61,11 @@ popd &>/dev/null || exit 1
 # which compiles with host CPU instructions → "Illegal instruction" on real H3
 export __platform="armv7-mali"
 
+# Force RetroPie-Setup to use the target user (not the CI runner or root user)
+# Without this, paths in es_systems.cfg and emulators.cfg point to /home/runner
+# or /root instead of /home/pi
+export __user="${BASE_USER}"
+
 # Run post-install steps: EmulationStation, Bluetooth, USB ROM service, autostart
 pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
 bash retropie_packages.sh emulationstation
@@ -81,14 +86,23 @@ echo_green "Registering installed emulators... [DONE]"
 # Configure the RetroPie settings menu (visible as a system in ES)
 bash retropie_packages.sh retropiemenu configure || true
 
-# Fix es_systems.cfg paths: chroot runs as root so RetroPie-Setup may write
-# /root/RetroPie instead of /home/<user>/RetroPie — fix all occurrences
+# Safety net: fix any wrong user paths in es_systems.cfg and emulators.cfg
+# (CI runner user, root, or literal ~user that wasn't expanded)
 ES_CFG="/etc/emulationstation/es_systems.cfg"
 if [ -f "${ES_CFG}" ]; then
-    sed -i "s|/root/RetroPie|/home/${BASE_USER}/RetroPie|g" "${ES_CFG}"
-    sed -i "s|/root/Retropie-Setup|/home/${BASE_USER}/Retropie-Setup|g" "${ES_CFG}"
+    sed -i "s|/root/RetroPie|/home/${BASE_USER}/RetroPie|g;
+            s|/root/Retropie-Setup|/home/${BASE_USER}/Retropie-Setup|g;
+            s|/home/runner/RetroPie|/home/${BASE_USER}/RetroPie|g;
+            s|/home/runner/Retropie-Setup|/home/${BASE_USER}/Retropie-Setup|g;
+            s|~runner/RetroPie|/home/${BASE_USER}/RetroPie|g;
+            s|~runner/Retropie-Setup|/home/${BASE_USER}/Retropie-Setup|g" "${ES_CFG}"
     echo_green "Fixed es_systems.cfg paths → /home/${BASE_USER}/"
 fi
+# Also fix emulators.cfg paths for runcommand
+find /opt/retropie/configs -name "emulators.cfg" -exec \
+    sed -i "s|/home/runner/|/home/${BASE_USER}/|g;
+            s|~runner/|/home/${BASE_USER}/|g;
+            s|/root/|/home/${BASE_USER}/|g" {} \;
 
 # Ensure retropiemenu .rp files exist (fallback if configure didn't install them)
 RPMENU_DIR="/home/${BASE_USER}/RetroPie/retropiemenu"
