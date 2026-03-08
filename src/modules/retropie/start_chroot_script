@@ -74,12 +74,48 @@ for core_dir in /opt/retropie/libretrocores/lr-*/; do
     [ -d "${core_dir}" ] || continue
     core_name=$(basename "${core_dir}")
     echo_green "  → ${core_name}"
-    bash retropie_packages.sh "${core_name}" configure 2>/dev/null || true
+    bash retropie_packages.sh "${core_name}" configure || true
 done
 echo_green "Registering installed emulators... [DONE]"
 
 # Configure the RetroPie settings menu (visible as a system in ES)
-bash retropie_packages.sh retropiemenu configure 2>/dev/null || true
+bash retropie_packages.sh retropiemenu configure || true
+
+# Fix es_systems.cfg paths: chroot runs as root so RetroPie-Setup may write
+# /root/RetroPie instead of /home/<user>/RetroPie — fix all occurrences
+ES_CFG="/etc/emulationstation/es_systems.cfg"
+if [ -f "${ES_CFG}" ]; then
+    sed -i "s|/root/RetroPie|/home/${BASE_USER}/RetroPie|g" "${ES_CFG}"
+    sed -i "s|/root/Retropie-Setup|/home/${BASE_USER}/Retropie-Setup|g" "${ES_CFG}"
+    echo_green "Fixed es_systems.cfg paths → /home/${BASE_USER}/"
+fi
+
+# Ensure retropiemenu .rp files exist (fallback if configure didn't install them)
+RPMENU_DIR="/home/${BASE_USER}/RetroPie/retropiemenu"
+mkdir -p "${RPMENU_DIR}"
+if [ ! -f "${RPMENU_DIR}/rpsetup.rp" ]; then
+    echo_green "Creating fallback retropiemenu scripts..."
+    cat > "${RPMENU_DIR}/rpsetup.rp" << 'RPEOF'
+#!/bin/bash
+sudo /home/pi/Retropie-Setup/retropie_setup.sh
+RPEOF
+    chmod +x "${RPMENU_DIR}/rpsetup.rp"
+fi
+
+# If retropiemenu is missing from es_systems.cfg, add it as fallback
+if [ -f "${ES_CFG}" ] && ! grep -q "retropiemenu" "${ES_CFG}"; then
+    echo_green "Adding retropiemenu entry to es_systems.cfg..."
+    sed -i "/<\/systemList>/i\\
+  <system>\\
+    <name>retropie</name>\\
+    <fullname>RetroPie</fullname>\\
+    <path>/home/${BASE_USER}/RetroPie/retropiemenu</path>\\
+    <extension>.rp .sh</extension>\\
+    <command>sudo /home/${BASE_USER}/Retropie-Setup/retropie_packages.sh retropiemenu launch %ROM% \&lt;/dev/tty \&gt;/dev/tty</command>\\
+    <platform/>\\
+    <theme>retropie</theme>\\
+  </system>" "${ES_CFG}"
+fi
 
 bash autostartES.sh
 popd &>/dev/null || exit 1
@@ -87,5 +123,6 @@ popd &>/dev/null || exit 1
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
 chown -R "${BASE_USER}:${BASE_USER}" "/opt/retropie/configs" 2>/dev/null || true
+chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/RetroPie" 2>/dev/null || true
 
 echo_green "Installing RetroPie (pre-compiled packages)... [DONE]"
