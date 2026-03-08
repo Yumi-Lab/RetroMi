@@ -134,6 +134,14 @@ fi
 bash autostartES.sh
 popd &>/dev/null || exit 1
 
+# Prevent EmulationStation from launching during firstboot wizard
+# autostart.sh is sourced on login — skip ES if /.firstboot marker exists
+AUTOSTART="/opt/retropie/configs/all/autostart.sh"
+if [ -f "${AUTOSTART}" ]; then
+    sed -i '1a\[ -f /.firstboot ] && exit 0' "${AUTOSTART}"
+    echo_green "Added firstboot guard to autostart.sh"
+fi
+
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
 chown -R "${BASE_USER}:${BASE_USER}" "/opt/retropie/configs" 2>/dev/null || true
