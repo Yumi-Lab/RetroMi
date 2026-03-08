@@ -16,6 +16,12 @@ echo_green "Installing controller udev rules..."
 # Deploy rules from filesystem/
 unpack /filesystem/etc/udev/rules.d /etc/udev/rules.d
 
+# Deploy pre-configured ES input mappings (prevents first-boot wizard)
+# Includes: keyboard, PS3/PS4/PS5, Xbox 360/One/Series, Switch Pro, 8BitDo, Logitech
+mkdir -p /opt/retropie/configs/all/emulationstation
+unpack /filesystem/opt/retropie/configs/all/emulationstation /opt/retropie/configs/all/emulationstation
+echo_green "Pre-configured controller mappings installed (es_input.cfg)"
+
 # Ensure 'pi' user has joystick access
 usermod -aG input pi
 
