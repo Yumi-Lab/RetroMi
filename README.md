@@ -15,20 +15,25 @@ RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One*
 
 ---
 
-## ✨ Features / Fonctionnalités
+## Features / Fonctionnalités
 
 | Feature | Details |
 |---------|---------|
-| 🎮 **EmulationStation** | Custom RetroMi theme, pre-configured |
-| 🕹️ **RetroArch** | 80+ libretro cores, Mali-400 optimized config |
-| 📦 **Pre-compiled packages** | 16 groups built for armhf — no compilation on device |
-| 🔫 **Sinden Lightgun** | Full support included |
-| 🎯 **Bezels / Overlays** | Per-system decorative bezels from TheBezelProject |
-| 🎮 **Controller hotplug** | PS4, PS5, Xbox, Switch Pro, 8BitDo — auto-configured via udev |
-| 🌐 **FileBrowser** | Web-based ROM manager on port 80 |
-| 🔌 **USB auto-mount** | Plug a USB drive → ROMs detected automatically |
-| 🎵 **Background music** | Retro ambiance music in EmulationStation |
-| ⚡ **Fast boot** | ~15 min build, RetroMi-packages pre-compiled separately |
+| **EmulationStation** | 17 themes pre-installed (EpicNoir default) |
+| **RetroArch** | 80+ libretro cores, Mali-400 GPU optimized |
+| **Pre-compiled packages** | 16 groups built for armhf — no compilation on device |
+| **235 gamepads** | PS3/PS4/PS5, Xbox, Switch Pro, 8BitDo, Logitech — auto-configured |
+| **Bezels / Overlays** | Per-system decorative bezels from TheBezelProject (19 systems) |
+| **FileBrowser** | Web-based ROM manager on port 80 |
+| **USB auto-mount** | Plug a USB drive — ROMs detected automatically |
+| **Fast boot** | Custom Plymouth splash, ~25 min build |
+
+### Pre-installed themes (17)
+
+| Source | Themes |
+|--------|--------|
+| Bundled (7z) | EpicNoir (default), Carbon 2021, Switch Black v2, Switch, ArkOS Carbon, Epic, Freeplay, GBZ35 Mod, Magical Pixel, Minimal ArkOS, NES Box |
+| Community | Art Book Next, Elementerial (MIT), Chicuelo, Not-so-Epic, LCARS (CC0), Tronkyfran |
 
 ### Supported systems (80+ cores across 16 groups)
 
@@ -53,88 +58,105 @@ RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One*
 
 ---
 
-## 📥 Installation
+## Installation
 
 ### 1. Download / Télécharger
 
-Download the image parts (`*.img.xz.partaa`, `*.img.xz.partab`) from the [Releases page](https://github.com/Yumi-Lab/RetroMi/releases).
+Download the image parts (`.7z.001`, `.7z.002`) from the [Releases page](https://github.com/Yumi-Lab/RetroMi/releases).
 
-The image is split into two parts due to GitHub's 2 GiB file size limit. Recombine before flashing:
+The image is split into two parts due to GitHub's 2 GiB file size limit.
 
+### 2. Extract / Extraire
+
+**Windows** — Use [7-Zip](https://7-zip.org/): right-click on `.7z.001` → Extract Here
+
+**macOS** — Use [Keka](https://www.keka.io/) or [The Unarchiver](https://theunarchiver.com/): open `.7z.001`
+
+**Linux** :
 ```bash
-cat *.img.xz.part* > image.img.xz
-xz -d image.img.xz
+7z x RetroMi-*.img.7z.001
 ```
 
-Or verify integrity first:
+Verify integrity:
 ```bash
-sha256sum -c *.img.xz.sha256
+sha256sum -c *.sha256
 ```
 
-### 2. Flash
+### 3. Flash
 
-Use [Balena Etcher](https://etcher.balena.io/) or `dd` to flash the `.img` to a microSD card (≥ 16 GB recommended):
+> **Important:** Balena Etcher is NOT compatible with AllWinner H3 images. Use `dd` instead.
 
 ```bash
 # Linux/macOS
-sudo dd if=*.img of=/dev/sdX bs=4M status=progress
+sudo dd if=RetroMi-*.img of=/dev/sdX bs=4M status=progress
 ```
 
-### 3. Boot
+**Windows** — Use [Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/) or [Rufus](https://rufus.ie/) (DD mode).
+
+### 4. Boot
 
 Insert the card into your SmartPi One and power on. First boot takes 2–3 minutes (initial setup).
 
 ---
 
-## 🔑 Default credentials
+## Default credentials
 
-| | Value |
-|-|-------|
-| **Username** | `pi` |
-| **Password** | `yumi` |
-
----
-
-## 🌐 Adding ROMs — FileBrowser
-
-Access the web file manager at **`http://<device-ip>/`** (port 80):
-
-- Login: `admin` / `admin` *(change after first login)*
-- Navigate to `pi/RetroPie/roms/<system>/` and upload your ROM files
-- Restart EmulationStation to refresh the game list
+| Service | User | Password |
+|---------|------|----------|
+| **SSH** | `pi` | `yumi` |
+| **FileBrowser** (port 80) | `admin` | `RetroMi2026!` |
+| **FileBrowser** (port 80) | `pi` | `YumiRetroMi25` |
 
 ---
 
-## 📡 Wi-Fi setup
+## Adding ROMs
 
-From the EmulationStation menu → **Wi-Fi**, or via SSH:
+### FileBrowser (web)
+
+Access **`http://<device-ip>/`** (port 80), navigate to `RetroPie/roms/<system>/` and upload your ROM files. Restart EmulationStation to refresh the game list.
+
+### USB (plug & play)
+
+Create a `RetroPie/roms/<system>/` folder structure on a USB drive. Plug it in — ROMs are detected and linked automatically.
+
+### SCP (SSH)
 
 ```bash
-sudo armbian-config
-# → Network → Wi-Fi
+scp game.zip pi@<device-ip>:/home/pi/RetroPie/roms/<system>/
 ```
 
 ---
 
-## 💾 USB ROMs (plug & play)
+## Wi-Fi setup
 
-Create a `RetroPie` folder on your USB drive with the standard RetroPie folder structure. Plug it in — ROMs are detected and linked automatically.
+From the EmulationStation menu → **RetroPie** → **Wi-Fi**, or via SSH:
+
+```bash
+sudo nmtui
+```
 
 ---
 
-## 🏗️ Architecture
+## Architecture
 
 ```
 Layer 1 — Yumi-Lab/SmartPi-armbian   : Armbian Bookworm server base (armhf)
 Layer 2 — Yumi-Lab/RetroMi-packages  : 80+ pre-compiled libretro cores (16 groups)
-Layer 3 — Yumi-Lab/RetroMi           : EmulationStation theme, config, modules
+Layer 3 — Yumi-Lab/RetroMi           : EmulationStation themes, config, modules
 ```
 
 Layer 2 is built separately via QEMU armhf in Docker — no compilation on the device.
 
+### Build modules chain
+
+```
+base → pkgupgrade → udev_fix → controllers → armbian → armbian_net → retropie
+     → retroarch → bezels → yumios → plymouth → filebroswer → emulatiostation → usb-mount
+```
+
 ---
 
-## 🛠️ Build from source
+## Build from source
 
 ```bash
 # Trigger a RetroMi image build
@@ -144,23 +166,17 @@ gh workflow run Release.yml --repo Yumi-Lab/RetroMi -f version=X.Y.Z
 gh workflow run build.yml --repo Yumi-Lab/RetroMi-packages -f version=X.Y.Z
 ```
 
-Requirements: [CustomPiOS-Yumi](https://github.com/Yumi-Lab/CustomPiOS-Yumi)
+Requirements: [CustomPiOS-Yumi v1.5.0](https://github.com/Yumi-Lab/CustomPiOS-Yumi)
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Conventional commits required. DCO sign-off enforced.
 
 ---
 
-## 📊 Retrogaming ecosystem
-
-A competitive landscape of 50+ retrogaming projects (Batocera, Lakka, RetroPie, EmuELEC…) is available in [docs/retrogaming-ecosystem.html](docs/retrogaming-ecosystem.html).
-
----
-
-## 📄 License
+## License
 
 GPL-3.0 — see [LICENSE](LICENSE).
 
