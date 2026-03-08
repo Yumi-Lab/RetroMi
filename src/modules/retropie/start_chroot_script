@@ -30,6 +30,27 @@ for group in ${RETROPIE_PACKAGE_GROUPS}; do
     rm -f "/tmp/packages-${group}-armhf.tar.gz"
 done
 
+# Create all ROM directories so the structure is ready for USB auto-mount
+ROM_DIR="/home/${BASE_USER}/RetroPie/roms"
+mkdir -p "${ROM_DIR}"
+for sys in \
+    nes snes megadrive mastersystem gamegear genesis sega32x segacd sg-1000 \
+    gb gbc gba nds n64 \
+    psx psp \
+    atari2600 atari5200 atari7800 atarilynx atarist \
+    pcengine ngp ngpc wonderswan wonderswancolor \
+    mame-libretro fba arcade neogeo \
+    scummvm dosbox \
+    c64 msx zxspectrum amstradcpc amiga \
+    dreamcast saturn 3do jaguar \
+    vectrex coleco intellivision \
+    virtualboy pokemini supervision megaduck uzebox arduboy \
+    pc88 pc98 x68000 x1 \
+    ports; do
+    mkdir -p "${ROM_DIR}/${sys}"
+done
+chown -R "${BASE_USER}:${BASE_USER}" "${ROM_DIR}"
+
 # Clone YUMI-RETROPIE for post-install configuration only (no compilation)
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
@@ -45,6 +66,21 @@ pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
 bash retropie_packages.sh emulationstation
 bash retropie_packages.sh bluetooth depends
 bash retropie_packages.sh usbromservice
+
+# Register all pre-compiled libretro cores in EmulationStation
+# Each 'configure' step calls addSystem → populates es_systems.cfg + emulators.cfg
+echo_green "Registering installed emulators in EmulationStation..."
+for core_dir in /opt/retropie/libretrocores/lr-*/; do
+    [ -d "${core_dir}" ] || continue
+    core_name=$(basename "${core_dir}")
+    echo_green "  → ${core_name}"
+    bash retropie_packages.sh "${core_name}" configure 2>/dev/null || true
+done
+echo_green "Registering installed emulators... [DONE]"
+
+# Configure the RetroPie settings menu (visible as a system in ES)
+bash retropie_packages.sh retropiemenu configure 2>/dev/null || true
+
 bash autostartES.sh
 popd &>/dev/null || exit 1
 
