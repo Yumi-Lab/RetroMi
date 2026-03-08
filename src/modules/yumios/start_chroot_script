@@ -56,7 +56,24 @@ if [[ -f "/etc/orangepi-release" ]]; then
 fi
 ## END Step 2
 
-## Step 3: Install CANBoot Dependency
+## Step 3: Custom login banner
+echo_green "Setting RetroMi login banner..."
+cat > /etc/update-motd.d/00-retromi-header << 'BANNER'
+#!/bin/bash
+echo ""
+echo " ____      _             __  __ _"
+echo "|  _ \ ___| |_ _ __ ___ |  \/  (_)"
+echo "| |_) / _ \ __| '__/ _ \| |\/| | |"
+echo "|  _ <  __/ |_| | | (_) | |  | | |"
+echo "|_| \_\___|\__|_|  \___/|_|  |_|_|"
+echo ""
+BANNER
+chmod +x /etc/update-motd.d/00-retromi-header
+# Remove old YumiOS/Armbian header if present
+rm -f /etc/update-motd.d/10-armbian-header 2>/dev/null || true
+## END Step 3
+
+## Step 4: Install CANBoot Dependency
 apt-get update --allow-releaseinfo-change
 # shellcheck disable=SC2086
 check_install_pkgs ${YUMIOS_DEPS}
