@@ -35,6 +35,11 @@ pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
 popd &>/dev/null || exit 1
 
+# Force platform detection for QEMU builds (prevents -march=native on x86 host)
+# Without this, RetroPie-Setup falls back to platform_native() in QEMU chroot,
+# which compiles with host CPU instructions → "Illegal instruction" on real H3
+export __platform="armv7-mali"
+
 # Run post-install steps: EmulationStation, Bluetooth, USB ROM service, autostart
 pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
 bash retropie_packages.sh emulationstation
