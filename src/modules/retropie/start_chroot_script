@@ -138,7 +138,7 @@ popd &>/dev/null || exit 1
 # autostart.sh is sourced on login — skip ES if /.firstboot marker exists
 AUTOSTART="/opt/retropie/configs/all/autostart.sh"
 if [ -f "${AUTOSTART}" ]; then
-    sed -i '1a\[ -f /.firstboot ] && exit 0' "${AUTOSTART}"
+    sed -i '/emulationstation/i\[ -f /.firstboot ] && exit 0' "${AUTOSTART}"
     echo_green "Added firstboot guard to autostart.sh"
 fi
 
