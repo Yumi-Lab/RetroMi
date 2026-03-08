@@ -40,3 +40,10 @@ cd /etc/emulationstation/themes/
 7z x themes.zip.001
 rm themes.zip*
 sudo chmod 777 -R /etc/emulationstation/themes/
+
+# Deploy pre-configured ES settings (theme selection + defaults)
+echo_green "Setting default EmulationStation theme (Switch_Black_v2)..."
+mkdir -p /opt/retropie/configs/all/emulationstation
+unpack /filesystem/opt/retropie/configs/all/emulationstation /opt/retropie/configs/all/emulationstation
+chown -R pi:pi /opt/retropie/configs/all/emulationstation
+echo_green "Default ES theme configured. (DONE)"

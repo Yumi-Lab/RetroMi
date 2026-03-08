@@ -11,4 +11,4 @@
 [ -n "${RETROPIE_PACKAGE_GROUPS}" ] || RETROPIE_PACKAGE_GROUPS="retroarch arcade arcade-compat nintendo n64 sega sony psp misc scummvm dosbox portables computers amiga japan-computers heavy"
 
 # Runtime dependencies only (no build tools — packages are pre-compiled)
-[ -n "${RETROPIE_DEPS}" ]        || RETROPIE_DEPS="wget ca-certificates dialog xmlstarlet git"
+[ -n "${RETROPIE_DEPS}" ]        || RETROPIE_DEPS="wget ca-certificates dialog xmlstarlet git wireless-tools"
