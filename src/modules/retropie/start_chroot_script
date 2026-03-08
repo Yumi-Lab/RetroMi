@@ -30,6 +30,27 @@ for group in ${RETROPIE_PACKAGE_GROUPS}; do
     rm -f "/tmp/packages-${group}-armhf.tar.gz"
 done
 
+# Create all ROM directories so the structure is ready for USB auto-mount
+ROM_DIR="/home/${BASE_USER}/RetroPie/roms"
+mkdir -p "${ROM_DIR}"
+for sys in \
+    nes snes megadrive mastersystem gamegear genesis sega32x segacd sg-1000 \
+    gb gbc gba nds n64 \
+    psx psp \
+    atari2600 atari5200 atari7800 atarilynx atarist \
+    pcengine ngp ngpc wonderswan wonderswancolor \
+    mame-libretro fba arcade neogeo \
+    scummvm dosbox \
+    c64 msx zxspectrum amstradcpc amiga \
+    dreamcast saturn 3do jaguar \
+    vectrex coleco intellivision \
+    virtualboy pokemini supervision megaduck uzebox arduboy \
+    pc88 pc98 x68000 x1 \
+    ports; do
+    mkdir -p "${ROM_DIR}/${sys}"
+done
+chown -R "${BASE_USER}:${BASE_USER}" "${ROM_DIR}"
+
 # Clone YUMI-RETROPIE for post-install configuration only (no compilation)
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
@@ -40,16 +61,90 @@ popd &>/dev/null || exit 1
 # which compiles with host CPU instructions → "Illegal instruction" on real H3
 export __platform="armv7-mali"
 
+# Force RetroPie-Setup to use the target user (not the CI runner or root user)
+# Without this, paths in es_systems.cfg and emulators.cfg point to /home/runner
+# or /root instead of /home/pi
+export __user="${BASE_USER}"
+
 # Run post-install steps: EmulationStation, Bluetooth, USB ROM service, autostart
 pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
 bash retropie_packages.sh emulationstation
 bash retropie_packages.sh bluetooth depends
 bash retropie_packages.sh usbromservice
+
+# Register all pre-compiled libretro cores in EmulationStation
+# Each 'configure' step calls addSystem → populates es_systems.cfg + emulators.cfg
+echo_green "Registering installed emulators in EmulationStation..."
+for core_dir in /opt/retropie/libretrocores/lr-*/; do
+    [ -d "${core_dir}" ] || continue
+    core_name=$(basename "${core_dir}")
+    echo_green "  → ${core_name}"
+    bash retropie_packages.sh "${core_name}" configure || true
+done
+echo_green "Registering installed emulators... [DONE]"
+
+# Configure the RetroPie settings menu (visible as a system in ES)
+bash retropie_packages.sh retropiemenu configure || true
+
+# Safety net: fix any wrong user paths in es_systems.cfg and emulators.cfg
+# (CI runner user, root, or literal ~user that wasn't expanded)
+ES_CFG="/etc/emulationstation/es_systems.cfg"
+if [ -f "${ES_CFG}" ]; then
+    sed -i "s|/root/RetroPie|/home/${BASE_USER}/RetroPie|g;
+            s|/root/Retropie-Setup|/home/${BASE_USER}/Retropie-Setup|g;
+            s|/home/runner/RetroPie|/home/${BASE_USER}/RetroPie|g;
+            s|/home/runner/Retropie-Setup|/home/${BASE_USER}/Retropie-Setup|g;
+            s|~runner/RetroPie|/home/${BASE_USER}/RetroPie|g;
+            s|~runner/Retropie-Setup|/home/${BASE_USER}/Retropie-Setup|g" "${ES_CFG}"
+    echo_green "Fixed es_systems.cfg paths → /home/${BASE_USER}/"
+fi
+# Also fix emulators.cfg paths for runcommand
+find /opt/retropie/configs -name "emulators.cfg" -exec \
+    sed -i "s|/home/runner/|/home/${BASE_USER}/|g;
+            s|~runner/|/home/${BASE_USER}/|g;
+            s|/root/|/home/${BASE_USER}/|g" {} \;
+
+# Ensure retropiemenu .rp files exist (fallback if configure didn't install them)
+RPMENU_DIR="/home/${BASE_USER}/RetroPie/retropiemenu"
+mkdir -p "${RPMENU_DIR}"
+if [ ! -f "${RPMENU_DIR}/rpsetup.rp" ]; then
+    echo_green "Creating fallback retropiemenu scripts..."
+    cat > "${RPMENU_DIR}/rpsetup.rp" << 'RPEOF'
+#!/bin/bash
+sudo /home/pi/Retropie-Setup/retropie_setup.sh
+RPEOF
+    chmod +x "${RPMENU_DIR}/rpsetup.rp"
+fi
+
+# If retropiemenu is missing from es_systems.cfg, add it as fallback
+if [ -f "${ES_CFG}" ] && ! grep -q "retropiemenu" "${ES_CFG}"; then
+    echo_green "Adding retropiemenu entry to es_systems.cfg..."
+    sed -i "/<\/systemList>/i\\
+  <system>\\
+    <name>retropie</name>\\
+    <fullname>RetroPie</fullname>\\
+    <path>/home/${BASE_USER}/RetroPie/retropiemenu</path>\\
+    <extension>.rp .sh</extension>\\
+    <command>sudo /home/${BASE_USER}/Retropie-Setup/retropie_packages.sh retropiemenu launch %ROM% \&lt;/dev/tty \&gt;/dev/tty</command>\\
+    <platform/>\\
+    <theme>retropie</theme>\\
+  </system>" "${ES_CFG}"
+fi
+
 bash autostartES.sh
 popd &>/dev/null || exit 1
+
+# Prevent EmulationStation from launching during firstboot wizard
+# autostart.sh is sourced on login — skip ES if /.firstboot marker exists
+AUTOSTART="/opt/retropie/configs/all/autostart.sh"
+if [ -f "${AUTOSTART}" ]; then
+    sed -i '1a\[ -f /.firstboot ] && exit 0' "${AUTOSTART}"
+    echo_green "Added firstboot guard to autostart.sh"
+fi
 
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
 chown -R "${BASE_USER}:${BASE_USER}" "/opt/retropie/configs" 2>/dev/null || true
+chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/RetroPie" 2>/dev/null || true
 
 echo_green "Installing RetroPie (pre-compiled packages)... [DONE]"

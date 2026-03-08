@@ -19,4 +19,7 @@ unpack /filesystem/etc/udev/rules.d /etc/udev/rules.d
 # Ensure 'pi' user has joystick access
 usermod -aG input pi
 
+# Load joydev kernel module at boot (required for /dev/input/js* devices)
+echo "joydev" > /etc/modules-load.d/retromi-controllers.conf
+
 echo_green "Controller udev rules installed. (DONE)"
