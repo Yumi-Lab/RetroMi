@@ -40,6 +40,11 @@ cd /etc/emulationstation/themes/
 7z x themes.zip.001
 rm themes.zip*
 
+# Remove Switch_Black_v2 — incomplete theme (missing icons for WiFi, Bluetooth,
+# RetroPie menu items). Users can't navigate settings with it.
+rm -rf /etc/emulationstation/themes/Switch_Black_v2
+echo_green "Removed Switch_Black_v2 (broken/incomplete theme)"
+
 # Install additional community themes
 echo_green "Installing additional community themes..."
 apt-get install -y --no-install-recommends git
