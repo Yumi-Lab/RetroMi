@@ -66,9 +66,9 @@ export __platform="armv7-mali"
 # or /root instead of /home/pi
 export __user="${BASE_USER}"
 
-# Run post-install steps: EmulationStation, Bluetooth, USB ROM service, autostart
+# Run post-install steps: Bluetooth, USB ROM service, autostart
+# EmulationStation is now pre-compiled in RetroMi-packages (no more inline build)
 pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
-bash retropie_packages.sh emulationstation
 bash retropie_packages.sh runcommand
 bash retropie_packages.sh bluetooth depends
 bash retropie_packages.sh usbromservice
