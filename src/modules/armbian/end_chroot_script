@@ -64,6 +64,7 @@ ${BASE_USER} ALL=(ALL) NOPASSWD: /usr/bin/apt-get *
 ${BASE_USER} ALL=(ALL) NOPASSWD: /usr/bin/systemctl *
 ${BASE_USER} ALL=(ALL) NOPASSWD: /sbin/shutdown *
 ${BASE_USER} ALL=(ALL) NOPASSWD: /sbin/reboot
+${BASE_USER} ALL=(ALL) NOPASSWD: /usr/sbin/armbian-config
 SUDOEOF
 chmod 440 /etc/sudoers.d/retromi-nopasswd
 ## END

@@ -143,6 +143,14 @@ if [ -f "${AUTOSTART}" ]; then
     echo_green "Added firstboot guard to autostart.sh"
 fi
 
+# Force epicnoir theme on every ES launch (ES regenerates es_settings.cfg on first run)
+# This sed runs before emulationstation and patches whatever ThemeSet value ES wrote
+ES_SETTINGS="/opt/retropie/configs/all/emulationstation/es_settings.cfg"
+if [ -f "${AUTOSTART}" ]; then
+    sed -i '/emulationstation/i\sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|'\'' '"${ES_SETTINGS}"' 2>/dev/null' "${AUTOSTART}"
+    echo_green "Added epicnoir theme enforcer to autostart.sh"
+fi
+
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
 chown -R "${BASE_USER}:${BASE_USER}" "/opt/retropie/configs" 2>/dev/null || true

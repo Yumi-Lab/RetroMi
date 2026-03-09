@@ -1,7 +1,7 @@
 [Unit]
 Description=Firstboot initialisation
-After=basic.target
-Before=multi-user.target getty@tty1.service
+After=basic.target getty@tty2.service
+Before=multi-user.target
 ConditionPathExists=/.firstboot
 
 [Service]

@@ -21,6 +21,9 @@ RESOLUTION=(20 60)
 
 #change active tty
 chvt 2
+sleep 1
+# Force terminal dimensions so dialog renders centered
+stty rows 30 cols 80 < /dev/tty2 2>/dev/null || true
 
 
 
