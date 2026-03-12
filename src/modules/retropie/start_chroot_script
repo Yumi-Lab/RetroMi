@@ -86,6 +86,10 @@ for core_dir in /opt/retropie/libretrocores/lr-*/; do
 done
 echo_green "Registering installed emulators... [DONE]"
 
+# Configure EmulationStation itself (creates /usr/bin/emulationstation symlink)
+echo_green "Configuring EmulationStation binary..."
+bash retropie_packages.sh emulationstation configure || true
+
 # Configure the RetroPie settings menu (visible as a system in ES)
 bash retropie_packages.sh retropiemenu configure || true
 
