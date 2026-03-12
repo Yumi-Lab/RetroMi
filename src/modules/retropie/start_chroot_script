@@ -14,11 +14,13 @@ echo_green "Installing RetroPie (pre-compiled packages)..."
 
 # Runtime dependencies (no compiler needed)
 apt-get update
+# shellcheck disable=SC2086
 check_install_pkgs ${RETROPIE_DEPS}
 
 # Download and extract each pre-compiled package group
 mkdir -p /opt/retropie
 
+# shellcheck disable=SC2086
 for group in ${RETROPIE_PACKAGE_GROUPS}; do
     echo_green "Downloading ${group} packages..."
     wget --tries=5 --waitretry=15 --timeout=60 --retry-on-http-error=502,503,504 --show-progress \

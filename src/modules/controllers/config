@@ -1,2 +1,3 @@
 # Controllers module config
+# shellcheck disable=SC2034
 CONTROLLERS_PKGS=""
