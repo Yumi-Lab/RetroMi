@@ -1,0 +1,43 @@
+#!/usr/bin/env bash
+#### Samba share for RetroMi ROMs — guest access, no password
+####
+#### This File is distributed under GPLv3
+####
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+echo_green "install samba..."
+
+apt-get install -y --no-install-recommends samba samba-common-bin
+
+cat << 'EOF' | sudo tee /etc/samba/smb.conf
+[global]
+   workgroup = WORKGROUP
+   server string = RetroMi
+   server role = standalone server
+   log file = /dev/null
+   max log size = 0
+   dns proxy = no
+   map to guest = Bad User
+   usershare allow guests = yes
+
+[ROMs]
+   comment = RetroMi ROMs
+   path = /home/pi/RetroPie/roms
+   browseable = yes
+   read only = no
+   guest ok = yes
+   force user = pi
+   create mask = 0664
+   directory mask = 0775
+EOF
+
+sudo systemctl enable smbd nmbd
+
+echo_green "install samba...(DONE)"
