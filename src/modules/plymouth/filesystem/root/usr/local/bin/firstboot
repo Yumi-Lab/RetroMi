@@ -17,7 +17,8 @@ DIALOGRC=/.firstboot
 export DIALOGRC
 DIALOG="$(which dialog)"
 DIALOG=("${DIALOG}" --backtitle "YumiOS for RetroMi")
-RESOLUTION=(20 60)
+RESOLUTION=(28 76)
+BASE_USER="${BASE_USER:-pi}"
 
 #change active tty
 chvt 2
