@@ -24,10 +24,10 @@ chvt 2
 sleep 2
 
 # Read actual terminal dimensions and fill the screen
-TERM_ROWS=$(stty size < /dev/tty2 2>/dev/null | cut -d' ' -f1)
-TERM_COLS=$(stty size < /dev/tty2 2>/dev/null | cut -d' ' -f2)
-[ -z "${TERM_ROWS}" ] || [ "${TERM_ROWS}" -lt 10 ] 2>/dev/null && TERM_ROWS=30
-[ -z "${TERM_COLS}" ] || [ "${TERM_COLS}" -lt 40 ] 2>/dev/null && TERM_COLS=80
+TERM_ROWS=$(stty size < /dev/tty2 2>/dev/null | cut -d' ' -f1 || true)
+TERM_COLS=$(stty size < /dev/tty2 2>/dev/null | cut -d' ' -f2 || true)
+if [ -z "${TERM_ROWS}" ] || [ "${TERM_ROWS}" -lt 10 ] 2>/dev/null; then TERM_ROWS=30; fi
+if [ -z "${TERM_COLS}" ] || [ "${TERM_COLS}" -lt 40 ] 2>/dev/null; then TERM_COLS=80; fi
 RESOLUTION=($((TERM_ROWS - 2)) $((TERM_COLS - 4)))
 
 
