@@ -14,8 +14,14 @@ MODULES="base(pkgupgrade,udev_fix,controllers,armbian(armbian_net,retropie,retro
 
 # SmartPi One — AllWinner H3 — ARMv7 32-bit
 BASE_ARCH="armhf"
+BASE_SBC="smartpi1"
+BASE_OS_CODENAME="bookworm"
+BASE_OS_VERSION="debian12"
 
 # export Variables
 export BASE_ARCH
+export BASE_SBC
+export BASE_OS_CODENAME
+export BASE_OS_VERSION
 export DOWNLOAD_URL_CHECKSUM
 export DOWNLOAD_URL_IMAGE
