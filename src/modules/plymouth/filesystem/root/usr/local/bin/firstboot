@@ -17,14 +17,18 @@ DIALOGRC=/.firstboot
 export DIALOGRC
 DIALOG="$(which dialog)"
 DIALOG=("${DIALOG}" --backtitle "YumiOS for RetroMi")
-RESOLUTION=(28 76)
 BASE_USER="${BASE_USER:-pi}"
 
 #change active tty
 chvt 2
-sleep 1
-# Force terminal dimensions so dialog renders centered
-stty rows 30 cols 80 < /dev/tty2 2>/dev/null || true
+sleep 2
+
+# Read actual terminal dimensions and fill the screen
+TERM_ROWS=$(stty size < /dev/tty2 2>/dev/null | cut -d' ' -f1)
+TERM_COLS=$(stty size < /dev/tty2 2>/dev/null | cut -d' ' -f2)
+[ -z "${TERM_ROWS}" ] || [ "${TERM_ROWS}" -lt 10 ] 2>/dev/null && TERM_ROWS=30
+[ -z "${TERM_COLS}" ] || [ "${TERM_COLS}" -lt 40 ] 2>/dev/null && TERM_COLS=80
+RESOLUTION=($((TERM_ROWS - 2)) $((TERM_COLS - 4)))
 
 
 
