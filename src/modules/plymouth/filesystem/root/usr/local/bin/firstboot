@@ -96,6 +96,12 @@ sed -i '$a\' "$script"
 echo "emulationstation #auto" >>"$script"
 chown "${BASE_USER}":"${BASE_USER}" "$script"
 
+# Force epicnoir theme before first ES launch (ES defaults to Carbon on fresh start)
+ES_SETTINGS="/opt/retropie/configs/all/emulationstation/es_settings.cfg"
+if [ -f "${ES_SETTINGS}" ]; then
+    sed -i 's|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|' "${ES_SETTINGS}"
+fi
+
 # Show reboot screen
 "${DIALOG[@]}" --clear --title "Firstboot preperation" \
     --no-cancel --no-ok --pause "$(reboot_msg)" "${RESOLUTION[@]}" 5
