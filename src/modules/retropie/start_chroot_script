@@ -149,8 +149,14 @@ if [ -f "${AUTOSTART}" ]; then
     echo_green "Added firstboot guard to autostart.sh"
 fi
 
-# epicnoir theme is now set once in firstboot script (before first ES launch)
-# No enforcer in autostart.sh — users can change theme freely in ES settings
+# Force epicnoir on first ES launch only (ES regenerates es_settings.cfg with Carbon default)
+# Uses a marker file so the user can change theme freely after first boot
+ES_SETTINGS="/opt/retropie/configs/all/emulationstation/es_settings.cfg"
+THEME_MARKER="/home/${BASE_USER}/.emulationstation/.theme_initialized"
+if [ -f "${AUTOSTART}" ]; then
+    sed -i '/emulationstation/i\if [ ! -f '"${THEME_MARKER}"' ]; then sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|'\'' '"${ES_SETTINGS}"' 2>/dev/null; touch '"${THEME_MARKER}"'; fi' "${AUTOSTART}"
+    echo_green "Added one-time epicnoir theme enforcer to autostart.sh"
+fi
 
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
