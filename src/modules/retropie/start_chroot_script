@@ -75,14 +75,19 @@ bash retropie_packages.sh runcommand
 bash retropie_packages.sh bluetooth depends
 bash retropie_packages.sh usbromservice
 
-# joy2key: translates joystick inputs to keyboard keys in terminal/dialog scripts
-# Without this, gamepad doesn't work in RetroPie configuration menus
-echo_green "Installing joy2key (gamepad-to-keyboard for terminal menus)..."
-bash retropie_packages.sh joy2key || true
-
-# WiFi configuration menu in RetroPie
-echo_green "Installing WiFi configuration menu..."
-bash retropie_packages.sh wifi || true
+# RetroPie supplementary packages — menu items and utilities
+echo_green "Installing RetroPie supplementary packages..."
+bash retropie_packages.sh joy2key || true          # gamepad-to-keyboard in terminal menus
+bash retropie_packages.sh wifi || true             # WiFi configuration menu
+bash retropie_packages.sh audiosettings || true    # audio output configuration
+bash retropie_packages.sh configedit || true       # RetroArch/ES config editor
+bash retropie_packages.sh esthemes || true         # theme downloader from ES menu
+bash retropie_packages.sh scraper || true          # game metadata/artwork scraper (sselphs)
+bash retropie_packages.sh skyscraper || true       # advanced game scraper (ScreenScraper API)
+bash retropie_packages.sh splashscreen || true     # boot splash screen configuration
+bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer configuration
+bash retropie_packages.sh resetromdirs || true     # reset/create ROM directory structure
+echo_green "RetroPie supplementary packages... [DONE]"
 
 # Register all pre-compiled libretro cores in EmulationStation
 # Each 'configure' step calls addSystem → populates es_systems.cfg + emulators.cfg
