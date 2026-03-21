@@ -102,6 +102,7 @@ script="/opt/retropie/configs/all/autostart.sh"
 sed -i '/#auto/d' "$script"
 
 # Update initramfs with smooth progress (runs in background)
+INITRAMFS_START=$(date +%s)
 gen_initramfs &
 INITRAMFS_PID=$!
 (
@@ -114,6 +115,8 @@ INITRAMFS_PID=$!
     echo 90
 ) | "${DIALOG[@]}" --clear --gauge "Updating boot image (Plymouth splash)..." "${RESOLUTION[@]}" 20
 wait "${INITRAMFS_PID}" 2>/dev/null || true
+INITRAMFS_END=$(date +%s)
+echo "firstboot: update-initramfs took $((INITRAMFS_END - INITRAMFS_START))s" >> /var/log/retromi-firstboot.log
 
 # disable firstboot service
 disable_firstboot
