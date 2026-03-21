@@ -32,28 +32,48 @@ RESOLUTION=($((TERM_ROWS - 2)) $((TERM_COLS - 4)))
 
 
 
+# Center text vertically inside dialog box
+# $1 = text content, $2 = box height, $3 = text line count
+center_text() {
+    local text="$1" box_h="$2" text_lines="$3"
+    local pad=$(( (box_h - text_lines - 6) / 2 ))
+    if [ "${pad}" -lt 0 ]; then pad=0; fi
+    local padding=""
+    for ((i=0; i<pad; i++)); do padding="${padding}\n"; done
+    printf '%b%s' "${padding}" "${text}"
+}
+
 welcome_msg() {
-    cat << EOF
-Hello dear YUMI RetroMi One user,
-Please be patient, we have to prepare your first start of your RetroBox!
+    local msg
+    msg=$(cat << 'MSGEOF'
+              Hello dear YUMI RetroMi One user,
 
-    *** DO NOT UNPLUG DEVICE OR DISRUPT THIS PROCESS! ***
-    *** THIS WILL HARM YOUR OS! ***
+   Please be patient, we have to prepare your first start
+                    of your RetroBox!
 
-Some steps may take several minutes. Stay patient please.
-The device will reboot after exiting ...
-Continuing setup in ...
-EOF
+      *** DO NOT UNPLUG DEVICE OR DISRUPT THIS PROCESS! ***
+      ***           THIS WILL HARM YOUR OS!             ***
+
+      Some steps may take several minutes. Stay patient.
+            The device will reboot after exiting ...
+
+                    Continuing setup in ...
+MSGEOF
+)
+    center_text "${msg}" "${RESOLUTION[0]}" 11
 }
 
 reboot_msg() {
-    cat << EOF
-Your device will be restarted in 5 seconds...
+    local msg
+    msg=$(cat << 'MSGEOF'
+         Your device will be restarted in 5 seconds...
 
-Thank you for being patient and have fun with your new
-    *** YUMI RetroMi ***
+   Thank you for being patient and have fun with your new
 
-EOF
+                    *** YUMI RetroMi ***
+MSGEOF
+)
+    center_text "${msg}" "${RESOLUTION[0]}" 5
 }
 
 gen_initramfs() {
