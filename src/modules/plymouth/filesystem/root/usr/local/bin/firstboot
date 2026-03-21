@@ -101,14 +101,26 @@ fi
 script="/opt/retropie/configs/all/autostart.sh"
 sed -i '/#auto/d' "$script"
 
-# Update initramfs
-gen_initramfs | "${DIALOG[@]}" --clear --gauge "Generate Initial RAM filesystem ..." "${RESOLUTION[@]}" 20
+# Update initramfs with smooth progress (runs in background)
+gen_initramfs &
+INITRAMFS_PID=$!
+(
+    pct=20
+    while kill -0 "${INITRAMFS_PID}" 2>/dev/null; do
+        echo "${pct}"
+        if [ "${pct}" -lt 85 ]; then pct=$((pct + 1)); fi
+        sleep 1
+    done
+    echo 90
+) | "${DIALOG[@]}" --clear --gauge "Updating boot image (Plymouth splash)..." "${RESOLUTION[@]}" 20
+wait "${INITRAMFS_PID}" 2>/dev/null || true
 
 # disable firstboot service
-disable_firstboot | "${DIALOG[@]}" --clear --gauge "Disable firstboot service ..." "${RESOLUTION[@]}" 90
+disable_firstboot
+sleep 1 | "${DIALOG[@]}" --clear --gauge "Finalizing setup ..." "${RESOLUTION[@]}" 95
 
 # Show fake finish
-sleep 2 | "${DIALOG[@]}" --clear --gauge "Finalize Firstboot ..." "${RESOLUTION[@]}" 100
+sleep 2 | "${DIALOG[@]}" --clear --gauge "Done! Preparing reboot ..." "${RESOLUTION[@]}" 100
 
 
 #Enable Emulastation
