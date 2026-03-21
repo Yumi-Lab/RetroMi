@@ -75,6 +75,15 @@ bash retropie_packages.sh runcommand
 bash retropie_packages.sh bluetooth depends
 bash retropie_packages.sh usbromservice
 
+# joy2key: translates joystick inputs to keyboard keys in terminal/dialog scripts
+# Without this, gamepad doesn't work in RetroPie configuration menus
+echo_green "Installing joy2key (gamepad-to-keyboard for terminal menus)..."
+bash retropie_packages.sh joy2key || true
+
+# WiFi configuration menu in RetroPie
+echo_green "Installing WiFi configuration menu..."
+bash retropie_packages.sh wifi || true
+
 # Register all pre-compiled libretro cores in EmulationStation
 # Each 'configure' step calls addSystem → populates es_systems.cfg + emulators.cfg
 echo_green "Registering installed emulators in EmulationStation..."
