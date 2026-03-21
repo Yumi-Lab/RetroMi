@@ -77,16 +77,36 @@ bash retropie_packages.sh usbromservice
 
 # RetroPie supplementary packages — menu items and utilities
 echo_green "Installing RetroPie supplementary packages..."
+
+# Core utilities
 bash retropie_packages.sh joy2key || true          # gamepad-to-keyboard in terminal menus
 bash retropie_packages.sh wifi || true             # WiFi configuration menu
 bash retropie_packages.sh audiosettings || true    # audio output configuration
 bash retropie_packages.sh configedit || true       # RetroArch/ES config editor
 bash retropie_packages.sh esthemes || true         # theme downloader from ES menu
-bash retropie_packages.sh scraper || true          # game metadata/artwork scraper (sselphs)
-bash retropie_packages.sh skyscraper || true       # advanced game scraper (ScreenScraper API)
 bash retropie_packages.sh splashscreen || true     # boot splash screen configuration
-bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer configuration
 bash retropie_packages.sh resetromdirs || true     # reset/create ROM directory structure
+
+# Game scrapers (metadata + artwork)
+bash retropie_packages.sh scraper || true          # sselphs scraper
+bash retropie_packages.sh skyscraper || true       # ScreenScraper API scraper
+
+# Multiplayer & streaming
+bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer
+bash retropie_packages.sh moonlight || true        # PC game streaming (NVIDIA/Sunshine)
+
+# Controller drivers (GPIO arcade builds + special controllers)
+bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers
+bash retropie_packages.sh mkarcadejoystick || true # GPIO arcade joystick driver
+bash retropie_packages.sh snesdev || true          # GPIO SNES controller driver
+bash retropie_packages.sh steamcontroller || true  # Steam Controller support
+bash retropie_packages.sh xpad || true             # Xbox controller kernel driver
+bash retropie_packages.sh xpadneo || true          # Xbox One S/X wireless driver
+
+# Virtual/mobile controllers
+bash retropie_packages.sh mobilegamepad || true    # phone as gamepad via WiFi
+bash retropie_packages.sh virtualgamepad || true   # web-based virtual gamepad
+
 echo_green "RetroPie supplementary packages... [DONE]"
 
 # Register all pre-compiled libretro cores in EmulationStation
