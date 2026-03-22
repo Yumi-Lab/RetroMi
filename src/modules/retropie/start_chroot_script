@@ -78,7 +78,7 @@ bash retropie_packages.sh usbromservice
 # RetroPie supplementary packages — menu items and utilities
 echo_green "Installing RetroPie supplementary packages..."
 
-# Core utilities
+# Core utilities (always installed — lightweight scripts)
 bash retropie_packages.sh joy2key || true          # gamepad-to-keyboard in terminal menus
 bash retropie_packages.sh wifi || true             # WiFi configuration menu
 bash retropie_packages.sh audiosettings || true    # audio output configuration
@@ -87,33 +87,40 @@ bash retropie_packages.sh esthemes || true         # theme downloader from ES me
 bash retropie_packages.sh splashscreen || true     # boot splash screen configuration
 bash retropie_packages.sh resetromdirs || true     # reset/create ROM directory structure
 
-# Alternative frontends (available for testing alongside ES)
-bash retropie_packages.sh attractmode || true      # Attract Mode frontend
-bash retropie_packages.sh mehstation || true       # mehstation frontend
-bash retropie_packages.sh pegasus-fe || true       # Pegasus frontend
+# Extended packages (skipped in LIGHT mode — these compile from source and add ~3GB)
+if [ "${RETROMI_LIGHT}" != "yes" ]; then
+    echo_green "Full build — installing extended packages..."
 
-# Game scrapers (metadata + artwork)
-bash retropie_packages.sh scraper || true          # sselphs scraper
-bash retropie_packages.sh skyscraper || true       # ScreenScraper API scraper
+    # Alternative frontends
+    bash retropie_packages.sh attractmode || true      # Attract Mode frontend
+    bash retropie_packages.sh mehstation || true       # mehstation frontend
+    bash retropie_packages.sh pegasus-fe || true       # Pegasus frontend
 
-# Multiplayer & streaming
-bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer
-bash retropie_packages.sh moonlight || true        # PC game streaming (NVIDIA/Sunshine)
+    # Game scrapers (metadata + artwork)
+    bash retropie_packages.sh scraper || true          # sselphs scraper
+    bash retropie_packages.sh skyscraper || true       # ScreenScraper API scraper
 
-# Controller drivers (GPIO arcade builds + special controllers)
-bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers
-bash retropie_packages.sh mkarcadejoystick || true # GPIO arcade joystick driver
-bash retropie_packages.sh snesdev || true          # GPIO SNES controller driver
-bash retropie_packages.sh steamcontroller || true  # Steam Controller support
-bash retropie_packages.sh xpad || true             # Xbox controller kernel driver
-bash retropie_packages.sh xpadneo || true          # Xbox One S/X wireless driver
-bash retropie_packages.sh sixaxis || true          # PS3/PS4 Sixaxis pairing via standard BlueZ
-bash retropie_packages.sh controlblock || true     # GPIO power/reset button (arcade builds)
-bash retropie_packages.sh powerblock || true       # GPIO power management
+    # Multiplayer & streaming
+    bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer
+    bash retropie_packages.sh moonlight || true        # PC game streaming (NVIDIA/Sunshine)
 
-# Virtual/mobile controllers
-bash retropie_packages.sh mobilegamepad || true    # phone as gamepad via WiFi
-bash retropie_packages.sh virtualgamepad || true   # web-based virtual gamepad
+    # Controller drivers (GPIO arcade builds + special controllers)
+    bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers
+    bash retropie_packages.sh mkarcadejoystick || true # GPIO arcade joystick driver
+    bash retropie_packages.sh snesdev || true          # GPIO SNES controller driver
+    bash retropie_packages.sh steamcontroller || true  # Steam Controller support
+    bash retropie_packages.sh xpad || true             # Xbox controller kernel driver
+    bash retropie_packages.sh xpadneo || true          # Xbox One S/X wireless driver
+    bash retropie_packages.sh sixaxis || true          # PS3/PS4 Sixaxis pairing via standard BlueZ
+    bash retropie_packages.sh controlblock || true     # GPIO power/reset button (arcade builds)
+    bash retropie_packages.sh powerblock || true       # GPIO power management
+
+    # Virtual/mobile controllers
+    bash retropie_packages.sh mobilegamepad || true    # phone as gamepad via WiFi
+    bash retropie_packages.sh virtualgamepad || true   # web-based virtual gamepad
+else
+    echo_green "LIGHT build — skipping extended packages"
+fi
 
 echo_green "RetroPie supplementary packages... [DONE]"
 
