@@ -21,6 +21,7 @@ buildtest:
   # - armbian/orangepi4lts
   - armbian/RetroMi
   - armbian/RetroMi-light
+  - armbian/RetroMi-dev
   #- armbian/smartpi
   # Orange Pi OS based images
   # - orangepi/orangepi_zero2
