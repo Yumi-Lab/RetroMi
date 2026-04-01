@@ -16,7 +16,7 @@ set -e
 DIALOGRC=/.firstboot
 export DIALOGRC
 DIALOG="$(which dialog)"
-DIALOG=("${DIALOG}" --backtitle "YumiOS for RetroMi")
+DIALOG=("${DIALOG}" --backtitle "YumiOS for RetroMi" --no-shadow)
 BASE_USER="${BASE_USER:-pi}"
 
 #change active tty
@@ -32,32 +32,46 @@ RESOLUTION=($((TERM_ROWS)) $((TERM_COLS)))
 
 
 
-# Center text vertically inside dialog box
+# Center text vertically and horizontally inside dialog box
 # $1 = text content, $2 = box height, $3 = text line count
 center_text() {
     local text="$1" box_h="$2" text_lines="$3"
-    local pad=$(( (box_h - text_lines - 6) / 2 ))
-    if [ "${pad}" -lt 0 ]; then pad=0; fi
-    local padding=""
-    for ((i=0; i<pad; i++)); do padding="${padding}\n"; done
-    printf '%b%s' "${padding}" "${text}"
+    local box_w="${RESOLUTION[1]}"
+    # Vertical padding
+    local vpad=$(( (box_h - text_lines - 6) / 2 ))
+    if [ "${vpad}" -lt 0 ]; then vpad=0; fi
+    local vpadding=""
+    for ((i=0; i<vpad; i++)); do vpadding="${vpadding}\n"; done
+    # Horizontal centering: pad each line
+    local centered=""
+    while IFS= read -r line; do
+        local stripped
+        stripped=$(echo "${line}" | sed 's/^[[:space:]]*//' | sed 's/[[:space:]]*$//')
+        local len=${#stripped}
+        local hpad=$(( (box_w - len - 4) / 2 ))
+        if [ "${hpad}" -lt 0 ]; then hpad=0; fi
+        local spaces=""
+        for ((j=0; j<hpad; j++)); do spaces="${spaces} "; done
+        centered="${centered}${spaces}${stripped}\n"
+    done <<< "${text}"
+    printf '%b%b' "${vpadding}" "${centered}"
 }
 
 welcome_msg() {
     local msg
     msg=$(cat << 'MSGEOF'
-              Hello dear YUMI RetroMi One user,
+Hello dear YUMI RetroMi One user,
 
-   Please be patient, we have to prepare your first start
-                    of your RetroBox!
+Please be patient, we have to prepare your first start
+of your RetroBox!
 
-      *** DO NOT UNPLUG DEVICE OR DISRUPT THIS PROCESS! ***
-      ***           THIS WILL HARM YOUR OS!             ***
+*** DO NOT UNPLUG DEVICE OR DISRUPT THIS PROCESS! ***
+*** THIS WILL HARM YOUR OS! ***
 
-      Some steps may take several minutes. Stay patient.
-            The device will reboot after exiting ...
+Some steps may take several minutes. Stay patient.
+The device will reboot after exiting ...
 
-                    Continuing setup in ...
+Continuing setup in ...
 MSGEOF
 )
     center_text "${msg}" "${RESOLUTION[0]}" 11
@@ -66,11 +80,11 @@ MSGEOF
 reboot_msg() {
     local msg
     msg=$(cat << 'MSGEOF'
-         Your device will be restarted in 5 seconds...
+Your device will be restarted in 5 seconds...
 
-   Thank you for being patient and have fun with your new
+Thank you for being patient and have fun with your new
 
-                    *** YUMI RetroMi ***
+*** YUMI RetroMi ***
 MSGEOF
 )
     center_text "${msg}" "${RESOLUTION[0]}" 5
