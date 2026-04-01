@@ -16,7 +16,7 @@ set -e
 DIALOGRC=/.firstboot
 export DIALOGRC
 DIALOG="$(which dialog)"
-DIALOG=("${DIALOG}" --backtitle "YumiOS for RetroMi" --no-shadow)
+DIALOG=("${DIALOG}" --backtitle "YumiOS for RetroMi" --no-shadow --no-collapse)
 BASE_USER="${BASE_USER:-pi}"
 
 #change active tty
@@ -149,14 +149,14 @@ chown "${BASE_USER}":"${BASE_USER}" "$script"
 # Fix both locations + add one-shot enforcer in autostart.sh
 for cfg in /opt/retropie/configs/all/emulationstation/es_settings.cfg /home/"${BASE_USER}"/.emulationstation/es_settings.cfg; do
     if [ -f "${cfg}" ]; then
-        sed -i 's|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|' "${cfg}"
+        sed -i 's|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="epicnoir"|' "${cfg}"
     fi
 done
 # Add one-shot enforcer: runs once before ES, then removes itself
 sed -i '/emulationstation #auto/i\
 if [ ! -f /home/'"${BASE_USER}"'/.emulationstation/.epicnoir_set ]; then\
-    sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|'\'' /home/'"${BASE_USER}"'/.emulationstation/es_settings.cfg 2>/dev/null\
-    sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|'\'' /opt/retropie/configs/all/emulationstation/es_settings.cfg 2>/dev/null\
+    sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="epicnoir"|'\'' /home/'"${BASE_USER}"'/.emulationstation/es_settings.cfg 2>/dev/null\
+    sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="epicnoir"|'\'' /opt/retropie/configs/all/emulationstation/es_settings.cfg 2>/dev/null\
     touch /home/'"${BASE_USER}"'/.emulationstation/.epicnoir_set\
 fi' "$script"
 

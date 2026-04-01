@@ -205,7 +205,7 @@ ES_HOME="/home/${BASE_USER}/.emulationstation/es_settings.cfg"
 ES_ALL="/opt/retropie/configs/all/emulationstation/es_settings.cfg"
 THEME_MARKER="/home/${BASE_USER}/.emulationstation/.epicnoir_set"
 if [ -f "${AUTOSTART}" ]; then
-    sed -i '/emulationstation/i\if [ ! -f '"${THEME_MARKER}"' ]; then for _cfg in '"${ES_HOME}"' '"${ES_ALL}"'; do sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|'\'' "$_cfg" 2>/dev/null; done; touch '"${THEME_MARKER}"'; fi' "${AUTOSTART}"
+    sed -i '/emulationstation/i\if [ ! -f '"${THEME_MARKER}"' ]; then for _cfg in '"${ES_HOME}"' '"${ES_ALL}"'; do sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="epicnoir"|'\'' "$_cfg" 2>/dev/null; done; touch '"${THEME_MARKER}"'; fi' "${AUTOSTART}"
     echo_green "Added one-time epicnoir theme enforcer to autostart.sh"
 fi
 
