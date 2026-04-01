@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh run view --job 65736828686 --repo Yumi-Lab/RetroMi-packages --log)",
+      "Bash(gh run:*)",
+      "Bash(/usr/local/bin/gh run:*)",
+      "Bash(find /Users/nicolasmichaut -name audit-*.html)",
+      "Bash(TaskOutput b7j7twvmr:*)",
+      "Bash(/opt/homebrew/bin/brew install:*)",
+      "Bash(/opt/homebrew/bin/gh run:*)",
+      "Bash(/opt/homebrew/bin/gh repo:*)",
+      "Bash(/opt/homebrew/bin/python3 -c \"import sys,json; [print\\(a[''''name'''']\\) for a in json.load\\(sys.stdin\\).get\\(''''artifacts'''',[]\\)]\")",
+      "Bash(/opt/homebrew/bin/gh api:*)",
+      "Read(//usr/local/**)",
+      "Bash(find /Users/nicolasmichaut/Documents/GitHub/RetroMi -name *pkgupgrade*)"
+    ],
+    "additionalDirectories": [
+      "/tmp"
+    ]
+  }
+}

@@ -145,11 +145,20 @@ sed -i '$a\' "$script"
 echo "emulationstation #auto" >>"$script"
 chown "${BASE_USER}":"${BASE_USER}" "$script"
 
-# Force epicnoir theme before first ES launch (ES defaults to Carbon on fresh start)
-ES_SETTINGS="/opt/retropie/configs/all/emulationstation/es_settings.cfg"
-if [ -f "${ES_SETTINGS}" ]; then
-    sed -i 's|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|' "${ES_SETTINGS}"
-fi
+# Force epicnoir theme — ES regenerates es_settings.cfg on first launch with Carbon default
+# Fix both locations + add one-shot enforcer in autostart.sh
+for cfg in /opt/retropie/configs/all/emulationstation/es_settings.cfg /home/"${BASE_USER}"/.emulationstation/es_settings.cfg; do
+    if [ -f "${cfg}" ]; then
+        sed -i 's|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|' "${cfg}"
+    fi
+done
+# Add one-shot enforcer: runs once before ES, then removes itself
+sed -i '/emulationstation #auto/i\
+if [ ! -f /home/'"${BASE_USER}"'/.emulationstation/.epicnoir_set ]; then\
+    sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|'\'' /home/'"${BASE_USER}"'/.emulationstation/es_settings.cfg 2>/dev/null\
+    sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|'\'' /opt/retropie/configs/all/emulationstation/es_settings.cfg 2>/dev/null\
+    touch /home/'"${BASE_USER}"'/.emulationstation/.epicnoir_set\
+fi' "$script"
 
 # Show reboot screen
 "${DIALOG[@]}" --clear --title "Firstboot preperation" \

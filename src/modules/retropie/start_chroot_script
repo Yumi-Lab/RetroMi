@@ -200,10 +200,12 @@ fi
 
 # Force epicnoir on first ES launch only (ES regenerates es_settings.cfg with Carbon default)
 # Uses a marker file so the user can change theme freely after first boot
-ES_SETTINGS="/opt/retropie/configs/all/emulationstation/es_settings.cfg"
-THEME_MARKER="/home/${BASE_USER}/.emulationstation/.theme_initialized"
+# ES reads from BOTH locations — fix both
+ES_HOME="/home/${BASE_USER}/.emulationstation/es_settings.cfg"
+ES_ALL="/opt/retropie/configs/all/emulationstation/es_settings.cfg"
+THEME_MARKER="/home/${BASE_USER}/.emulationstation/.epicnoir_set"
 if [ -f "${AUTOSTART}" ]; then
-    sed -i '/emulationstation/i\if [ ! -f '"${THEME_MARKER}"' ]; then sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|'\'' '"${ES_SETTINGS}"' 2>/dev/null; touch '"${THEME_MARKER}"'; fi' "${AUTOSTART}"
+    sed -i '/emulationstation/i\if [ ! -f '"${THEME_MARKER}"' ]; then for _cfg in '"${ES_HOME}"' '"${ES_ALL}"'; do sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="theme-epicnoir"|'\'' "$_cfg" 2>/dev/null; done; touch '"${THEME_MARKER}"'; fi' "${AUTOSTART}"
     echo_green "Added one-time epicnoir theme enforcer to autostart.sh"
 fi
 
