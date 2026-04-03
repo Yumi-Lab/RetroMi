@@ -10,7 +10,7 @@ DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/downloa
 # DEV build — minimal image, fastest build (~20min)
 # Only Nintendo cores (GB/GBC/GBA/NES/SNES) + ES + core config
 # For testing: wizard, themes, controllers, RetroArch mapping
-BASE_IMAGE_ENLARGEROOT=4000
+BASE_IMAGE_ENLARGEROOT=8000
 RETROMI_LIGHT="yes"
 
 # Minimal modules — no samba, no bezels, no filebrowser, no usb-mount

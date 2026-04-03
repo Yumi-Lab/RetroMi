@@ -160,16 +160,34 @@ find /opt/retropie/configs -name "emulators.cfg" -exec \
             s|~runner/|/home/${BASE_USER}/|g;
             s|/root/|/home/${BASE_USER}/|g" {} \;
 
-# Ensure retropiemenu .rp files exist (fallback if configure didn't install them)
+# Ensure retropiemenu .rp files exist
+# RetroPie-Setup skips wifi.rp on non-Raspbian and audiosettings/splashscreen on non-RPi
+# We force-create them since our Armbian SmartPi supports all these features
 RPMENU_DIR="/home/${BASE_USER}/RetroPie/retropiemenu"
 mkdir -p "${RPMENU_DIR}"
+
+# WiFi — skipped by retropiemenu because __os_id != "Raspbian"
+if [ ! -f "${RPMENU_DIR}/wifi.rp" ]; then
+    touch "${RPMENU_DIR}/wifi.rp"
+    echo_green "Created wifi.rp (forced for Armbian)"
+fi
+
+# Audio settings — skipped by retropiemenu because isPlatform "rpi" = false
+if [ ! -f "${RPMENU_DIR}/audiosettings.rp" ]; then
+    touch "${RPMENU_DIR}/audiosettings.rp"
+    echo_green "Created audiosettings.rp (forced for Armbian)"
+fi
+
+# Splash screen — same reason
+if [ ! -f "${RPMENU_DIR}/splashscreen.rp" ]; then
+    touch "${RPMENU_DIR}/splashscreen.rp"
+    echo_green "Created splashscreen.rp (forced for Armbian)"
+fi
+
+# RetroPie Setup fallback
 if [ ! -f "${RPMENU_DIR}/rpsetup.rp" ]; then
-    echo_green "Creating fallback retropiemenu scripts..."
-    cat > "${RPMENU_DIR}/rpsetup.rp" << 'RPEOF'
-#!/bin/bash
-sudo /home/pi/Retropie-Setup/retropie_setup.sh
-RPEOF
-    chmod +x "${RPMENU_DIR}/rpsetup.rp"
+    touch "${RPMENU_DIR}/rpsetup.rp"
+    echo_green "Created rpsetup.rp (fallback)"
 fi
 
 # If retropiemenu is missing from es_systems.cfg, add it as fallback

@@ -40,6 +40,12 @@ cd /etc/emulationstation/themes/
 7z x themes.zip.001
 rm themes.zip*
 
+# Rename theme-epicnoir → epicnoir so ThemeSet value matches the folder name
+if [ -d "theme-epicnoir" ] && [ ! -d "epicnoir" ]; then
+    mv theme-epicnoir epicnoir
+    echo_green "Renamed theme-epicnoir → epicnoir"
+fi
+
 # Remove Switch_Black_v2 — incomplete theme (missing icons for WiFi, Bluetooth,
 # RetroPie menu items). Users can't navigate settings with it.
 rm -rf /etc/emulationstation/themes/Switch_Black_v2
