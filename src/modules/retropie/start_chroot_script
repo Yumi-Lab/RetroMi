@@ -53,6 +53,22 @@ for sys in \
 done
 chown -R "${BASE_USER}:${BASE_USER}" "${ROM_DIR}"
 
+# Download game data from Yumi-Lab/RetroMi-games
+ROM_PORTS="/home/${BASE_USER}/RetroPie/roms/ports"
+GAMES_URL="https://github.com/Yumi-Lab/RetroMi-games/releases/latest/download/ports-data.tar.gz"
+echo_green "Downloading ports game data (Doom, Quake, Cave Story, XRick, Dinothawr, Mr.Boom, DOSBox)..."
+wget --tries=5 --waitretry=10 --timeout=60 --retry-on-http-error=502,503,504 \
+    -O /tmp/ports-data.tar.gz "${GAMES_URL}" || true
+if [ -f /tmp/ports-data.tar.gz ] && [ "$(stat -c%s /tmp/ports-data.tar.gz 2>/dev/null)" -gt 1000 ]; then
+    tar xzf /tmp/ports-data.tar.gz -C "${ROM_PORTS}/"
+    rm -f /tmp/ports-data.tar.gz
+    chown -R "${BASE_USER}:${BASE_USER}" "${ROM_PORTS}"
+    echo_green "Ports game data installed."
+else
+    echo_green "WARNING: ports-data.tar.gz download failed or empty — skipping"
+    rm -f /tmp/ports-data.tar.gz
+fi
+
 # Clone YUMI-RETROPIE for post-install configuration only (no compilation)
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
@@ -222,15 +238,15 @@ if [ -f "${AUTOSTART}" ]; then
     echo_green "Added firstboot guard to autostart.sh"
 fi
 
-# Force art-book-next on first ES launch only (ES regenerates es_settings.cfg with Carbon default)
+# Force epicnoir on first ES launch only (ES regenerates es_settings.cfg with Carbon default)
 # Uses a marker file so the user can change theme freely after first boot
 # ES reads from BOTH locations — fix both
 ES_HOME="/home/${BASE_USER}/.emulationstation/es_settings.cfg"
 ES_ALL="/opt/retropie/configs/all/emulationstation/es_settings.cfg"
-THEME_MARKER="/home/${BASE_USER}/.emulationstation/.theme_set"
+THEME_MARKER="/home/${BASE_USER}/.emulationstation/.epicnoir_set"
 if [ -f "${AUTOSTART}" ]; then
-    sed -i '/emulationstation/i\if [ ! -f '"${THEME_MARKER}"' ]; then for _cfg in '"${ES_HOME}"' '"${ES_ALL}"'; do sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="art-book-next"|'\'' "$_cfg" 2>/dev/null; done; touch '"${THEME_MARKER}"'; fi' "${AUTOSTART}"
-    echo_green "Added one-time art-book-next theme enforcer to autostart.sh"
+    sed -i '/emulationstation/i\if [ ! -f '"${THEME_MARKER}"' ]; then for _cfg in '"${ES_HOME}"' '"${ES_ALL}"'; do sed -i '\''s|<string name="ThemeSet" value="[^"]*"|<string name="ThemeSet" value="epicnoir"|'\'' "$_cfg" 2>/dev/null; done; touch '"${THEME_MARKER}"'; fi' "${AUTOSTART}"
+    echo_green "Added one-time epicnoir theme enforcer to autostart.sh"
 fi
 
 # Override per-system retroarch.cfg with global config
