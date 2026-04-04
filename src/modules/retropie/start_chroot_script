@@ -259,6 +259,13 @@ if [ -f "${GLOBAL_RA}" ]; then
     echo_green "Copying global retroarch.cfg to all per-system configs..."
     find /opt/retropie/configs -mindepth 2 -name "retroarch.cfg" -not -path "*/all/*" \
         -exec cp "${GLOBAL_RA}" {} \;
+    # Also pre-deploy to ports configs — lr-* configure doesn't always create them,
+    # and RetroArch would generate keyboard-only defaults on first launch
+    for port_dir in /opt/retropie/configs/ports/*/; do
+        [ -d "${port_dir}" ] || continue
+        cp "${GLOBAL_RA}" "${port_dir}/retroarch.cfg"
+    done
+    echo_green "Global retroarch.cfg deployed to all systems + ports."
 fi
 
 # Fix ownership
