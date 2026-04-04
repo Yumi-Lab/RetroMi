@@ -75,6 +75,12 @@ bash retropie_packages.sh runcommand
 bash retropie_packages.sh bluetooth depends
 bash retropie_packages.sh usbromservice
 
+# RetroArch — packages-retroarch-armhf.tar.gz only contains configs (3.3KB),
+# the binary is missing from RetroMi-packages. Build it inline from source.
+# Required by all lr-* cores. __platform prevents -march=native on QEMU x86 host.
+echo_green "Building RetroArch from source (required — not in pre-compiled packages)..."
+bash retropie_packages.sh retroarch
+
 # RetroPie supplementary packages — menu items and utilities
 echo_green "Installing RetroPie supplementary packages..."
 
