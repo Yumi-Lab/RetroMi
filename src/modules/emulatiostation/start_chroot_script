@@ -83,18 +83,19 @@ echo_green "Community themes installed. (DONE)"
 # Deploy pre-configured ES settings (theme selection + defaults)
 # IMPORTANT: only copy es_settings.cfg — do NOT overwrite the whole directory,
 # because the controllers module already deployed es_input.cfg (235+ gamepads)
-echo_green "Setting default EmulationStation theme (epicnoir)..."
+echo_green "Setting default EmulationStation theme (art-book-next)..."
 mkdir -p /opt/retropie/configs/all/emulationstation
 cp /filesystem/opt/retropie/configs/all/emulationstation/es_settings.cfg \
     /opt/retropie/configs/all/emulationstation/es_settings.cfg
 chown -R pi:pi /opt/retropie/configs/all/emulationstation
 
 # Also overwrite /home/pi/.emulationstation/es_settings.cfg — the base image may
-# contain a stale ES session (es_log.txt from Mar 2026) with a different ThemeSet.
-# Remove .epicnoir_set so the autostart enforcer can run at first real boot.
+# contain a stale ES session with a different ThemeSet.
+# Remove .theme_set marker so the autostart enforcer can run at first real boot.
 mkdir -p /home/pi/.emulationstation
 cp /filesystem/opt/retropie/configs/all/emulationstation/es_settings.cfg \
     /home/pi/.emulationstation/es_settings.cfg
+rm -f /home/pi/.emulationstation/.theme_set
 rm -f /home/pi/.emulationstation/.epicnoir_set
 chown -R pi:pi /home/pi/.emulationstation
 echo_green "Default ES theme configured. (DONE)"
