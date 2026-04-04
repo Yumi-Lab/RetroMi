@@ -54,11 +54,13 @@ done
 chown -R "${BASE_USER}:${BASE_USER}" "${ROM_DIR}"
 
 # Download game data from Yumi-Lab/RetroMi-games
+# GitHub releases use 302 redirects — curl handles them better than wget in QEMU chroot
 ROM_PORTS="/home/${BASE_USER}/RetroPie/roms/ports"
+mkdir -p "${ROM_PORTS}"
 GAMES_URL="https://github.com/Yumi-Lab/RetroMi-games/releases/latest/download/ports-data.tar.gz"
 echo_green "Downloading ports game data (Doom, Quake, Cave Story, XRick, Dinothawr, Mr.Boom, DOSBox)..."
-wget --tries=5 --waitretry=10 --timeout=60 --retry-on-http-error=502,503,504 \
-    -O /tmp/ports-data.tar.gz "${GAMES_URL}" || true
+curl -fSL --retry 5 --retry-delay 10 --connect-timeout 30 \
+    -o /tmp/ports-data.tar.gz "${GAMES_URL}" || true
 if [ -f /tmp/ports-data.tar.gz ] && [ "$(stat -c%s /tmp/ports-data.tar.gz 2>/dev/null)" -gt 1000 ]; then
     tar xzf /tmp/ports-data.tar.gz -C "${ROM_PORTS}/"
     rm -f /tmp/ports-data.tar.gz
