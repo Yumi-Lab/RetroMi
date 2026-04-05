@@ -254,6 +254,12 @@ fi
 # Per-system retroarch.cfg uses #include to inherit from the global config.
 # RetroPie's stock global config auto-detects video/audio drivers — do NOT override it.
 # Gamepad input is handled by the autoconfig in retroarch-joypads/USB Gamepad.cfg.
+# Only append settings that aren't in the stock config:
+GLOBAL_RA="/opt/retropie/configs/all/retroarch.cfg"
+if [ -f "${GLOBAL_RA}" ]; then
+    grep -q "quit_on_close_content" "${GLOBAL_RA}" || \
+        echo 'quit_on_close_content = "2"' >> "${GLOBAL_RA}"
+fi
 
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
