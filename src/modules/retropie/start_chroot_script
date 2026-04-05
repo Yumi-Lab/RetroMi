@@ -255,11 +255,10 @@ fi
 
 # Per-system retroarch.cfg uses #include to inherit from the global config.
 # RetroPie's stock global config auto-detects video/audio drivers — do NOT override it.
-# Gamepad: autodetect enabled — RetroArch loads per-device autoconfig from built-in dir.
-# Fix stock config: enable gamepad hotkeys and quit-on-close.
-# The built-in autoconfig dir contains conflicting files for USB Gamepad 0810:0001
-# (USB_Gamepad.cfg, Twin_USB_Gamepad.cfg, Twin_USB_Joystick.cfg) with wrong hat mapping.
-# We overwrite them with our axis-based mapping deployed by the retroarch module.
+# Gamepad: autodetect=false + explicit per-player bindings for USB Gamepad 0810:0001.
+# autodetect=true is unreliable on this setup (device name with spaces, multiple conflicting
+# vendor_id=2064 files in built-in dir). Explicit bindings are the only robust approach.
+# D-pad: ABS_X/Y axes (not hat). a=btn1 (Cross/X), b=btn2 (Circle/O), y=btn0, x=btn3.
 GLOBAL_RA="/opt/retropie/configs/all/retroarch.cfg"
 if [ -f "${GLOBAL_RA}" ]; then
     # input_enable_hotkey = "nul" disables all gamepad hotkeys — remove it
@@ -267,25 +266,50 @@ if [ -f "${GLOBAL_RA}" ]; then
     # When a game exits via its own menu, quit RetroArch and return to ES
     grep -q "quit_on_close_content" "${GLOBAL_RA}" || \
         echo 'quit_on_close_content = "2"' >> "${GLOBAL_RA}"
+    # Disable autodetect: explicit bindings override any autoconfig loading
+    sed -i 's/^input_autodetect_enable = "true"/input_autodetect_enable = "false"/' "${GLOBAL_RA}"
     # Hotkey combo: SELECT (btn8) + START (btn9) = quit RetroArch
     grep -q "input_enable_hotkey_btn" "${GLOBAL_RA}" || \
         echo 'input_enable_hotkey_btn = "8"' >> "${GLOBAL_RA}"
     grep -q "input_exit_emulator_btn" "${GLOBAL_RA}" || \
         echo 'input_exit_emulator_btn = "9"' >> "${GLOBAL_RA}"
-    # Overwrite conflicting built-in autoconfig files for USB Gamepad 0810:0001.
-    # Stock files (USB_gamepad.cfg, USB_Gamepad_.cfg, Twin_USB_Joystick.cfg) use hat
-    # mapping (ABS_HAT0X/Y) but this device reports D-pad as ABS_X/Y axes.
-    # Source files in retroarch-joypads/ have spaces in names (deployed by retroarch module).
-    CUSTOM_AC="/opt/retropie/configs/all/retroarch-joypads"
-    BUILTIN_AC="/opt/retropie/emulators/retroarch/autoconfig-presets/udev"
-    if [ -d "${BUILTIN_AC}" ] && [ -d "${CUSTOM_AC}" ]; then
-        # Overwrite all known variant filenames (spaces vs underscores, case variants)
-        for TARGET in USB_Gamepad.cfg USB_gamepad.cfg USB_Gamepad_.cfg; do
-            cp "${CUSTOM_AC}/USB Gamepad.cfg" "${BUILTIN_AC}/${TARGET}" 2>/dev/null || true
-        done
-        cp "${CUSTOM_AC}/Twin USB Gamepad.cfg" "${BUILTIN_AC}/Twin_USB_Gamepad.cfg" 2>/dev/null || true
-        sed 's/input_device = "Twin USB Gamepad"/input_device = "Twin USB Joystick"/' \
-            "${CUSTOM_AC}/Twin USB Gamepad.cfg" > "${BUILTIN_AC}/Twin_USB_Joystick.cfg" 2>/dev/null || true
+    # Explicit player1+2 bindings — validated on SmartPi H3 with USB Gamepad 0810:0001
+    # a=btn1 (Cross ✕), b=btn2 (Circle ○), y=btn0 (Triangle), x=btn3 (Square)
+    if ! grep -q "input_player1_joypad_index" "${GLOBAL_RA}"; then
+        cat >> "${GLOBAL_RA}" << 'JOYEOF'
+input_player1_joypad_index = "0"
+input_player1_analog_dpad_mode = "1"
+input_player1_up_axis = "-1"
+input_player1_down_axis = "+1"
+input_player1_left_axis = "-0"
+input_player1_right_axis = "+0"
+input_player1_y_btn = "0"
+input_player1_b_btn = "2"
+input_player1_a_btn = "1"
+input_player1_x_btn = "3"
+input_player1_l_btn = "4"
+input_player1_r_btn = "5"
+input_player1_l2_btn = "6"
+input_player1_r2_btn = "7"
+input_player1_select_btn = "8"
+input_player1_start_btn = "9"
+input_player2_joypad_index = "1"
+input_player2_analog_dpad_mode = "1"
+input_player2_up_axis = "-1"
+input_player2_down_axis = "+1"
+input_player2_left_axis = "-0"
+input_player2_right_axis = "+0"
+input_player2_y_btn = "0"
+input_player2_b_btn = "2"
+input_player2_a_btn = "1"
+input_player2_x_btn = "3"
+input_player2_l_btn = "4"
+input_player2_r_btn = "5"
+input_player2_l2_btn = "6"
+input_player2_r2_btn = "7"
+input_player2_select_btn = "8"
+input_player2_start_btn = "9"
+JOYEOF
     fi
 fi
 
