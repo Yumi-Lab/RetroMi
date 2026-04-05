@@ -260,11 +260,55 @@ fi
 GLOBAL_RA="/opt/retropie/configs/all/retroarch.cfg"
 if [ -f "${GLOBAL_RA}" ]; then
     # input_enable_hotkey = "nul" disables all gamepad hotkeys — remove it
-    # The autoconfig USB Gamepad.cfg sets input_enable_hotkey_btn = "8" (Select)
     sed -i '/^input_enable_hotkey = "nul"/d' "${GLOBAL_RA}"
     # When a game exits via its own menu, quit RetroArch and return to ES
     grep -q "quit_on_close_content" "${GLOBAL_RA}" || \
         echo 'quit_on_close_content = "2"' >> "${GLOBAL_RA}"
+    # Hotkey combo: SELECT (btn8) + START (btn9) = quit RetroArch
+    grep -q "input_enable_hotkey_btn" "${GLOBAL_RA}" || \
+        echo 'input_enable_hotkey_btn = "8"' >> "${GLOBAL_RA}"
+    grep -q "input_exit_emulator_btn" "${GLOBAL_RA}" || \
+        echo 'input_exit_emulator_btn = "9"' >> "${GLOBAL_RA}"
+    # Disable autodetect: RetroArch axis bindings from autoconfig are ignored
+    # in favour of config-level input_player* bindings (tested on SmartPi H3).
+    sed -i 's/^input_autodetect_enable = "true"/input_autodetect_enable = "false"/' "${GLOBAL_RA}"
+    # Explicit player1+player2 bindings for USB Gamepad 0810:0001 (Twin USB)
+    # D-pad uses ABS_X/Y axes (not hat): axis0=X, axis1=Y, center=127, range 0-255
+    # y=btn0, b=btn1, a=btn2, x=btn3, l=btn4, r=btn5, l2=btn6, r2=btn7
+    if ! grep -q "input_player1_joypad_index" "${GLOBAL_RA}"; then
+        cat >> "${GLOBAL_RA}" << 'JOYEOF'
+input_player1_joypad_index = "0"
+input_player1_up_axis = "-1"
+input_player1_down_axis = "+1"
+input_player1_left_axis = "-0"
+input_player1_right_axis = "+0"
+input_player1_y_btn = "0"
+input_player1_b_btn = "1"
+input_player1_a_btn = "2"
+input_player1_x_btn = "3"
+input_player1_l_btn = "4"
+input_player1_r_btn = "5"
+input_player1_l2_btn = "6"
+input_player1_r2_btn = "7"
+input_player1_select_btn = "8"
+input_player1_start_btn = "9"
+input_player2_joypad_index = "1"
+input_player2_up_axis = "-1"
+input_player2_down_axis = "+1"
+input_player2_left_axis = "-0"
+input_player2_right_axis = "+0"
+input_player2_y_btn = "0"
+input_player2_b_btn = "1"
+input_player2_a_btn = "2"
+input_player2_x_btn = "3"
+input_player2_l_btn = "4"
+input_player2_r_btn = "5"
+input_player2_l2_btn = "6"
+input_player2_r2_btn = "7"
+input_player2_select_btn = "8"
+input_player2_start_btn = "9"
+JOYEOF
+    fi
 fi
 
 # Fix ownership
