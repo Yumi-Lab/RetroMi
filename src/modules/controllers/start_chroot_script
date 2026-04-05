@@ -20,11 +20,15 @@ unpack /filesystem/etc/udev/rules.d /etc/udev/rules.d
 # Includes: keyboard, PS3/PS4/PS5, Xbox 360/One/Series, Switch Pro, 8BitDo, Logitech
 mkdir -p /opt/retropie/configs/all/emulationstation
 unpack /filesystem/opt/retropie/configs/all/emulationstation /opt/retropie/configs/all/emulationstation
-# ES and joy2key both read from ~/.emulationstation/ — copy there too
+# ES and joy2key both read from ~/.emulationstation/ — copy there if not already the same file (symlink)
 mkdir -p /home/pi/.emulationstation
-rm -f /home/pi/.emulationstation/es_input.cfg
-cp /opt/retropie/configs/all/emulationstation/es_input.cfg /home/pi/.emulationstation/es_input.cfg
-chown pi:pi /home/pi/.emulationstation/es_input.cfg
+SRC=/opt/retropie/configs/all/emulationstation/es_input.cfg
+DST=/home/pi/.emulationstation/es_input.cfg
+if [ "$(realpath "$SRC" 2>/dev/null)" != "$(realpath "$DST" 2>/dev/null)" ]; then
+    rm -f "$DST"
+    cp "$SRC" "$DST"
+    chown pi:pi "$DST"
+fi
 echo_green "Pre-configured controller mappings installed (es_input.cfg)"
 
 # Ensure 'pi' user has joystick access
