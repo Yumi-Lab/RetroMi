@@ -40,6 +40,14 @@ grep -q 'input_player1_b_btn = "2"' "$RA" \
     && ok "player1 b=btn2 (Circle O)" \
     || fail "player1_b_btn wrong (expected 2/Circle, got: $(grep input_player1_b_btn "$RA" || echo MISSING))"
 
+grep -q 'input_player1_x_btn = "0"' "$RA" \
+    && ok "player1 x=btn0 (Triangle)" \
+    || fail "player1_x_btn wrong (expected 0/Triangle, got: $(grep input_player1_x_btn "$RA" || echo MISSING))"
+
+grep -q 'input_player1_y_btn = "3"' "$RA" \
+    && ok "player1 y=btn3 (Square)" \
+    || fail "player1_y_btn wrong (expected 3/Square, got: $(grep input_player1_y_btn "$RA" || echo MISSING))"
+
 grep -q 'input_enable_hotkey_btn = "8"' "$RA" \
     && ok "hotkey SELECT=btn8" \
     || fail "input_enable_hotkey_btn missing or wrong"
