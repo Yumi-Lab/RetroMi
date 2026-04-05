@@ -91,7 +91,7 @@ export __user="${BASE_USER}"
 pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
 bash retropie_packages.sh runcommand
 bash retropie_packages.sh bluetooth depends
-bash retropie_packages.sh usbromservice
+bash retropie_packages.sh usbromservice || echo_warning "usbromservice failed (git clone usbmount) — skipping"
 
 # RetroArch — packages-retroarch-armhf.tar.gz only contains configs (3.3KB),
 # the binary is missing from RetroMi-packages. Build it inline from source.
