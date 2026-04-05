@@ -24,14 +24,21 @@ RA="/opt/retropie/configs/all/retroarch.cfg"
 BUILTIN="/opt/retropie/emulators/retroarch/autoconfig-presets/udev"
 
 echo "[ 1/4 ] global retroarch.cfg"
-grep -q 'input_autodetect_enable = "true"' "$RA" \
-    && ok "autodetect=true" \
-    || fail "autodetect != true (got: $(grep input_autodetect "$RA" || echo MISSING))"
+grep -q 'input_autodetect_enable = "false"' "$RA" \
+    && ok "autodetect=false (explicit bindings mode)" \
+    || fail "autodetect != false (got: $(grep input_autodetect "$RA" || echo MISSING))"
 
-COUNT=$(grep -cE 'input_player[12].*(axis|_btn|joypad_index|analog_dpad)' "$RA" 2>/dev/null) || COUNT=0
-[ "${COUNT:-0}" -eq 0 ] \
-    && ok "No explicit player1/2 axis/btn bindings" \
-    || fail "${COUNT} explicit player bindings found (cause button conflicts with other gamepads)"
+grep -q 'input_player1_up_axis = "-1"' "$RA" \
+    && ok "player1 D-pad axis binding present" \
+    || fail "player1_up_axis missing — gamepad won't work in games"
+
+grep -q 'input_player1_a_btn = "1"' "$RA" \
+    && ok "player1 a=btn1 (Cross X)" \
+    || fail "player1_a_btn wrong (expected 1/Cross, got: $(grep input_player1_a_btn "$RA" || echo MISSING))"
+
+grep -q 'input_player1_b_btn = "2"' "$RA" \
+    && ok "player1 b=btn2 (Circle O)" \
+    || fail "player1_b_btn wrong (expected 2/Circle, got: $(grep input_player1_b_btn "$RA" || echo MISSING))"
 
 grep -q 'input_enable_hotkey_btn = "8"' "$RA" \
     && ok "hotkey SELECT=btn8" \
