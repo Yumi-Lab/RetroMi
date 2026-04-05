@@ -256,9 +256,13 @@ fi
 # Per-system retroarch.cfg uses #include to inherit from the global config.
 # RetroPie's stock global config auto-detects video/audio drivers — do NOT override it.
 # Gamepad input is handled by the autoconfig in retroarch-joypads/USB Gamepad.cfg.
-# Only append settings that aren't in the stock config:
+# Fix stock config: enable gamepad hotkeys and quit-on-close
 GLOBAL_RA="/opt/retropie/configs/all/retroarch.cfg"
 if [ -f "${GLOBAL_RA}" ]; then
+    # input_enable_hotkey = "nul" disables all gamepad hotkeys — remove it
+    # The autoconfig USB Gamepad.cfg sets input_enable_hotkey_btn = "8" (Select)
+    sed -i '/^input_enable_hotkey = "nul"/d' "${GLOBAL_RA}"
+    # When a game exits via its own menu, quit RetroArch and return to ES
     grep -q "quit_on_close_content" "${GLOBAL_RA}" || \
         echo 'quit_on_close_content = "2"' >> "${GLOBAL_RA}"
 fi
