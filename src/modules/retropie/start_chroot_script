@@ -148,8 +148,17 @@ fi
 
 echo_green "RetroPie supplementary packages... [DONE]"
 
+# Configure EmulationStation FIRST — it generates 3000-line per-system retroarch.cfg
+# files. The lr-* configure steps below will overwrite them with small #include configs.
+echo_green "Configuring EmulationStation binary..."
+bash retropie_packages.sh emulationstation configure || true
+
+# Configure the RetroPie settings menu (visible as a system in ES)
+bash retropie_packages.sh retropiemenu configure || true
+
 # Register all pre-compiled libretro cores in EmulationStation
 # Each 'configure' step calls addSystem → populates es_systems.cfg + emulators.cfg
+# MUST run AFTER emulationstation configure to restore #include per-system configs
 echo_green "Registering installed emulators in EmulationStation..."
 for core_dir in /opt/retropie/libretrocores/lr-*/; do
     [ -d "${core_dir}" ] || continue
@@ -158,13 +167,6 @@ for core_dir in /opt/retropie/libretrocores/lr-*/; do
     bash retropie_packages.sh "${core_name}" configure || true
 done
 echo_green "Registering installed emulators... [DONE]"
-
-# Configure EmulationStation itself (creates /usr/bin/emulationstation symlink)
-echo_green "Configuring EmulationStation binary..."
-bash retropie_packages.sh emulationstation configure || true
-
-# Configure the RetroPie settings menu (visible as a system in ES)
-bash retropie_packages.sh retropiemenu configure || true
 
 # Safety net: fix any wrong user paths in es_systems.cfg and emulators.cfg
 # (CI runner user, root, or literal ~user that wasn't expanded)
