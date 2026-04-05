@@ -25,12 +25,15 @@ tar -xzf /tmp/filebrowser.tar.gz -C /usr/local/bin filebrowser
 rm -f /tmp/filebrowser.tar.gz
 chmod +x /usr/local/bin/filebrowser
 
-echo "configure filebrowser (noauth)"
+# Allow filebrowser to bind port 80 without root
+setcap 'cap_net_bind_service=+ep' /usr/local/bin/filebrowser
+
+echo "configure filebrowser (noauth, user=pi)"
 cat << 'EOF' | sudo tee /usr/local/bin/start_filebrowser.sh
 #!/bin/bash
 # Remove stale DB so --noauth quick setup works (v2.62+)
-rm -f /var/lib/filebrowser.db
-filebrowser --noauth --address 0.0.0.0 --port 80 --root /home/pi/RetroPie -d /var/lib/filebrowser.db
+rm -f /home/pi/.filebrowser.db
+filebrowser --noauth --address 0.0.0.0 --port 80 --root /home/pi/RetroPie -d /home/pi/.filebrowser.db
 EOF
 
 sudo chmod +x /usr/local/bin/start_filebrowser.sh
@@ -43,8 +46,8 @@ After=network.target
 [Service]
 ExecStart=/usr/local/bin/start_filebrowser.sh
 Restart=always
-User=root
-Group=root
+User=pi
+Group=pi
 
 [Install]
 WantedBy=multi-user.target
@@ -52,6 +55,4 @@ EOF
 
 sudo systemctl daemon-reload
 sudo systemctl enable filebrowser.service
-
-sudo chmod 777 -R /home/pi/RetroPie/
 echo_green "install filebroswer...(DONE)"
