@@ -273,15 +273,19 @@ if [ -f "${GLOBAL_RA}" ]; then
     grep -q "input_exit_emulator_btn" "${GLOBAL_RA}" || \
         echo 'input_exit_emulator_btn = "9"' >> "${GLOBAL_RA}"
     # Overwrite conflicting built-in autoconfig files for USB Gamepad 0810:0001.
-    # Stock files use hat mapping (ABS_HAT0X/Y) but this device reports D-pad as
-    # ABS_X/Y axes — overwrite with our correct axis-based cfg for plug & play.
+    # Stock files (USB_gamepad.cfg, USB_Gamepad_.cfg, Twin_USB_Joystick.cfg) use hat
+    # mapping (ABS_HAT0X/Y) but this device reports D-pad as ABS_X/Y axes.
+    # Source files in retroarch-joypads/ have spaces in names (deployed by retroarch module).
     CUSTOM_AC="/opt/retropie/configs/all/retroarch-joypads"
     BUILTIN_AC="/opt/retropie/emulators/retroarch/autoconfig-presets/udev"
     if [ -d "${BUILTIN_AC}" ] && [ -d "${CUSTOM_AC}" ]; then
-        cp "${CUSTOM_AC}/USB_Gamepad.cfg"       "${BUILTIN_AC}/USB_Gamepad.cfg"       2>/dev/null || true
-        cp "${CUSTOM_AC}/Twin_USB_Gamepad.cfg"  "${BUILTIN_AC}/Twin_USB_Gamepad.cfg"  2>/dev/null || true
+        # Overwrite all known variant filenames (spaces vs underscores, case variants)
+        for TARGET in USB_Gamepad.cfg USB_gamepad.cfg USB_Gamepad_.cfg; do
+            cp "${CUSTOM_AC}/USB Gamepad.cfg" "${BUILTIN_AC}/${TARGET}" 2>/dev/null || true
+        done
+        cp "${CUSTOM_AC}/Twin USB Gamepad.cfg" "${BUILTIN_AC}/Twin_USB_Gamepad.cfg" 2>/dev/null || true
         sed 's/input_device = "Twin USB Gamepad"/input_device = "Twin USB Joystick"/' \
-            "${CUSTOM_AC}/Twin_USB_Gamepad.cfg" > "${BUILTIN_AC}/Twin_USB_Joystick.cfg" 2>/dev/null || true
+            "${CUSTOM_AC}/Twin USB Gamepad.cfg" > "${BUILTIN_AC}/Twin_USB_Joystick.cfg" 2>/dev/null || true
     fi
 fi
 
