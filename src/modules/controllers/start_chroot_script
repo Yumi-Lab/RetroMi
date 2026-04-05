@@ -22,6 +22,7 @@ mkdir -p /opt/retropie/configs/all/emulationstation
 unpack /filesystem/opt/retropie/configs/all/emulationstation /opt/retropie/configs/all/emulationstation
 # ES and joy2key both read from ~/.emulationstation/ — copy there too
 mkdir -p /home/pi/.emulationstation
+rm -f /home/pi/.emulationstation/es_input.cfg
 cp /opt/retropie/configs/all/emulationstation/es_input.cfg /home/pi/.emulationstation/es_input.cfg
 chown pi:pi /home/pi/.emulationstation/es_input.cfg
 echo_green "Pre-configured controller mappings installed (es_input.cfg)"
