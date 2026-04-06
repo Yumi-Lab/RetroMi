@@ -164,6 +164,9 @@ fi' "$script"
 # Boot resets retroarch.cfg to defaults — this must run AFTER all configure steps
 sed -i 's/menu_swap_ok_cancel_buttons = "false"/menu_swap_ok_cancel_buttons = "true"/' /opt/retropie/configs/all/retroarch.cfg 2>/dev/null
 
+# Default to Dev Mode OFF (clean black screen between ES and games)
+sed -i 's/disable_menu = "0"/disable_menu = "1"/' /opt/retropie/configs/all/runcommand.cfg 2>/dev/null
+
 # Show reboot screen
 "${DIALOG[@]}" --clear --title "Firstboot preperation" \
     --no-cancel --no-ok --pause "$(reboot_msg)" "${RESOLUTION[@]}" 5
