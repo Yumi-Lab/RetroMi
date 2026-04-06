@@ -273,8 +273,14 @@ if [ -f "${GLOBAL_RA}" ]; then
         echo 'input_enable_hotkey_btn = "8"' >> "${GLOBAL_RA}"
     grep -q "input_exit_emulator_btn" "${GLOBAL_RA}" || \
         echo 'input_exit_emulator_btn = "9"' >> "${GLOBAL_RA}"
+    # Hotkey combo: SELECT (btn8) + ○ Circle (btn1) = toggle RetroArch menu
+    grep -q "input_menu_toggle_btn" "${GLOBAL_RA}" || \
+        echo 'input_menu_toggle_btn = "1"' >> "${GLOBAL_RA}"
+    # Swap OK/Cancel so ✕(btn2) = confirm in RA menu + joy2key (WiFi dialogs)
+    grep -q "menu_swap_ok_cancel_buttons" "${GLOBAL_RA}" || \
+        echo 'menu_swap_ok_cancel_buttons = "true"' >> "${GLOBAL_RA}"
     # Explicit player1+2 bindings — validated on SmartPi H3 with USB Gamepad 0810:0001
-    # a=btn1 (Cross ✕), b=btn2 (Circle ○), y=btn0 (Triangle), x=btn3 (Square)
+    # btn1=○(Circle), btn2=✕(Cross), btn0=△(Triangle), btn3=□(Square)
     if ! grep -q "input_player1_joypad_index" "${GLOBAL_RA}"; then
         cat >> "${GLOBAL_RA}" << 'JOYEOF'
 input_player1_joypad_index = "0"
