@@ -277,8 +277,11 @@ if [ -f "${GLOBAL_RA}" ]; then
     grep -q "input_menu_toggle_btn" "${GLOBAL_RA}" || \
         echo 'input_menu_toggle_btn = "1"' >> "${GLOBAL_RA}"
     # Swap OK/Cancel so ✕(btn2) = confirm in RA menu + joy2key (WiFi dialogs)
-    grep -q "menu_swap_ok_cancel_buttons" "${GLOBAL_RA}" || \
+    if grep -q 'menu_swap_ok_cancel_buttons' "${GLOBAL_RA}"; then
+        sed -i 's/menu_swap_ok_cancel_buttons = "false"/menu_swap_ok_cancel_buttons = "true"/' "${GLOBAL_RA}"
+    else
         echo 'menu_swap_ok_cancel_buttons = "true"' >> "${GLOBAL_RA}"
+    fi
     # Explicit player1+2 bindings — validated on SmartPi H3 with USB Gamepad 0810:0001
     # btn1=○(Circle), btn2=✕(Cross), btn0=△(Triangle), btn3=□(Square)
     if ! grep -q "input_player1_joypad_index" "${GLOBAL_RA}"; then
