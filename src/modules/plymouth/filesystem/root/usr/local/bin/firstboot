@@ -160,6 +160,10 @@ if [ ! -f /home/'"${BASE_USER}"'/.emulationstation/.epicnoir_set ]; then\
     touch /home/'"${BASE_USER}"'/.emulationstation/.epicnoir_set\
 fi' "$script"
 
+# Force menu_swap so Cross(btn2)=confirm in joy2key/RA menu
+# Boot resets retroarch.cfg to defaults — this must run AFTER all configure steps
+sed -i 's/menu_swap_ok_cancel_buttons = "false"/menu_swap_ok_cancel_buttons = "true"/' /opt/retropie/configs/all/retroarch.cfg 2>/dev/null
+
 # Show reboot screen
 "${DIALOG[@]}" --clear --title "Firstboot preperation" \
     --no-cancel --no-ok --pause "$(reboot_msg)" "${RESOLUTION[@]}" 5
