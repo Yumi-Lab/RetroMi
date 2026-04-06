@@ -318,6 +318,48 @@ JOYEOF
     fi
 fi
 
+# Devmode toggle script — switch runcommand menu ON/OFF from RetroPie menu
+RETROPIEMENU="/home/${BASE_USER}/RetroPie/retropiemenu"
+cat > "${RETROPIEMENU}/zz-devmode.sh" << 'DEVMODE'
+#!/bin/bash
+CFG=/opt/retropie/configs/all/runcommand.cfg
+if grep -q 'disable_menu = "1"' "$CFG" 2>/dev/null; then
+    CURRENT="OFF"
+else
+    CURRENT="ON"
+fi
+choice=$(dialog --backtitle "RetroMi — Dev Mode (current: $CURRENT)" \
+    --title "Dev Mode" \
+    --menu "\nON  = Runcommand menu visible before games.\n      Press a button within 2s to configure\n      core, video mode or BIOS settings.\n\nOFF = Black screen between ES and games.\n      Clean transition, no menu.\n" 18 58 2 \
+    "OFF" "Black screen (production)" \
+    "ON"  "Show runcommand menu" \
+    3>&1 1>&2 2>&3)
+case "$choice" in
+    ON)
+        sed -i 's/disable_menu = "1"/disable_menu = "0"/' "$CFG"
+        dialog --backtitle "RetroMi" --msgbox "\n  Dev Mode : ON\n\n  Runcommand menu is now visible." 9 45
+        ;;
+    OFF)
+        sed -i 's/disable_menu = "0"/disable_menu = "1"/' "$CFG"
+        dialog --backtitle "RetroMi" --msgbox "\n  Dev Mode : OFF\n\n  Black screen between ES and games." 9 45
+        ;;
+esac
+DEVMODE
+chmod +x "${RETROPIEMENU}/zz-devmode.sh"
+
+# gamelist.xml — custom display name for devmode in ES menu
+cat > "${RETROPIEMENU}/gamelist.xml" << 'GAMELIST'
+<?xml version="1.0"?>
+<gameList>
+  <game>
+    <path>./zz-devmode.sh</path>
+    <name>Devmode : ON/OFF</name>
+    <desc>Toggle runcommand menu before games. ON = debug/config, OFF = clean black screen.</desc>
+  </game>
+</gameList>
+GAMELIST
+echo_green "Devmode toggle script installed"
+
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
 chown -R "${BASE_USER}:${BASE_USER}" "/opt/retropie/configs" 2>/dev/null || true
