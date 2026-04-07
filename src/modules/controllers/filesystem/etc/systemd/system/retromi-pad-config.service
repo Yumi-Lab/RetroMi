@@ -1,0 +1,13 @@
+[Unit]
+Description=RetroMi — Generate RetroArch gamepad autoconfig profiles
+After=local-fs.target
+Before=emulationstation.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/retromi-pad-config
+User=root
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target

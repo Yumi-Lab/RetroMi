@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #### RetroMi — RetroArch config deployment
-#### Deploys pre-baked retroarch.cfg (H3/Mali-400 optimized) + SDL_GameControllerDB.
+#### Deploys retroarch.cfg (H3/Mali-400 optimized) + gamepad plug & play system.
 #### RetroArch itself is installed by the retropie module via RetroMi-packages.
 
 # shellcheck enable=require-variable-braces
@@ -13,42 +13,63 @@ install_cleanup_trap
 
 echo_green "Deploying RetroArch config (H3/Mali-400 optimized)..."
 
-# Create required directories (remove file if retropie installed it as a file instead of a directory)
+# Create required directories
 rm -f /opt/retropie/configs/all/retroarch-joypads 2>/dev/null || true
 mkdir -p /opt/retropie/configs/all/retroarch-joypads
 mkdir -p /home/pi/RetroPie/saves
 mkdir -p /home/pi/RetroPie/savestates
 mkdir -p /home/pi/RetroPie/screenshots
 
-# Deploy retroarch.cfg + joypad configs from filesystem
+# Deploy joypad configs + runcommand hook + retromi-pad-config from filesystem
 unpack /filesystem/opt/retropie/configs/all /opt/retropie/configs/all
+unpack /filesystem/usr/local/bin /usr/local/bin
+chmod +x /usr/local/bin/retromi-pad-config
+chmod +x /opt/retropie/configs/all/runcommand-onstart.sh
 
-# Fix conflicting built-in autoconfig presets for USB Gamepad (0810:0001)
-# RetroArch ships profiles with hat-based D-pad (ABS_HAT0X/Y) but our gamepads
-# send D-pad via ABS_X/Y axes. The built-in files match by vendor_id=2064 and
-# override our axis-based profiles. Remove them and copy ours instead.
-RA_BUILTIN_AUTOCONFIG="/opt/retropie/emulators/retroarch/autoconfig/udev"
+# ============================================================
+# Gamepad Plug & Play — configure RetroArch for autodetect
+# ============================================================
+# Strategy: enable RetroArch autodetect + retromi-pad-config generates
+# autoconfig profiles with EXACT kernel device names at boot/hotplug.
+# This is the same approach as Batocera's configgen but as a bash script.
+GLOBAL_RA="/opt/retropie/configs/all/retroarch.cfg"
+
+if [ -f "${GLOBAL_RA}" ]; then
+    echo_green "Configuring RetroArch for gamepad plug & play..."
+
+    # Disable autodetect (Batocera approach: retromi-pad-config writes
+    # input_player* bindings directly from es_input.cfg at each game launch)
+    sed -i 's/^input_autodetect_enable = "true"/input_autodetect_enable = "false"/' "${GLOBAL_RA}"
+    if ! grep -q "^input_autodetect_enable" "${GLOBAL_RA}"; then
+        echo 'input_autodetect_enable = "false"' >> "${GLOBAL_RA}"
+    fi
+
+    # Remove hardcoded player bindings — autodetect + pad-config handle this
+    sed -i '/^input_player[0-9]*_joypad_index/d' "${GLOBAL_RA}"
+    sed -i '/^input_player[0-9]*_analog_dpad_mode/d' "${GLOBAL_RA}"
+    sed -i '/^input_player[0-9]*_.*_btn/d' "${GLOBAL_RA}"
+    sed -i '/^input_player[0-9]*_.*_axis/d' "${GLOBAL_RA}"
+
+    # Remove global input_menu_toggle_btn (must be per-profile only,
+    # otherwise it triggers standalone without hotkey combo)
+    sed -i '/^input_menu_toggle_btn/d' "${GLOBAL_RA}"
+
+    # Ensure hotkey + exit are set globally (works with per-profile overrides)
+    grep -q "^input_enable_hotkey_btn" "${GLOBAL_RA}" || echo 'input_enable_hotkey_btn = "8"' >> "${GLOBAL_RA}"
+    grep -q "^input_exit_emulator_btn" "${GLOBAL_RA}" || echo 'input_exit_emulator_btn = "9"' >> "${GLOBAL_RA}"
+
+    echo_green "RetroArch gamepad plug & play configured (Batocera-style)."
+fi
+
+# Remove conflicting built-in autoconfig presets
+# These match by VID+PID but have wrong D-pad mapping (hat vs axis)
+# or wrong button layout. retromi-pad-config generates correct ones at runtime.
+RA_BUILTIN_AUTOCONFIG="/opt/retropie/emulators/retroarch/autoconfig-presets/udev"
 if [ -d "${RA_BUILTIN_AUTOCONFIG}" ]; then
-    echo_green "Fixing built-in autoconfig presets (hat→axis D-pad)..."
-    # Remove conflicting built-in profiles (hat-based D-pad, wrong for our gamepads)
+    echo_green "Cleaning conflicting built-in autoconfig presets..."
     rm -f "${RA_BUILTIN_AUTOCONFIG}/USB_Gamepad_.cfg"
     rm -f "${RA_BUILTIN_AUTOCONFIG}/USB_gamepad.cfg"
     rm -f "${RA_BUILTIN_AUTOCONFIG}/Twin_USB_Joystick.cfg"
-    # Copy our axis-based profiles into the built-in dir as fallback
-    # (joypad_autoconfig_dir is checked first, built-in dir is the safety net)
-    cp /opt/retropie/configs/all/retroarch-joypads/*.cfg "${RA_BUILTIN_AUTOCONFIG}/"
-    echo_green "Built-in autoconfig presets fixed."
-fi
-
-# Ensure joypad_autoconfig_dir points to our profiles (takes priority over built-in)
-GLOBAL_RA="/opt/retropie/configs/all/retroarch.cfg"
-if [ -f "${GLOBAL_RA}" ]; then
-    if grep -q "^joypad_autoconfig_dir" "${GLOBAL_RA}"; then
-        sed -i 's|^joypad_autoconfig_dir = .*|joypad_autoconfig_dir = "/opt/retropie/configs/all/retroarch-joypads"|' "${GLOBAL_RA}"
-    else
-        echo 'joypad_autoconfig_dir = "/opt/retropie/configs/all/retroarch-joypads"' >> "${GLOBAL_RA}"
-    fi
-    echo_green "joypad_autoconfig_dir set to retroarch-joypads/"
 fi
 
 # SDL_GameControllerDB — plug & play pour 4000+ manettes

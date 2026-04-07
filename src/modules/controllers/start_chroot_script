@@ -11,10 +11,14 @@ set -Ee
 source /common.sh
 install_cleanup_trap
 
-echo_green "Installing controller udev rules..."
+echo_green "Installing controller udev rules + gamepad autoconfig service..."
 
-# Deploy rules from filesystem/
+# Deploy rules + systemd service from filesystem/
 unpack /filesystem/etc/udev/rules.d /etc/udev/rules.d
+unpack /filesystem/etc/systemd/system /etc/systemd/system
+
+# Enable pad-config service (generates RetroArch profiles at boot)
+systemctl enable retromi-pad-config.service 2>/dev/null || true
 
 # Deploy pre-configured ES input mappings (prevents first-boot wizard)
 # Includes: keyboard, PS3/PS4/PS5, Xbox 360/One/Series, Switch Pro, 8BitDo, Logitech

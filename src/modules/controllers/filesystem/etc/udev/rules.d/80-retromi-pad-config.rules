@@ -1,0 +1,3 @@
+# RetroMi — Auto-generate RetroArch gamepad profile on hotplug
+# Triggers retromi-pad-config when any joystick is plugged in.
+ACTION=="add", SUBSYSTEM=="input", ENV{ID_INPUT_JOYSTICK}=="1", KERNEL=="js*", RUN+="/usr/local/bin/retromi-pad-config"

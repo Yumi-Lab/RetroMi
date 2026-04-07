@@ -1,0 +1,220 @@
+#!/bin/bash
+# retromi-pad-config — Batocera-style gamepad configuration for RetroArch
+#
+# Reads connected joysticks, matches against es_input.cfg by VID+PID,
+# writes input_player* bindings directly into retroarch.cfg.
+# input_autodetect_enable = false — same as Batocera.
+#
+# Triggered by: boot (systemd), hotplug (udev), game launch (runcommand)
+
+RETROARCH_CFG="/opt/retropie/configs/all/retroarch.cfg"
+ES_INPUTS=("/home/pi/.emulationstation/es_input.cfg" "/opt/retropie/configs/all/emulationstation/es_input.cfg")
+LOG="/tmp/retromi-pad-config.log"
+
+log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG"; }
+
+find_es_input() {
+    for f in "${ES_INPUTS[@]}"; do
+        [ -f "$f" ] && echo "$f" && return
+    done
+}
+
+guid_vid() { local g="$1"; printf "%d" "0x${g:10:2}${g:8:2}" 2>/dev/null || echo "0"; }
+guid_pid() { local g="$1"; printf "%d" "0x${g:18:2}${g:16:2}" 2>/dev/null || echo "0"; }
+
+# Find best ES GUID for VID+PID — prefer axis-based D-pad over hat
+find_best_es_guid() {
+    local vid="$1" pid="$2" es_file="$3"
+    [ -z "$es_file" ] && return 1
+    local best="" fallback=""
+    local guid
+    while IFS= read -r guid; do
+        [ -z "$guid" ] && continue
+        if [ "$(guid_vid "$guid")" = "$vid" ] && [ "$(guid_pid "$guid")" = "$pid" ]; then
+            local dpad
+            dpad=$(xmlstarlet sel -t -m "//inputConfig[@deviceGUID='$guid']/input[@name='up']" -v "@type" "$es_file" 2>/dev/null | head -1)
+            if [ "$dpad" = "axis" ]; then
+                best="$guid"
+                break
+            fi
+            [ -z "$fallback" ] && fallback="$guid"
+        fi
+    done < <(xmlstarlet sel -t -m "//inputConfig[@type='joystick']" -v "@deviceGUID" -n "$es_file" 2>/dev/null)
+    [ -n "$best" ] && echo "$best" && return 0
+    [ -n "$fallback" ] && echo "$fallback" && return 0
+    return 1
+}
+
+# Write input_player${N}_* bindings from ES mapping
+# Handles both naming conventions:
+#   Batocera-style: pageup, pagedown, l2, r2, l3, r3, joystick1up...
+#   SDL-style: leftshoulder, rightshoulder, lefttrigger, righttrigger, leftanalogup...
+write_player_bindings() {
+    local player="$1" js_index="$2" guid="$3" es_file="$4"
+    local p="input_player${player}"
+
+    echo "${p}_joypad_index = \"${js_index}\""
+    echo "${p}_analog_dpad_mode = \"1\""
+
+    local has_hotkey=0 select_id=""
+
+    while IFS='|' read -r iname itype iid ivalue; do
+        [ -z "$iname" ] && continue
+        local ra=""
+
+        case "$iname" in
+            a)        ra="${p}_a" ;;
+            b)        ra="${p}_b" ;;
+            x)        ra="${p}_x" ;;
+            y)        ra="${p}_y" ;;
+            up)       ra="${p}_up" ;;
+            down)     ra="${p}_down" ;;
+            left)     ra="${p}_left" ;;
+            right)    ra="${p}_right" ;;
+            start)    ra="${p}_start" ;;
+            select)   ra="${p}_select"; select_id="$iid" ;;
+            # Both naming conventions for shoulders/triggers
+            pageup|leftshoulder)        ra="${p}_l" ;;
+            pagedown|rightshoulder)     ra="${p}_r" ;;
+            l2|lefttrigger)             ra="${p}_l2" ;;
+            r2|righttrigger)            ra="${p}_r2" ;;
+            l3|leftthumbstickclick)     ra="${p}_l3" ;;
+            r3|rightthumbstickclick)    ra="${p}_r3" ;;
+            hotkey|hotkeyenable)        has_hotkey=1 ;;
+        esac
+
+        case "$itype" in
+            button)
+                [ -n "$ra" ] && echo "${ra}_btn = \"${iid}\""
+                if [ "$player" = "1" ]; then
+                    case "$iname" in
+                        hotkey|hotkeyenable)
+                            echo "input_enable_hotkey_btn = \"${iid}\"" ;;
+                    esac
+                fi
+                ;;
+            axis)
+                if [ -n "$ra" ]; then
+                    [ "$ivalue" = "-1" ] && echo "${ra}_axis = \"-${iid}\"" || echo "${ra}_axis = \"+${iid}\""
+                fi
+                # Analog sticks — both naming conventions
+                case "$iname" in
+                    joystick1up|leftanalogup)      echo "${p}_l_y_minus_axis = \"-${iid}\""; echo "${p}_l_y_plus_axis = \"+${iid}\"" ;;
+                    joystick1left|leftanalogleft)   echo "${p}_l_x_minus_axis = \"-${iid}\""; echo "${p}_l_x_plus_axis = \"+${iid}\"" ;;
+                    joystick2up|rightanalogup)      echo "${p}_r_y_minus_axis = \"-${iid}\""; echo "${p}_r_y_plus_axis = \"+${iid}\"" ;;
+                    joystick2left|rightanalogleft)  echo "${p}_r_x_minus_axis = \"-${iid}\""; echo "${p}_r_x_plus_axis = \"+${iid}\"" ;;
+                    leftanalogdown)     echo "${p}_l_y_plus_axis = \"+${iid}\"" ;;
+                    leftanalogright)    echo "${p}_l_x_plus_axis = \"+${iid}\"" ;;
+                    rightanalogdown)    echo "${p}_r_y_plus_axis = \"+${iid}\"" ;;
+                    rightanalogright)   echo "${p}_r_x_plus_axis = \"+${iid}\"" ;;
+                esac
+                ;;
+            hat)
+                if [ -n "$ra" ]; then
+                    local hd=""
+                    case "$ivalue" in 1) hd="up" ;; 2) hd="right" ;; 4) hd="down" ;; 8) hd="left" ;; esac
+                    [ -n "$hd" ] && echo "${ra}_btn = \"h${iid}${hd}\""
+                fi
+                ;;
+        esac
+    done < <(xmlstarlet sel -t -m "//inputConfig[@deviceGUID='${guid}']/input" \
+             -v "concat(@name,'|',@type,'|',@id,'|',@value)" -n "$es_file" 2>/dev/null)
+
+    # Default hotkey = select if not explicitly mapped
+    if [ "$player" = "1" ] && [ "$has_hotkey" -eq 0 ] && [ -n "$select_id" ]; then
+        echo "input_enable_hotkey_btn = \"${select_id}\""
+    fi
+}
+
+# Generic 10-button mapping
+write_generic() {
+    local player="$1" js_index="$2"
+    local p="input_player${player}"
+    cat << EOF
+${p}_joypad_index = "${js_index}"
+${p}_analog_dpad_mode = "1"
+${p}_a_btn = "1"
+${p}_b_btn = "2"
+${p}_x_btn = "0"
+${p}_y_btn = "3"
+${p}_l_btn = "4"
+${p}_r_btn = "5"
+${p}_l2_btn = "6"
+${p}_r2_btn = "7"
+${p}_select_btn = "8"
+${p}_start_btn = "9"
+${p}_up_axis = "-1"
+${p}_down_axis = "+1"
+${p}_left_axis = "-0"
+${p}_right_axis = "+0"
+EOF
+    [ "$player" = "1" ] && echo "input_enable_hotkey_btn = \"8\""
+}
+
+# Main: scan joysticks and inject player bindings
+configure_all() {
+    local es_file
+    es_file=$(find_es_input)
+    log "ES input: ${es_file:-none}"
+    [ ! -f "$RETROARCH_CFG" ] && { log "ERROR: $RETROARCH_CFG not found"; return 1; }
+
+    # Clean existing player/hotkey bindings
+    sed -i '/^input_player[0-9]/d' "$RETROARCH_CFG"
+    sed -i '/^input_enable_hotkey_btn/d' "$RETROARCH_CFG"
+    sed -i '/^input_exit_emulator_btn/d' "$RETROARCH_CFG"
+    sed -i '/^input_menu_toggle_btn/d' "$RETROARCH_CFG"
+
+    # Scan joysticks and build bindings
+    local bindings=""
+    local player=1 name="" vid="" pid=""
+
+    while IFS= read -r line; do
+        case "$line" in
+            I:*)
+                vid=$(echo "$line" | grep -oP 'Vendor=\K[0-9a-f]+')
+                pid=$(echo "$line" | grep -oP 'Product=\K[0-9a-f]+')
+                ;;
+            N:*)
+                name="${line#N: Name=\"}"
+                name="${name%\"}"
+                ;;
+            H:*)
+                if echo "$line" | grep -q "js[0-9]"; then
+                    local js_index vid_dec pid_dec guid
+                    js_index=$(echo "$line" | grep -oP 'js\K[0-9]+')
+                    vid_dec=$(printf "%d" "0x${vid}")
+                    pid_dec=$(printf "%d" "0x${pid}")
+
+                    log "Player ${player}: '${name}' js${js_index} VID:${vid_dec} PID:${pid_dec}"
+
+                    guid=$(find_best_es_guid "$vid_dec" "$pid_dec" "$es_file" 2>/dev/null)
+                    if [ -n "$guid" ]; then
+                        log "  → ES GUID=${guid}"
+                        bindings+=$'\n'"$(write_player_bindings "$player" "$js_index" "$guid" "$es_file")"
+                    else
+                        log "  → generic"
+                        bindings+=$'\n'"$(write_generic "$player" "$js_index")"
+                    fi
+                    player=$((player+1))
+                fi
+                ;;
+            "")
+                name="" vid="" pid=""
+                ;;
+        esac
+    done < /proc/bus/input/devices
+
+    # Write hotkey combos + player bindings
+    {
+        echo "input_exit_emulator_btn = \"9\""
+        echo "input_menu_toggle_btn = \"2\""
+        echo "$bindings"
+    } >> "$RETROARCH_CFG"
+
+    log "Configured $((player-1)) player(s)"
+}
+
+: > "$LOG"
+log "=== retromi-pad-config ==="
+configure_all
+log "=== done ==="
