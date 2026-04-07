@@ -275,7 +275,7 @@ if [ -f "${GLOBAL_RA}" ]; then
         echo 'input_exit_emulator_btn = "9"' >> "${GLOBAL_RA}"
     # Hotkey combo: SELECT (btn8) + ○ Circle (btn1) = toggle RetroArch menu
     grep -q "input_menu_toggle_btn" "${GLOBAL_RA}" || \
-        echo 'input_menu_toggle_btn = "1"' >> "${GLOBAL_RA}"
+        echo 'input_menu_toggle_btn = "2"' >> "${GLOBAL_RA}"
     # menu_swap_ok_cancel_buttons is set in the firstboot wizard (/usr/local/bin/firstboot)
     # because boot resets retroarch.cfg to defaults — do NOT set it here
     # Explicit player1+2 bindings — validated on SmartPi H3 with USB Gamepad 0810:0001
