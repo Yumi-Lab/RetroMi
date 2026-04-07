@@ -28,10 +28,10 @@ unpack /filesystem/opt/retropie/configs/all/emulationstation /opt/retropie/confi
 mkdir -p /home/pi/.emulationstation
 SRC=/opt/retropie/configs/all/emulationstation/es_input.cfg
 DST=/home/pi/.emulationstation/es_input.cfg
-if [ "$(realpath "$SRC" 2>/dev/null)" != "$(realpath "$DST" 2>/dev/null)" ]; then
-    rm -f "$DST"
-    cp "$SRC" "$DST"
-    chown pi:pi "$DST"
+if [ "$(realpath "${SRC}" 2>/dev/null)" != "$(realpath "${DST}" 2>/dev/null)" ]; then
+    rm -f "${DST}"
+    cp "${SRC}" "${DST}"
+    chown pi:pi "${DST}"
 fi
 echo_green "Pre-configured controller mappings installed (es_input.cfg)"
 
