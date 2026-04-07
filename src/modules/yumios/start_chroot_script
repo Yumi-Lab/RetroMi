@@ -94,7 +94,12 @@ pcm.!default {
 ALSA
 ## END Step 4
 
-## Step 5: Install CANBoot Dependency
+## Step 5: Remove spi-dev from /etc/modules (SmartPi base, not needed for RetroMi)
+echo_green "Removing spi-dev module (not needed, causes Failed error at boot)..."
+sed -i '/^spi-dev$/d' /etc/modules
+## END Step 5
+
+## Step 6: Install CANBoot Dependency
 apt-get update --allow-releaseinfo-change
 # shellcheck disable=SC2086
 check_install_pkgs ${YUMIOS_DEPS}
