@@ -255,10 +255,10 @@ fi
 
 # Per-system retroarch.cfg uses #include to inherit from the global config.
 # RetroPie's stock global config auto-detects video/audio drivers — do NOT override it.
-# Gamepad: autodetect=false + explicit per-player bindings for USB Gamepad 0810:0001.
-# autodetect=true is unreliable on this setup (device name with spaces, multiple conflicting
-# vendor_id=2064 files in built-in dir). Explicit bindings are the only robust approach.
-# D-pad: ABS_X/Y axes (not hat). a=btn1 (Cross/X), b=btn2 (Circle/O), y=btn0, x=btn3.
+# Gamepad: autodetect=true — RetroArch uses 1089 built-in autoconfig presets (udev/)
+# to match any USB/BT gamepad by device name. Custom overrides for the Twin USB Gamepad
+# (0810:0001) live in retroarch-joypads/ (deployed by the retroarch module).
+# No explicit per-player bindings in the global config — autoconfig handles everything.
 GLOBAL_RA="/opt/retropie/configs/all/retroarch.cfg"
 if [ -f "${GLOBAL_RA}" ]; then
     # input_enable_hotkey = "nul" disables all gamepad hotkeys — remove it
@@ -266,56 +266,18 @@ if [ -f "${GLOBAL_RA}" ]; then
     # When a game exits via its own menu, quit RetroArch and return to ES
     grep -q "quit_on_close_content" "${GLOBAL_RA}" || \
         echo 'quit_on_close_content = "2"' >> "${GLOBAL_RA}"
-    # Disable autodetect: explicit bindings override any autoconfig loading
-    sed -i 's/^input_autodetect_enable = "true"/input_autodetect_enable = "false"/' "${GLOBAL_RA}"
+    # Ensure autodetect is enabled (RetroArch matches gamepads via 1089 built-in presets)
+    sed -i 's/^input_autodetect_enable = "false"/input_autodetect_enable = "true"/' "${GLOBAL_RA}"
     # Hotkey combo: SELECT (btn8) + START (btn9) = quit RetroArch
     grep -q "input_enable_hotkey_btn" "${GLOBAL_RA}" || \
         echo 'input_enable_hotkey_btn = "8"' >> "${GLOBAL_RA}"
     grep -q "input_exit_emulator_btn" "${GLOBAL_RA}" || \
         echo 'input_exit_emulator_btn = "9"' >> "${GLOBAL_RA}"
-    # Hotkey combo: SELECT (btn8) + ○ Circle (btn1) = toggle RetroArch menu
-    grep -q "input_menu_toggle_btn" "${GLOBAL_RA}" || \
-        echo 'input_menu_toggle_btn = "2"' >> "${GLOBAL_RA}"
+    # input_menu_toggle_btn is set per-gamepad in autoconfig profiles (retroarch-joypads/)
+    # NOT in global config — a global value triggers without hotkey combo
     # menu_swap_ok_cancel_buttons is set in the firstboot wizard (/usr/local/bin/firstboot)
     # because boot resets retroarch.cfg to defaults — do NOT set it here
-    # Explicit player1+2 bindings — validated on SmartPi H3 with USB Gamepad 0810:0001
-    # btn1=○(Circle), btn2=✕(Cross), btn0=△(Triangle), btn3=□(Square)
-    if ! grep -q "input_player1_joypad_index" "${GLOBAL_RA}"; then
-        cat >> "${GLOBAL_RA}" << 'JOYEOF'
-input_player1_joypad_index = "0"
-input_player1_analog_dpad_mode = "1"
-input_player1_up_axis = "-1"
-input_player1_down_axis = "+1"
-input_player1_left_axis = "-0"
-input_player1_right_axis = "+0"
-input_player1_x_btn = "0"
-input_player1_b_btn = "2"
-input_player1_a_btn = "1"
-input_player1_y_btn = "3"
-input_player1_l_btn = "4"
-input_player1_r_btn = "5"
-input_player1_l2_btn = "6"
-input_player1_r2_btn = "7"
-input_player1_select_btn = "8"
-input_player1_start_btn = "9"
-input_player2_joypad_index = "1"
-input_player2_analog_dpad_mode = "1"
-input_player2_up_axis = "-1"
-input_player2_down_axis = "+1"
-input_player2_left_axis = "-0"
-input_player2_right_axis = "+0"
-input_player2_x_btn = "0"
-input_player2_b_btn = "2"
-input_player2_a_btn = "1"
-input_player2_y_btn = "3"
-input_player2_l_btn = "4"
-input_player2_r_btn = "5"
-input_player2_l2_btn = "6"
-input_player2_r2_btn = "7"
-input_player2_select_btn = "8"
-input_player2_start_btn = "9"
-JOYEOF
-    fi
+    # No explicit player bindings — autoconfig presets handle all gamepads
 fi
 
 # Devmode toggle script — switch runcommand menu ON/OFF from RetroPie menu
