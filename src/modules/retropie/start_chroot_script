@@ -91,6 +91,7 @@ export __user="${BASE_USER}"
 pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
 bash retropie_packages.sh runcommand
 bash retropie_packages.sh bluetooth depends
+# shellcheck disable=SC2015
 for i in 1 2 3; do bash retropie_packages.sh usbromservice && break || { [ "${i}" -lt 3 ] && echo "usbromservice attempt ${i} failed, retrying..." && sleep 10; }; done
 
 # RetroArch — packages-retroarch-armhf.tar.gz only contains configs (3.3KB),
