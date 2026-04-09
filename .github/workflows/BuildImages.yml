@@ -25,7 +25,7 @@ on:
 
 # Allow to stop obsolete workflows
 concurrency:
-  group: ci-buildtrain-${{ github.ref }}-1
+  group: ci-buildtrain-${{ github.head_ref || github.ref }}-1
   cancel-in-progress: true
 
 jobs:
