@@ -125,6 +125,15 @@ runs:
       shell: bash
       run: sudo modprobe loop && cd repository/src && sudo bash -x ./build_dist
 
+    - name: Filesystem check (e2fsck)
+      shell: bash
+      run: |
+        IMG=$(sudo find repository/src/workspace -name "*.img" | head -1)
+        LOOP=$(sudo losetup -fP --show "$IMG")
+        sleep 1
+        sudo e2fsck -fy "${LOOP}p2" || true
+        sudo losetup -d "$LOOP"
+
     - name: Cleanup workspace & fix permissions
       if: success()
       shell: bash
