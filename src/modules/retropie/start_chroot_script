@@ -169,6 +169,20 @@ for core_dir in /opt/retropie/libretrocores/lr-*/; do
 done
 echo_green "Registering installed emulators... [DONE]"
 
+# Register ports (non-libretro standalone engines)
+for port in openbor; do
+    if [ -d "/opt/retropie/ports/${port}" ] || [ -d "/opt/retropie/emulators/${port}" ]; then
+        echo_green "  → ${port} (port)"
+        bash retropie_packages.sh "${port}" configure || true
+    fi
+done
+
+# Register standalone ports (not libretro cores — separate configure step)
+if [ -f "/opt/retropie/ports/openbor/OpenBOR" ]; then
+    echo_green "Registering OpenBOR port..."
+    bash retropie_packages.sh openbor configure || true
+fi
+
 # Safety net: fix any wrong user paths in es_systems.cfg and emulators.cfg
 # (CI runner user, root, or literal ~user that wasn't expanded)
 ES_CFG="/etc/emulationstation/es_systems.cfg"
