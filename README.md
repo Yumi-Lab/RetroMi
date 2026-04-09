@@ -84,14 +84,14 @@ sha256sum -c *.sha256
 
 ### 3. Flash
 
-> **Important:** Balena Etcher is NOT compatible with AllWinner H3 images. Use `dd` instead.
+Use [Balena Etcher](https://etcher.balena.io/), [Raspberry Pi Imager](https://www.raspberrypi.com/software/), or `dd`:
 
 ```bash
 # Linux/macOS
 sudo dd if=RetroMi-*.img of=/dev/sdX bs=4M status=progress
 ```
 
-**Windows** — Use [Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/) or [Rufus](https://rufus.ie/) (DD mode).
+**Windows** — Use [Balena Etcher](https://etcher.balena.io/), [Win32 Disk Imager](https://sourceforge.net/projects/win32diskimager/), or [Rufus](https://rufus.ie/).
 
 ### 4. Boot
 

@@ -8,10 +8,12 @@
 # Triggered by: boot (systemd), hotplug (udev), game launch (runcommand)
 
 RETROARCH_CFG="/opt/retropie/configs/all/retroarch.cfg"
+PROFILES_DIR="/opt/retropie/configs/all/retroarch-joypads"
 ES_INPUTS=("/home/pi/.emulationstation/es_input.cfg" "/opt/retropie/configs/all/emulationstation/es_input.cfg")
 LOG="/tmp/retromi-pad-config.log"
+touch "$LOG" 2>/dev/null && chmod 666 "$LOG" 2>/dev/null || true
 
-log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG"; }
+log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG" 2>/dev/null || true; }
 
 find_es_input() {
     for f in "${ES_INPUTS[@]}"; do
@@ -126,6 +128,54 @@ write_player_bindings() {
     fi
 }
 
+# VID:PID profile lookup — returns profile path if exists
+find_vidpid_profile() {
+    local vid_dec="$1" pid_dec="$2"
+    local vid_hex pid_hex
+    vid_hex=$(printf "%04x" "$vid_dec")
+    pid_hex=$(printf "%04x" "$pid_dec")
+    local f="${PROFILES_DIR}/${vid_hex}-${pid_hex}.cfg"
+    [ -f "$f" ] && echo "$f"
+}
+
+# Write player bindings from a VID:PID profile file
+write_player_from_profile() {
+    local player="$1" js_index="$2" profile="$3"
+    local p="input_player${player}"
+    local hotkey_btn=""
+
+    echo "${p}_joypad_index = \"${js_index}\""
+
+    while IFS='=' read -r key val; do
+        [[ "$key" =~ ^# ]] && continue
+        key="${key%"${key##*[! ]}"}"  # trim trailing spaces
+        val="${val%"${val##*[! ]}"}"  # trim trailing spaces
+        [ -z "$key" ] && continue
+        case "$key" in
+            analog_dpad_mode) echo "${p}_analog_dpad_mode = \"${val}\"" ;;
+            b_btn)     echo "${p}_b_btn = \"${val}\"" ;;
+            a_btn)     echo "${p}_a_btn = \"${val}\"" ;;
+            x_btn)     echo "${p}_x_btn = \"${val}\"" ;;
+            y_btn)     echo "${p}_y_btn = \"${val}\"" ;;
+            l_btn)     echo "${p}_l_btn = \"${val}\"" ;;
+            r_btn)     echo "${p}_r_btn = \"${val}\"" ;;
+            l2_btn)    echo "${p}_l2_btn = \"${val}\"" ;;
+            r2_btn)    echo "${p}_r2_btn = \"${val}\"" ;;
+            l3_btn)    echo "${p}_l3_btn = \"${val}\"" ;;
+            r3_btn)    echo "${p}_r3_btn = \"${val}\"" ;;
+            start_btn) echo "${p}_start_btn = \"${val}\"" ;;
+            select_btn) echo "${p}_select_btn = \"${val}\"" ;;
+            hotkey_btn) hotkey_btn="$val" ;;
+            up_axis)    echo "${p}_up_axis = \"${val}\"" ;;
+            down_axis)  echo "${p}_down_axis = \"${val}\"" ;;
+            left_axis)  echo "${p}_left_axis = \"${val}\"" ;;
+            right_axis) echo "${p}_right_axis = \"${val}\"" ;;
+        esac
+    done < "$profile"
+
+    [ "$player" = "1" ] && [ -n "$hotkey_btn" ] && echo "input_enable_hotkey_btn = \"${hotkey_btn}\""
+}
+
 # Generic 10-button mapping
 write_generic() {
     local player="$1" js_index="$2"
@@ -187,13 +237,20 @@ configure_all() {
 
                     log "Player ${player}: '${name}' js${js_index} VID:${vid_dec} PID:${pid_dec}"
 
-                    guid=$(find_best_es_guid "$vid_dec" "$pid_dec" "$es_file" 2>/dev/null)
-                    if [ -n "$guid" ]; then
-                        log "  → ES GUID=${guid}"
-                        bindings+=$'\n'"$(write_player_bindings "$player" "$js_index" "$guid" "$es_file")"
+                    local profile
+                    profile=$(find_vidpid_profile "$vid_dec" "$pid_dec")
+                    if [ -n "$profile" ]; then
+                        log "  → profile $(basename "$profile")"
+                        bindings+=$'\n'"$(write_player_from_profile "$player" "$js_index" "$profile")"
                     else
-                        log "  → generic"
-                        bindings+=$'\n'"$(write_generic "$player" "$js_index")"
+                        guid=$(find_best_es_guid "$vid_dec" "$pid_dec" "$es_file" 2>/dev/null)
+                        if [ -n "$guid" ]; then
+                            log "  → ES GUID=${guid}"
+                            bindings+=$'\n'"$(write_player_bindings "$player" "$js_index" "$guid" "$es_file")"
+                        else
+                            log "  → generic"
+                            bindings+=$'\n'"$(write_generic "$player" "$js_index")"
+                        fi
                     fi
                     player=$((player+1))
                 fi

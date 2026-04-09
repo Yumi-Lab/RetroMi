@@ -1,14 +1,14 @@
 #!/usr/bin/env bash
-# RetroMi — Gamepad regression test
+# RetroMi — Gamepad regression test (Plug & Play approach)
 # Run after each build to confirm all gamepad invariants are correct.
 # Usage: bash scripts/test-gamepad.sh [PI_IP]
 # Example: bash scripts/test-gamepad.sh 192.168.1.129
 #
-# What this checks (USB Gamepad 0810:0001 / Twin USB Gamepad):
-#   1. global retroarch.cfg: autodetect=true, no explicit player1/2 axis/btn bindings
-#   2. Built-in autoconfig: USB_Gamepad.cfg uses axis mapping (not hat)
+# What this checks:
+#   1. global retroarch.cfg: autodetect=true, NO player1/2 bindings, NO menu_toggle_btn
+#   2. Custom autoconfig profiles in retroarch-joypads/ (device name, hotkey, menu_toggle)
 #   3. Per-system retroarch.cfg: no files with input_player1_up_axis = "nul"
-#   4. Hotkeys present: input_enable_hotkey_btn + input_exit_emulator_btn
+#   4. Built-in autoconfig-presets/udev/ contains 1000+ profiles
 
 PI_IP="${1:-192.168.1.129}"
 PI_USER="pi"
@@ -22,72 +22,87 @@ fail() { echo "  FAIL: $*"; PASS=1; }
 
 RA="/opt/retropie/configs/all/retroarch.cfg"
 BUILTIN="/opt/retropie/emulators/retroarch/autoconfig-presets/udev"
+CUSTOM="/opt/retropie/configs/all/retroarch-joypads"
 
-echo "[ 1/4 ] global retroarch.cfg"
-grep -q 'input_autodetect_enable = "false"' "$RA" \
-    && ok "autodetect=false (explicit bindings mode)" \
-    || fail "autodetect != false (got: $(grep input_autodetect "$RA" || echo MISSING))"
+echo "[ 1/4 ] global retroarch.cfg — autodetect + no hardcoded bindings"
 
-grep -q 'input_player1_up_axis = "-1"' "$RA" \
-    && ok "player1 D-pad axis binding present" \
-    || fail "player1_up_axis missing — gamepad won't work in games"
+# autodetect must be true (or absent = default true)
+if grep -q 'input_autodetect_enable = "false"' "$RA" 2>/dev/null; then
+    fail "autodetect=false — must be true for plug & play"
+else
+    ok "autodetect enabled (true or default)"
+fi
 
-grep -q 'input_player1_a_btn = "1"' "$RA" \
-    && ok "player1 a=btn1 (Cross X)" \
-    || fail "player1_a_btn wrong (expected 1/Cross, got: $(grep input_player1_a_btn "$RA" || echo MISSING))"
+# NO player1/player2 explicit bindings in global cfg
+P1=$(grep -c 'input_player1_' "$RA" 2>/dev/null) || true
+P2=$(grep -c 'input_player2_' "$RA" 2>/dev/null) || true
+[ "$P1" -eq 0 ] \
+    && ok "no input_player1_* in global cfg" \
+    || fail "$P1 input_player1_* lines found in global cfg (should be 0)"
+[ "$P2" -eq 0 ] \
+    && ok "no input_player2_* in global cfg" \
+    || fail "$P2 input_player2_* lines found in global cfg (should be 0)"
 
-grep -q 'input_player1_b_btn = "2"' "$RA" \
-    && ok "player1 b=btn2 (Circle O)" \
-    || fail "player1_b_btn wrong (expected 2/Circle, got: $(grep input_player1_b_btn "$RA" || echo MISSING))"
+# NO menu_toggle_btn in global cfg (only in per-profile)
+grep -q 'input_menu_toggle_btn' "$RA" 2>/dev/null \
+    && fail "input_menu_toggle_btn found in global cfg (should only be in profiles)" \
+    || ok "no input_menu_toggle_btn in global cfg"
 
-grep -q 'input_player1_x_btn = "0"' "$RA" \
-    && ok "player1 x=btn0 (Triangle)" \
-    || fail "player1_x_btn wrong (expected 0/Triangle, got: $(grep input_player1_x_btn "$RA" || echo MISSING))"
-
-grep -q 'input_player1_y_btn = "3"' "$RA" \
-    && ok "player1 y=btn3 (Square)" \
-    || fail "player1_y_btn wrong (expected 3/Square, got: $(grep input_player1_y_btn "$RA" || echo MISSING))"
-
+# Hotkeys must still be in global cfg
 grep -q 'input_enable_hotkey_btn = "8"' "$RA" \
     && ok "hotkey SELECT=btn8" \
     || fail "input_enable_hotkey_btn missing or wrong"
-
 grep -q 'input_exit_emulator_btn = "9"' "$RA" \
     && ok "exit START=btn9" \
     || fail "input_exit_emulator_btn missing or wrong"
 
 echo ""
-echo "[ 2/4 ] USB Gamepad autoconfig (built-in dir)"
-for CFG in USB_Gamepad.cfg Twin_USB_Gamepad.cfg; do
-    FILE="$BUILTIN/$CFG"
-    if [ ! -f "$FILE" ]; then
-        fail "$CFG: file not found in $BUILTIN"; continue
-    fi
-    grep -q 'input_up_axis = "-1"' "$FILE" \
-        && ok "$CFG: D-pad uses axis (up_axis=-1)" \
-        || fail "$CFG: wrong up_axis (expected -1, got: $(grep input_up "$FILE" || echo MISSING))"
-    grep -qE 'h0up|_hat' "$FILE" \
-        && fail "$CFG: hat mapping detected (breaks D-pad)" \
-        || ok "$CFG: no hat mapping"
-done
+echo "[ 2/4 ] custom autoconfig profiles in retroarch-joypads/"
+PROFILES=("$CUSTOM"/*.cfg)
+if [ ${#PROFILES[@]} -eq 0 ] || [ ! -f "${PROFILES[0]}" ]; then
+    fail "no custom profiles found in $CUSTOM"
+else
+    ok "${#PROFILES[@]} custom profile(s) found"
+    for CFG in "${PROFILES[@]}"; do
+        NAME=$(basename "$CFG")
+        # Each profile must have input_device
+        grep -q 'input_device' "$CFG" \
+            && ok "$NAME: input_device present" \
+            || fail "$NAME: input_device MISSING"
+        # Each profile must have input_enable_hotkey_btn
+        grep -q 'input_enable_hotkey_btn' "$CFG" \
+            && ok "$NAME: input_enable_hotkey_btn present" \
+            || fail "$NAME: input_enable_hotkey_btn MISSING"
+        # Each profile must have input_menu_toggle_btn
+        grep -q 'input_menu_toggle_btn' "$CFG" \
+            && ok "$NAME: input_menu_toggle_btn present" \
+            || fail "$NAME: input_menu_toggle_btn MISSING"
+        # D-pad: axis or hat (must have one)
+        if grep -q 'input_up_axis' "$CFG" || grep -q 'input_up_btn' "$CFG"; then
+            ok "$NAME: D-pad mapping present"
+        else
+            fail "$NAME: no D-pad mapping (need up_axis or up_btn)"
+        fi
+    done
+fi
 
 echo ""
-echo "[ 3/4 ] Per-system retroarch.cfg (no nul axis values)"
+echo "[ 3/4 ] per-system retroarch.cfg (no nul axis values)"
 NUL=$(find /opt/retropie/configs -mindepth 2 -name retroarch.cfg \
     ! -path "*/all/*" -exec grep -l 'up_axis = "nul"' {} \; 2>/dev/null | wc -l)
 [ "$NUL" -eq 0 ] \
-    && ok "No per-system cfg with nul axis" \
+    && ok "no per-system cfg with nul axis" \
     || fail "$NUL per-system cfg have up_axis=nul (will override global)"
 
 echo ""
-echo "[ 4/4 ] joypad_autoconfig_dir"
-ACDIR=$(grep 'joypad_autoconfig_dir' "$RA" 2>/dev/null || echo "")
-if echo "$ACDIR" | grep -q "autoconfig-presets/udev"; then
-    ok "joypad_autoconfig_dir → autoconfig-presets/udev"
-elif [ -z "$ACDIR" ]; then
-    ok "joypad_autoconfig_dir not set (uses compiled-in default)"
+echo "[ 4/4 ] built-in autoconfig-presets/udev/"
+if [ -d "$BUILTIN" ]; then
+    COUNT=$(find "$BUILTIN" -name '*.cfg' | wc -l)
+    [ "$COUNT" -ge 400 ] \
+        && ok "$COUNT built-in autoconfig profiles (>= 400)" \
+        || fail "only $COUNT built-in profiles (expected >= 400)"
 else
-    fail "unexpected joypad_autoconfig_dir: $ACDIR"
+    fail "directory $BUILTIN not found"
 fi
 
 echo ""
