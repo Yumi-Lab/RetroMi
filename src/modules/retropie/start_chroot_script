@@ -23,13 +23,16 @@ mkdir -p /opt/retropie
 # shellcheck disable=SC2086
 for group in ${RETROPIE_PACKAGE_GROUPS}; do
     echo_green "Downloading ${group} packages..."
-    wget --tries=5 --waitretry=15 --timeout=60 --retry-on-http-error=502,503,504 --show-progress \
+    if wget --tries=3 --waitretry=15 --timeout=60 --retry-on-http-error=502,503,504 --show-progress \
         -O "/tmp/packages-${group}-armhf.tar.gz" \
-        "${RETROPIE_PACKAGES_URL}/packages-${group}-armhf.tar.gz"
-
-    echo_green "Extracting ${group} packages..."
-    tar -xzf "/tmp/packages-${group}-armhf.tar.gz" -C /
-    rm -f "/tmp/packages-${group}-armhf.tar.gz"
+        "${RETROPIE_PACKAGES_URL}/packages-${group}-armhf.tar.gz"; then
+        echo_green "Extracting ${group} packages..."
+        tar -xzf "/tmp/packages-${group}-armhf.tar.gz" -C /
+        rm -f "/tmp/packages-${group}-armhf.tar.gz"
+    else
+        echo_green "WARNING: packages-${group}-armhf.tar.gz not available in current release — skipping"
+        rm -f "/tmp/packages-${group}-armhf.tar.gz"
+    fi
 done
 
 # Create all ROM directories so the structure is ready for USB auto-mount
