@@ -249,7 +249,7 @@ if [ -f "${ES_CFG}" ] && ! grep -q "retropiemenu" "${ES_CFG}"; then
   </system>" "${ES_CFG}"
 fi
 
-bash autostartES.sh
+bash retropie_packages.sh autostart
 popd &>/dev/null || exit 1
 
 # Prevent EmulationStation from launching during firstboot wizard
