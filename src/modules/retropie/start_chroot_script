@@ -173,6 +173,7 @@ done
 echo_green "Registering installed emulators... [DONE]"
 
 # Register ports (non-libretro standalone engines)
+# shellcheck disable=SC2043
 for port in openbor; do
     if [ -d "/opt/retropie/ports/${port}" ] || [ -d "/opt/retropie/emulators/${port}" ]; then
         echo_green "  → ${port} (port)"
