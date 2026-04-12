@@ -131,7 +131,12 @@ rm -f /usr/local/bin/dpkg-buildpackage
 # Required by all lr-* cores. __platform prevents -march=native on QEMU x86 host.
 # Use armv7-neon-hf (no mali suffix) — mali-fbdev is not a Debian package on Armbian H3.
 # Mali GPU support comes from the Lima/mesa driver in the base image.
+# CFLAGS/CXXFLAGS are required: retroarch.sh uses autotools which does NOT inherit
+# __platform CPU flags from system.sh — without these the QEMU chroot generates
+# ARMv8 binaries (Tag_CPU_arch: v8) that SIGILL on H3 Cortex-A7.
 echo_green "Building RetroArch from source (required — not in pre-compiled packages)..."
+CFLAGS="-march=armv7-a -mfpu=neon-vfpv4 -mfloat-abi=hard" \
+CXXFLAGS="-march=armv7-a -mfpu=neon-vfpv4 -mfloat-abi=hard" \
 __platform="armv7-neon-hf" bash retropie_packages.sh retroarch
 
 # RetroPie supplementary packages — menu items and utilities
