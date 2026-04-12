@@ -250,8 +250,8 @@ if [ -f "${ES_CFG}" ] && ! grep -q "retropiemenu" "${ES_CFG}"; then
   </system>" "${ES_CFG}"
 fi
 
-# Configure EmulationStation auto-start (replaces autostartES.sh from YUMI-RETROPIE)
-# Cannot use retropie_packages.sh autostart — it's a config/gui module, not an installer
+# Configure EmulationStation auto-start
+# retropie_packages.sh autostart is a config/gui module — inline the logic directly
 AUTOSTART_SCRIPT="${configdir:-/opt/retropie/configs}/all/autostart.sh"
 mkdir -p "$(dirname "${AUTOSTART_SCRIPT}")"
 
