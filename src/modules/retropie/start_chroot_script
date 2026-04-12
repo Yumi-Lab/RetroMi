@@ -269,7 +269,6 @@ rm -f /etc/profile.d/10-emulationstation.sh
 # Set EmulationStation as default autostart
 touch "${AUTOSTART_SCRIPT}"
 sed -i '/#auto/d' "${AUTOSTART_SCRIPT}"
-sed -i '$a\' "${AUTOSTART_SCRIPT}"
 echo "emulationstation #auto" >> "${AUTOSTART_SCRIPT}"
 chown "${BASE_USER}:${BASE_USER}" "${AUTOSTART_SCRIPT}"
 
