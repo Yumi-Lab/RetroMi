@@ -250,7 +250,39 @@ if [ -f "${ES_CFG}" ] && ! grep -q "retropiemenu" "${ES_CFG}"; then
   </system>" "${ES_CFG}"
 fi
 
-bash retropie_packages.sh autostart
+# Configure EmulationStation auto-start (replaces autostartES.sh from YUMI-RETROPIE)
+# Cannot use retropie_packages.sh autostart — it's a config/gui module, not an installer
+AUTOSTART_SCRIPT="${configdir:-/opt/retropie/configs}/all/autostart.sh"
+mkdir -p "$(dirname "${AUTOSTART_SCRIPT}")"
+
+# Profile script: launch autostart.sh on tty1 login
+cat > /etc/profile.d/10-retropie.sh << RETROPIE_PROFILE
+# launch our autostart apps (if we are on the correct tty and not in X)
+if [ "\$(tty)" = "/dev/tty1" ] && [ -z "\${DISPLAY}" ] && [ "\${USER}" = "${BASE_USER}" ]; then
+    bash "${AUTOSTART_SCRIPT}"
+fi
+RETROPIE_PROFILE
+
+# Remove legacy ES profile script
+rm -f /etc/profile.d/10-emulationstation.sh
+
+# Set EmulationStation as default autostart
+touch "${AUTOSTART_SCRIPT}"
+sed -i '/#auto/d' "${AUTOSTART_SCRIPT}"
+sed -i '$a\' "${AUTOSTART_SCRIPT}"
+echo "emulationstation #auto" >> "${AUTOSTART_SCRIPT}"
+chown "${BASE_USER}:${BASE_USER}" "${AUTOSTART_SCRIPT}"
+
+# Autologin on tty1 via systemd getty override
+mkdir -p /etc/systemd/system/getty@tty1.service.d
+cat > /etc/systemd/system/getty@tty1.service.d/autologin.conf << GETTY_CONF
+[Service]
+ExecStart=
+ExecStart=-/sbin/agetty --autologin ${BASE_USER} --noclear %I \$TERM
+GETTY_CONF
+
+echo_green "EmulationStation auto-start configured."
+
 popd &>/dev/null || exit 1
 
 # Prevent EmulationStation from launching during firstboot wizard
