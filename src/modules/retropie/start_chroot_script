@@ -74,7 +74,7 @@ else
     rm -f /tmp/ports-data.tar.gz
 fi
 
-# Clone YUMI-RETROPIE for post-install configuration only (no compilation)
+# Clone RetroPie-Setup fork for post-install configuration only (no compilation)
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
 popd &>/dev/null || exit 1
