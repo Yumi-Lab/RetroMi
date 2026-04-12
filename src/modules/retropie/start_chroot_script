@@ -74,6 +74,27 @@ else
     rm -f /tmp/ports-data.tar.gz
 fi
 
+# Homebrew ROMs — 288 legally free ROMs across 11 systems
+HOMEBREW_URL="https://github.com/Yumi-Lab/RetroMi-games/releases/latest/download/homebrew-roms.zip"
+echo_green "Downloading homebrew ROMs (NES, SNES, Megadrive, SMS, GBA, Atari, ZX Spectrum, Arcade...)..."
+curl -fSL --retry 5 --retry-delay 10 --connect-timeout 30 \
+    -o /tmp/homebrew-roms.zip "${HOMEBREW_URL}" || true
+if [ -f /tmp/homebrew-roms.zip ] && [ "$(stat -c%s /tmp/homebrew-roms.zip 2>/dev/null)" -gt 10000 ]; then
+    apt-get install -y unzip -qq
+    unzip -q -o /tmp/homebrew-roms.zip -d /tmp/homebrew-roms
+    for dir in /tmp/homebrew-roms/*/; do
+        system=$(basename "${dir}")
+        target="/home/${BASE_USER}/RetroPie/roms/${system}"
+        [ -d "${target}" ] && cp -r "${dir}"* "${target}/" 2>/dev/null || true
+    done
+    rm -rf /tmp/homebrew-roms /tmp/homebrew-roms.zip
+    chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/RetroPie/roms"
+    echo_green "Homebrew ROMs installed."
+else
+    echo_green "WARNING: homebrew-roms.zip download failed — skipping"
+    rm -f /tmp/homebrew-roms.zip
+fi
+
 # Clone RetroPie-Setup fork for post-install configuration only (no compilation)
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
