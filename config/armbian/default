@@ -4,9 +4,6 @@
 # Declare Variables before exporting.
 # See https://www.shellcheck.net/wiki/SC2155
 
-# Download Base Url
-DOWNLOAD_BASE_URL="https://github.com/Yumi-Lab/YUMI-RETROPIE/releases/latest/download"
-
 # Base User
 BASE_ADD_USER="yes"
 BASE_USER="pi"
@@ -28,7 +25,6 @@ BASE_RELEASE_COMPRESS=no
 MODULES="base,pkgupgrade,udev_fix,armbian(armbian_net,yumios,plymouth,filebroswer,hdmi,emulatiostation,usb-mount)"
 
 # export Variables
-export DOWNLOAD_BASE_URL
 export BASE_ADD_USER
 export BASE_USER
 export BASE_USER_PASSWORD
