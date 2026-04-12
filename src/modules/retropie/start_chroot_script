@@ -94,8 +94,16 @@ export __user="${BASE_USER}"
 pushd "/home/${BASE_USER}/Retropie-Setup" &>/dev/null || exit 1
 bash retropie_packages.sh runcommand
 bash retropie_packages.sh bluetooth depends
+# usbromservice calls dpkg-buildpackage to compile usbmount — no GPG key in CI.
+# Wrap dpkg-buildpackage to always skip signing.
+cat > /usr/local/bin/dpkg-buildpackage << 'DPKG_WRAPPER'
+#!/bin/bash
+exec /usr/bin/dpkg-buildpackage --no-sign "$@"
+DPKG_WRAPPER
+chmod +x /usr/local/bin/dpkg-buildpackage
 # shellcheck disable=SC2015
 for i in 1 2 3; do bash retropie_packages.sh usbromservice && break || { [ "${i}" -lt 3 ] && echo "usbromservice attempt ${i} failed, retrying..." && sleep 10; }; done
+rm -f /usr/local/bin/dpkg-buildpackage
 
 # RetroArch — packages-retroarch-armhf.tar.gz only contains configs (3.3KB),
 # the binary is missing from RetroMi-packages. Build it inline from source.
