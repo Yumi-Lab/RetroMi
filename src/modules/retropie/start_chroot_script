@@ -105,25 +105,13 @@ chmod +x /usr/local/bin/dpkg-buildpackage
 for i in 1 2 3; do bash retropie_packages.sh usbromservice && break || { [ "${i}" -lt 3 ] && echo "usbromservice attempt ${i} failed, retrying..." && sleep 10; }; done
 rm -f /usr/local/bin/dpkg-buildpackage
 
-# mali-fbdev is not a Debian package on Armbian H3 — Mali libs are in the base image.
-# RetroPie-Setup's retroarch.sh lists it as a dependency (upstream upstream, Raspberry Pi).
-# Install a dummy package so getDepends() doesn't abort the build.
-mkdir -p /tmp/mali-fbdev-dummy/DEBIAN
-cat > /tmp/mali-fbdev-dummy/DEBIAN/control << 'MALI_CTRL'
-Package: mali-fbdev
-Version: 1.0
-Architecture: all
-Maintainer: RetroMi Build
-Description: Dummy mali-fbdev — Mali libs provided by Armbian base image
-MALI_CTRL
-dpkg-deb --build /tmp/mali-fbdev-dummy /tmp/mali-fbdev_1.0_all.deb
-dpkg -i /tmp/mali-fbdev_1.0_all.deb
-
 # RetroArch — packages-retroarch-armhf.tar.gz only contains configs (3.3KB),
 # the binary is missing from RetroMi-packages. Build it inline from source.
 # Required by all lr-* cores. __platform prevents -march=native on QEMU x86 host.
+# Use armv7-neon-hf (no mali suffix) — mali-fbdev is not a Debian package on Armbian H3.
+# Mali GPU support comes from the Lima/mesa driver in the base image.
 echo_green "Building RetroArch from source (required — not in pre-compiled packages)..."
-bash retropie_packages.sh retroarch
+__platform="armv7-neon-hf" bash retropie_packages.sh retroarch
 
 # RetroPie supplementary packages — menu items and utilities
 echo_green "Installing RetroPie supplementary packages..."
