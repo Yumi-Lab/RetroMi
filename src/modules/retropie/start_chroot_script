@@ -119,8 +119,9 @@ Description: Dummy mali-fbdev for Armbian/Lima builds
  Mali framebuffer driver is not used on Lima/Armbian (EGL/KMS instead).
  This dummy package satisfies build-time dependency checks in RetroPie-Setup.
 EQUIVS_CTRL
-cd /tmp && equivs-build mali-fbdev-dummy.ctrl -o /tmp/mali-fbdev_1.0-retromi_armhf.deb
-dpkg -i /tmp/mali-fbdev_1.0-retromi_armhf.deb
+mkdir -p /tmp/mali-fbdev-build && cp /tmp/mali-fbdev-dummy.ctrl /tmp/mali-fbdev-build/
+cd /tmp/mali-fbdev-build && equivs-build mali-fbdev-dummy.ctrl
+dpkg -i /tmp/mali-fbdev-build/mali-fbdev_1.0-retromi_all.deb
 cd /
 
 # Patch retroarch.sh only: remove --enable-mali_fbdev from configure params.
