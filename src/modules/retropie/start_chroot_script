@@ -128,16 +128,21 @@ rm -f /usr/local/bin/dpkg-buildpackage
 
 # RetroArch — packages-retroarch-armhf.tar.gz only contains configs (3.3KB),
 # the binary is missing from RetroMi-packages. Build it inline from source.
-# Required by all lr-* cores. __platform prevents -march=native on QEMU x86 host.
-# Use armv7-neon-hf (no mali suffix) — mali-fbdev is not a Debian package on Armbian H3.
-# Mali GPU support comes from the Lima/mesa driver in the base image.
-# CFLAGS/CXXFLAGS are required: retroarch.sh uses autotools which does NOT inherit
-# __platform CPU flags from system.sh — without these the QEMU chroot generates
-# ARMv8 binaries (Tag_CPU_arch: v8) that SIGILL on H3 Cortex-A7.
+# Required by all lr-* cores.
+#
+# Platform: keep armv7-mali (set above) — gives correct cortex-a7 + NEON flags
+# and generates a proper ARMv7 binary. armv7-neon-hf generates ARMv8 in QEMU (SIGILL).
+#
+# mali-fbdev: not available as a Debian package on Armbian H3. On Lima/Armbian,
+# video goes through EGL/KMS — mali_fbdev is not needed. YUMI-RETROPIE (the former
+# fork) had these two lines commented out. We replicate that via sed on the local
+# chroot copy only — Yumi-Lab/RetroPie-Setup source stays vanilla.
 echo_green "Building RetroArch from source (required — not in pre-compiled packages)..."
-CFLAGS="-march=armv7-a -mfpu=neon-vfpv4 -mfloat-abi=hard" \
-CXXFLAGS="-march=armv7-a -mfpu=neon-vfpv4 -mfloat-abi=hard" \
-__platform="armv7-neon-hf" bash retropie_packages.sh retroarch
+sed -i \
+    -e 's/isPlatform "mali" && depends+=(mali-fbdev)/: # mali-fbdev not available on Armbian H3 (Lima\/EGL replaces it)/' \
+    -e 's/isPlatform "mali" && params+=.*--enable-mali_fbdev.*/: # mali_fbdev not needed with Lima\/KMS on Armbian H3/' \
+    scriptmodules/emulators/retroarch.sh
+bash retropie_packages.sh retroarch
 
 # RetroPie supplementary packages — menu items and utilities
 echo_green "Installing RetroPie supplementary packages..."
