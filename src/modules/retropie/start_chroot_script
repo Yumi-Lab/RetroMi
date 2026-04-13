@@ -100,14 +100,34 @@ pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
 popd &>/dev/null || exit 1
 
-# Patch retroarch.sh in the local Retropie-Setup copy (chroot only — upstream stays vanilla).
-# mali-fbdev is a legacy proprietary framebuffer driver, not available on Armbian/Lima.
-# On Lima/Armbian, video goes through EGL/KMS — mali-fbdev is not needed.
-# We remove only the two mali lines from the local copy so the package builds cleanly.
+# Install a dummy mali-fbdev package to satisfy dependency checks across ALL RetroPie
+# scriptmodules (retroarch, sdl2, etc.). mali-fbdev is a legacy proprietary Mali
+# framebuffer driver — not available on Armbian/Lima which uses EGL/KMS instead.
+# The dummy package has no files and no effect, it just satisfies the apt dependency.
+# --enable-mali_fbdev is NOT passed to configure because platform_armv7-mali() does
+# not add it when mali-fbdev is missing — and we never pass it explicitly.
+apt-get install -y equivs -qq
+cat > /tmp/mali-fbdev-dummy.ctrl << 'EQUIVS_CTRL'
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+
+Package: mali-fbdev
+Version: 1.0-retromi
+Maintainer: RetroMi <build@yumi-lab.com>
+Description: Dummy mali-fbdev for Armbian/Lima builds
+ Mali framebuffer driver is not used on Lima/Armbian (EGL/KMS instead).
+ This dummy package satisfies build-time dependency checks in RetroPie-Setup.
+EQUIVS_CTRL
+cd /tmp && equivs-build mali-fbdev-dummy.ctrl -o /tmp/mali-fbdev_1.0-retromi_armhf.deb
+dpkg -i /tmp/mali-fbdev_1.0-retromi_armhf.deb
+cd /
+
+# Patch retroarch.sh only: remove --enable-mali_fbdev from configure params.
+# The dummy package satisfies the dependency check, but mali_fbdev configure flag
+# would cause RetroArch to try using the Mali framebuffer at runtime — which doesn't
+# exist on Lima/Armbian (EGL/KMS). Remove only the params line, not the depends line.
 RETROARCH_SH="/home/${BASE_USER}/Retropie-Setup/scriptmodules/emulators/retroarch.sh"
-# depends: isPlatform "mali" && depends+=(mali-fbdev)
-sed -i '/isPlatform "mali" && depends+=(mali-fbdev)/d' "${RETROARCH_SH}"
-# build params: isPlatform "mali" && params+=(--enable-mali_fbdev)
 sed -i '/isPlatform "mali" && params+=(--enable-mali_fbdev)/d' "${RETROARCH_SH}"
 
 # Force platform detection for QEMU builds (prevents -march=native on x86 host)
