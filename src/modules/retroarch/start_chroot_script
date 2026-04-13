@@ -58,6 +58,11 @@ if [ -f "${GLOBAL_RA}" ]; then
     grep -q "^input_enable_hotkey_btn" "${GLOBAL_RA}" || echo 'input_enable_hotkey_btn = "8"' >> "${GLOBAL_RA}"
     grep -q "^input_exit_emulator_btn" "${GLOBAL_RA}" || echo 'input_exit_emulator_btn = "9"' >> "${GLOBAL_RA}"
 
+    # Disable GLSL shaders — stock shader fails to compile on Lima/Mesa GLES2
+    # (GL_OES_standard_derivatives unsupported + syntax error → RetroArch exits immediately)
+    sed -i 's/^video_shader_enable = "true"/video_shader_enable = "false"/' "${GLOBAL_RA}"
+    grep -q '^video_shader_enable' "${GLOBAL_RA}" || echo 'video_shader_enable = "false"' >> "${GLOBAL_RA}"
+
     echo_green "RetroArch gamepad plug & play configured (Batocera-style)."
 fi
 
