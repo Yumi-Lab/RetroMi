@@ -138,10 +138,7 @@ rm -f /usr/local/bin/dpkg-buildpackage
 # fork) had these two lines commented out. We replicate that via sed on the local
 # chroot copy only — Yumi-Lab/RetroPie-Setup source stays vanilla.
 echo_green "Building RetroArch from source (required — not in pre-compiled packages)..."
-sed -i \
-    -e 's/isPlatform "mali" && depends+=(mali-fbdev)/: # mali-fbdev not available on Armbian H3 (Lima\/EGL replaces it)/' \
-    -e 's/isPlatform "mali" && params+=.*--enable-mali_fbdev.*/: # mali_fbdev not needed with Lima\/KMS on Armbian H3/' \
-    scriptmodules/emulators/retroarch.sh
+sed -i 's/.*mali-fbdev.*/#&/' scriptmodules/emulators/retroarch.sh
 bash retropie_packages.sh retroarch
 
 # RetroPie supplementary packages — menu items and utilities
