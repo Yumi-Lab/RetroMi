@@ -19,9 +19,13 @@ install_cleanup_trap
 
 
 echo_green "install filebroswer..."
-curl -fsSL --retry 5 --retry-delay 10 --retry-on-http-error 502,503,504 \
-    "https://github.com/filebrowser/filebrowser/releases/latest/download/linux-armv7-filebrowser.tar.gz" \
-    -o /tmp/filebrowser.tar.gz
+for i in 1 2 3 4 5; do
+    curl -fsSL --retry 3 --retry-delay 5 \
+        "https://github.com/filebrowser/filebrowser/releases/latest/download/linux-armv7-filebrowser.tar.gz" \
+        -o /tmp/filebrowser.tar.gz && break
+    echo "filebrowser download attempt ${i} failed, retrying..."
+    sleep 10
+done
 tar -xzf /tmp/filebrowser.tar.gz -C /usr/local/bin filebrowser
 rm -f /tmp/filebrowser.tar.gz
 chmod +x /usr/local/bin/filebrowser
