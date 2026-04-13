@@ -100,28 +100,20 @@ pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
 popd &>/dev/null || exit 1
 
-# Inject platform_armv7_neon_hf into the local Retropie-Setup copy.
-# The Yumi-Lab fork only defines platform_armv7-mali (with mali flag) — no neon-hf variant.
-# We add it here (chroot copy only — upstream stays vanilla) so RetroArch can be built
-# with the correct flags for Lima/Armbian: ARMv7 + GLES + KMS, without mali-fbdev.
-#   - cpu_armv7() sets __default_cpu_flags="-march=armv7-a -mfpu=neon-vfpv4" → proper ARMv7 binary
-#   - gles → libgles2-mesa-dev dep + --enable-opengles configure flag
-#   - kms  → libgbm-dev dep + --enable-kms --enable-egl (Lima uses DRM/KMS)
-#   - NO mali → no mali-fbdev dep, no --enable-mali_fbdev (legacy fbdev, not available on Lima)
-cat >> "/home/${BASE_USER}/Retropie-Setup/scriptmodules/system.sh" << 'PLATFORM_INJECT'
-
-# RetroMi H3 (Lima/Armbian): ARMv7 + GLES + KMS, no mali-fbdev
-function platform_armv7_neon_hf() {
-    cpu_armv7
-    __platform_flags+=(gles kms)
-}
-PLATFORM_INJECT
+# Patch retroarch.sh in the local Retropie-Setup copy (chroot only — upstream stays vanilla).
+# mali-fbdev is a legacy proprietary framebuffer driver, not available on Armbian/Lima.
+# On Lima/Armbian, video goes through EGL/KMS — mali-fbdev is not needed.
+# We remove only the two mali lines from the local copy so the package builds cleanly.
+RETROARCH_SH="/home/${BASE_USER}/Retropie-Setup/scriptmodules/emulators/retroarch.sh"
+# depends: isPlatform "mali" && depends+=(mali-fbdev)
+sed -i '/isPlatform "mali" && depends+=(mali-fbdev)/d' "${RETROARCH_SH}"
+# build params: isPlatform "mali" && params+=(--enable-mali_fbdev)
+sed -i '/isPlatform "mali" && params+=(--enable-mali_fbdev)/d' "${RETROARCH_SH}"
 
 # Force platform detection for QEMU builds (prevents -march=native on x86 host)
 # Without this, RetroPie-Setup falls back to platform_native() in QEMU chroot,
 # which compiles with host CPU instructions → "Illegal instruction" on real H3
-# armv7-mali: has a platform function → cpu_armv7() → -march=armv7-a (proper ARMv7 binary)
-# Used for all packages except retroarch (which uses armv7-neon-hf, see below)
+# armv7-mali: platform_armv7-mali() exists → cpu_armv7() → -march=armv7-a (proper ARMv7)
 export __platform="armv7-mali"
 
 # Force RetroPie-Setup to use the target user (not the CI runner or root user)
@@ -149,13 +141,10 @@ rm -f /usr/local/bin/dpkg-buildpackage
 # the binary is missing from RetroMi-packages. Build it inline from source.
 # Required by all lr-* cores.
 #
-# Uses platform_armv7_neon_hf (injected above into system.sh):
-#   - cpu_armv7() → -march=armv7-a → ARMv7 binary (no SIGILL on real H3)
-#   - gles + kms → correct deps and configure flags for Lima/DRM
-#   - NO mali → no mali-fbdev dep, no --enable-mali_fbdev
-# The inline __platform assignment overrides the exported armv7-mali only for this call.
+# Platform armv7-mali: platform_armv7-mali() → cpu_armv7() → -march=armv7-a → proper ARMv7 binary.
+# mali-fbdev lines removed above from the local retroarch.sh copy → no missing package dep.
 echo_green "Building RetroArch from source (required — not in pre-compiled packages)..."
-__platform="armv7-neon-hf" bash retropie_packages.sh retroarch
+bash retropie_packages.sh retroarch
 
 # RetroPie supplementary packages — menu items and utilities
 echo_green "Installing RetroPie supplementary packages..."
