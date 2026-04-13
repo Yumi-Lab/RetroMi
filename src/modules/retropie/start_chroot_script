@@ -124,12 +124,18 @@ cd /tmp/mali-fbdev-build && equivs-build mali-fbdev-dummy.ctrl
 dpkg -i /tmp/mali-fbdev-build/mali-fbdev_1.0-retromi_all.deb
 cd /
 
-# Patch retroarch.sh only: remove --enable-mali_fbdev from configure params.
-# The dummy package satisfies the dependency check, but mali_fbdev configure flag
-# would cause RetroArch to try using the Mali framebuffer at runtime — which doesn't
-# exist on Lima/Armbian (EGL/KMS). Remove only the params line, not the depends line.
+# Patch mali configure flags from local scriptmodules (chroot copy only — upstream vanilla).
+# The dummy mali-fbdev package satisfies dep checks, but mali configure flags would make
+# SDL2 and RetroArch use the Mali fbdev backend at runtime → black screen on Lima/Armbian.
+# Lima/Armbian uses EGL/KMS — not the legacy Mali framebuffer driver.
+#
+# retroarch.sh: remove --enable-mali_fbdev
 RETROARCH_SH="/home/${BASE_USER}/Retropie-Setup/scriptmodules/emulators/retroarch.sh"
 sed -i '/isPlatform "mali" && params+=(--enable-mali_fbdev)/d' "${RETROARCH_SH}"
+# sdl2.sh: remove --enable-video-mali --disable-video-opengl
+# Without this, SDL2 builds with mali fbdev video backend → ES black screen
+SDL2_SH="/home/${BASE_USER}/Retropie-Setup/scriptmodules/supplementary/sdl2.sh"
+sed -i '/isPlatform "mali" && conf_flags+=("--enable-video-mali"/d' "${SDL2_SH}"
 
 # Force platform detection for QEMU builds (prevents -march=native on x86 host)
 # Without this, RetroPie-Setup falls back to platform_native() in QEMU chroot,
