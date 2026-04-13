@@ -4,7 +4,7 @@
 
 # RetroPie-Setup fork (used for post-install config only — no compilation)
 [ -n "${RETROPIE_REPO_SHIP}" ]   || RETROPIE_REPO_SHIP="https://github.com/Yumi-Lab/RetroPie-Setup.git"
-[ -n "${RETROPIE_REPO_BRANCH}" ] || RETROPIE_REPO_BRANCH="master"
+[ -n "${RETROPIE_REPO_BRANCH}" ] || RETROPIE_REPO_BRANCH="yumi-armhf"
 
 # Pre-compiled packages from RetroMi-packages (armhf, Debian Bookworm)
 [ -n "${RETROPIE_PACKAGES_URL}" ] || RETROPIE_PACKAGES_URL="https://github.com/Yumi-Lab/RetroMi-packages/releases/latest/download"

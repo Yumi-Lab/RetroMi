@@ -100,34 +100,11 @@ pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup
 popd &>/dev/null || exit 1
 
-# Install a dummy mali-fbdev package to satisfy RetroArch's build-time dep check.
-# mali-fbdev is a legacy proprietary Mali framebuffer driver — not available on
-# Armbian/Lima (uses EGL/KMS). The dummy package has no files, just satisfies apt.
-apt-get install -y equivs -qq
-cat > /tmp/mali-fbdev-dummy.ctrl << 'EQUIVS_CTRL'
-Section: misc
-Priority: optional
-Standards-Version: 3.9.2
-
-Package: mali-fbdev
-Version: 1.0-retromi
-Maintainer: RetroMi <build@yumi-lab.com>
-Description: Dummy mali-fbdev for Armbian/Lima builds
- Mali framebuffer driver is not used on Lima/Armbian (EGL/KMS instead).
- This dummy package satisfies build-time dependency checks in RetroPie-Setup.
-EQUIVS_CTRL
-mkdir -p /tmp/mali-fbdev-build && cp /tmp/mali-fbdev-dummy.ctrl /tmp/mali-fbdev-build/
-cd /tmp/mali-fbdev-build && equivs-build mali-fbdev-dummy.ctrl
-dpkg -i /tmp/mali-fbdev-build/mali-fbdev_1.0-retromi_all.deb
-cd /
-
-# Patch local scriptmodules to strip mali fbdev flags before compilation.
-# Lima/Armbian uses EGL/KMS — mali fbdev driver is absent.
-# (chroot copies only — upstream vanilla preserved)
-RETROARCH_SH="/home/${BASE_USER}/Retropie-Setup/scriptmodules/emulators/retroarch.sh"
-sed -i '/enable-mali_fbdev/d' "${RETROARCH_SH}"
-SDL2_SH="/home/${BASE_USER}/Retropie-Setup/scriptmodules/supplementary/sdl2.sh"
-sed -i '/enable-video-mali/d' "${SDL2_SH}"
+# Simulate Lima kernel module for QEMU chroot.
+# On the real H3, /sys/module/lima exists → RetroPie-Setup (yumi-armhf branch)
+# detects Lima/Panfrost and skips mali fbdev flags automatically.
+# In QEMU chroot /sys is not the host sysfs — create the marker manually.
+mkdir -p /sys/module/lima
 
 # Force platform detection for QEMU builds (prevents -march=native on x86 host)
 # Without this, RetroPie-Setup falls back to platform_native() in QEMU chroot,
