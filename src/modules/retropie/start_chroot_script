@@ -143,18 +143,11 @@ bash retropie_packages.sh resetromdirs || true     # reset/create ROM directory 
 if [ "${RETROMI_LIGHT}" != "yes" ]; then
     echo_green "Full build — installing extended packages..."
 
-    # Alternative frontends
-    bash retropie_packages.sh attractmode || true      # Attract Mode frontend
-    bash retropie_packages.sh mehstation || true       # mehstation frontend
-    bash retropie_packages.sh pegasus-fe || true       # Pegasus frontend
-
     # Game scrapers (metadata + artwork)
     bash retropie_packages.sh scraper || true          # sselphs scraper
-    bash retropie_packages.sh skyscraper || true       # ScreenScraper API scraper
 
     # Multiplayer & streaming
     bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer
-    bash retropie_packages.sh moonlight || true        # PC game streaming (NVIDIA/Sunshine)
 
     # Controller drivers (GPIO arcade builds + special controllers)
     bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers
