@@ -189,6 +189,15 @@ for core_dir in /opt/retropie/libretrocores/lr-*/; do
 done
 echo_green "Registering installed emulators... [DONE]"
 
+# Set default emulators for arcade systems (after configure so definitions exist)
+for system in arcade mame-libretro fba neogeo; do
+    cfg="/opt/retropie/configs/${system}/emulators.cfg"
+    if [ -f "${cfg}" ]; then
+        sed -i '/^default/d' "${cfg}"
+        echo 'default = "lr-fbneo"' >> "${cfg}"
+    fi
+done
+
 # Register ports (non-libretro standalone engines)
 # shellcheck disable=SC2043
 for port in openbor; do
