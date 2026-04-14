@@ -133,10 +133,10 @@ echo_green "Installing RetroPie supplementary packages..."
 # Core utilities (always installed — lightweight scripts)
 bash retropie_packages.sh joy2key || true          # gamepad-to-keyboard in terminal menus
 bash retropie_packages.sh wifi || true             # WiFi configuration menu
-bash retropie_packages.sh audiosettings || true    # audio output configuration
+false && bash retropie_packages.sh audiosettings || true    # audio output configuration — !all rpi (menu RPi-specific)
 bash retropie_packages.sh configedit || true       # RetroArch/ES config editor
 bash retropie_packages.sh esthemes || true         # theme downloader from ES menu
-bash retropie_packages.sh splashscreen || true     # boot splash screen configuration
+false && bash retropie_packages.sh splashscreen || true     # boot splash screen configuration — !all rpi (RetroMi uses plymouth module)
 bash retropie_packages.sh resetromdirs || true     # reset/create ROM directory structure
 
 # Extended packages (skipped in LIGHT mode — these compile from source and add ~3GB)
@@ -150,15 +150,15 @@ if [ "${RETROMI_LIGHT}" != "yes" ]; then
     bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer
 
     # Controller drivers (GPIO arcade builds + special controllers)
-    bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers
-    bash retropie_packages.sh mkarcadejoystick || true # GPIO arcade joystick driver
-    bash retropie_packages.sh snesdev || true          # GPIO SNES controller driver
+    false && bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers — !all rpi (Broadcom GPIO only)
+    false && bash retropie_packages.sh mkarcadejoystick || true # GPIO arcade joystick driver — !all rpi (Broadcom GPIO only)
+    false && bash retropie_packages.sh snesdev || true          # GPIO SNES controller driver — !all rpi (Broadcom GPIO only)
     bash retropie_packages.sh steamcontroller || true  # Steam Controller support
-    bash retropie_packages.sh xpad || true             # Xbox controller kernel driver
+    false && bash retropie_packages.sh xpad || true             # Xbox controller kernel driver — !mali (kernel module already in Armbian)
     bash retropie_packages.sh xpadneo || true          # Xbox One S/X wireless driver
     bash retropie_packages.sh sixaxis || true          # PS3/PS4 Sixaxis pairing via standard BlueZ
-    bash retropie_packages.sh controlblock || true     # GPIO power/reset button (arcade builds)
-    bash retropie_packages.sh powerblock || true       # GPIO power management
+    false && bash retropie_packages.sh controlblock || true     # GPIO power/reset button (arcade builds) — !all rpi (Broadcom GPIO only)
+    false && bash retropie_packages.sh powerblock || true       # GPIO power management — !all rpi (Broadcom GPIO only)
 
     # Virtual/mobile controllers
     bash retropie_packages.sh mobilegamepad || true    # phone as gamepad via WiFi
