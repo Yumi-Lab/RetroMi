@@ -95,6 +95,11 @@ else
     rm -f /tmp/homebrew-roms.zip
 fi
 
+# Deploy OpenBOR launcher + gamepad config script
+unpack /filesystem/root /
+chmod +x /usr/local/bin/openbor-pad-config
+chmod +x /opt/retropie/ports/openbor/openbor.sh 2>/dev/null || true
+
 # Clone RetroPie-Setup fork for post-install configuration only (no compilation)
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
 gitclone RETROPIE_REPO Retropie-Setup

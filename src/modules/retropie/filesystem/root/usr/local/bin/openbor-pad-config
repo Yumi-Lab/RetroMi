@@ -1,0 +1,183 @@
+#!/bin/bash
+# OpenBOR Universal Gamepad Config — RetroMi
+# Auto-maps any controller listed in es_input.cfg to OpenBOR binary cfg format.
+# Called by openbor.sh before each OpenBOR launch.
+#
+# OpenBOR key codes are device-dependent:
+#   base(601) + [buttons] + [axes × 2] + [hats × 4]
+# The script reads the physical device capabilities (sysfs) to compute correct offsets,
+# then looks up button assignments from EmulationStation's es_input.cfg.
+
+ES_INPUT="/opt/retropie/configs/all/emulationstation/es_input.cfg"
+SAVES_DIR="/opt/retropie/ports/openbor/Saves"
+JOY_BASE=601
+UNASSIGNED=6937
+
+# Count set bits in a decimal number
+popcount() {
+    local val="$1" count=0
+    while [ "$val" -gt 0 ] 2>/dev/null; do
+        count=$((count + (val & 1)))
+        val=$((val >> 1))
+    done
+    echo $count
+}
+
+# Get js0 device name from /proc/bus/input/devices
+get_js0_name() {
+    local name=""
+    while IFS= read -r line; do
+        case "$line" in
+            N:*) name=$(echo "$line" | sed 's/N: Name="//;s/"$//' | sed 's/^[[:space:]]*//;s/[[:space:]]*$//') ;;
+            H:*) echo "$line" | grep -q "js0" && echo "$name" && return 0 ;;
+        esac
+    done < /proc/bus/input/devices
+    return 1
+}
+
+# Get js0 capabilities from sysfs
+# Returns: num_buttons|num_axes|num_hats
+get_js0_caps() {
+    local key_bmp abs_bmp
+    key_bmp=$(cat /sys/class/input/js0/device/capabilities/key 2>/dev/null)
+    abs_bmp=$(cat /sys/class/input/js0/device/capabilities/abs 2>/dev/null)
+
+    # Button count: first word of KEY bitmap (BTN_JOYSTICK range)
+    local first_key
+    first_key=$(echo "$key_bmp" | awk '{print $1}')
+    local num_buttons
+    num_buttons=$(popcount $((0x$first_key)))
+
+    # ABS: last word = bits 0-31 (regular axes 0-15 + hat axes 16-31)
+    local last_abs
+    last_abs=$(echo "$abs_bmp" | awk '{print $NF}')
+    local abs_val=$((0x$last_abs))
+    local low16=$((abs_val & 0xFFFF))
+    local high16=$(((abs_val >> 16) & 0xFFFF))
+
+    local num_axes
+    num_axes=$(popcount $low16)
+    local hat_axes
+    hat_axes=$(popcount $high16)
+    local num_hats=$((hat_axes / 2))
+
+    echo "${num_buttons}|${num_axes}|${num_hats}"
+}
+
+# Get input info from es_input.cfg
+# Returns: type|id|value
+get_input_info() {
+    local dev_name="$1" input_name="$2"
+    local block
+    block=$(sed -n "/deviceName=\"${dev_name}\"/,/<\/inputConfig>/p" "$ES_INPUT" | head -30)
+    [ -z "$block" ] && echo "none|-1|0" && return 1
+    local match
+    match=$(echo "$block" | grep "name=\"${input_name}\"" | head -1)
+    if [ -n "$match" ]; then
+        local type id value
+        type=$(echo "$match" | sed 's/.*type="//;s/".*//')
+        id=$(echo "$match" | sed 's/.*id="//;s/".*//')
+        value=$(echo "$match" | sed 's/.*value="//;s/".*//')
+        echo "$type|$id|$value"
+    else
+        echo "none|-1|0"
+    fi
+}
+
+# Calculate OpenBOR key code from input type/id/value and device capabilities
+calc_obr_code() {
+    local input_type="$1" input_id="$2" input_value="$3"
+    local num_buttons="$4" num_axes="$5"
+
+    case "$input_type" in
+        button) echo $((JOY_BASE + input_id)) ;;
+        axis)
+            local axis_base=$((JOY_BASE + num_buttons))
+            [ "$input_value" = "-1" ] && echo $((axis_base + input_id * 2)) || echo $((axis_base + input_id * 2 + 1))
+            ;;
+        hat)
+            local hat_base=$((JOY_BASE + num_buttons + num_axes * 2))
+            local dir=0
+            case "$input_value" in
+                1) dir=0 ;; 2) dir=1 ;; 4) dir=2 ;; 8) dir=3 ;;
+            esac
+            echo $((hat_base + input_id * 4 + dir))
+            ;;
+        *) echo $UNASSIGNED ;;
+    esac
+}
+
+# Write 4-byte little-endian int at offset in file
+write_le32() {
+    local file="$1" offset="$2" value="$3"
+    printf "\\x$(printf '%02x' $((value & 0xFF)))\\x$(printf '%02x' $(((value >> 8) & 0xFF)))\\x$(printf '%02x' $(((value >> 16) & 0xFF)))\\x$(printf '%02x' $(((value >> 24) & 0xFF)))" | \
+        dd of="$file" bs=1 seek="$offset" conv=notrunc 2>/dev/null
+}
+
+# Parse es_input info string and calculate OpenBOR code
+pac() {
+    local info="$1" nb="$2" na="$3"
+    local t i v
+    t=$(echo "$info" | cut -d'|' -f1)
+    i=$(echo "$info" | cut -d'|' -f2)
+    v=$(echo "$info" | cut -d'|' -f3)
+    [ "$t" = "none" ] && echo $UNASSIGNED && return
+    calc_obr_code "$t" "$i" "$v" "$nb" "$na"
+}
+
+# ---- MAIN ----
+[ ! -f "$ES_INPUT" ] && exit 0
+
+DEV_NAME=$(get_js0_name)
+[ -z "$DEV_NAME" ] && exit 0
+
+CAPS=$(get_js0_caps)
+NB=$(echo "$CAPS" | cut -d'|' -f1)
+NA=$(echo "$CAPS" | cut -d'|' -f2)
+NH=$(echo "$CAPS" | cut -d'|' -f3)
+
+# Get D-pad and button mappings from es_input.cfg
+UP=$(get_input_info "$DEV_NAME" "up")
+DN=$(get_input_info "$DEV_NAME" "down")
+LF=$(get_input_info "$DEV_NAME" "left")
+RT=$(get_input_info "$DEV_NAME" "right")
+A=$(get_input_info "$DEV_NAME" "a")
+B=$(get_input_info "$DEV_NAME" "b")
+X=$(get_input_info "$DEV_NAME" "x")
+Y=$(get_input_info "$DEV_NAME" "y")
+ST=$(get_input_info "$DEV_NAME" "start")
+SE=$(get_input_info "$DEV_NAME" "select")
+L1=$(get_input_info "$DEV_NAME" "pageup")
+R1=$(get_input_info "$DEV_NAME" "pagedown")
+
+# Calculate OpenBOR codes
+# Mapping: A=ATTACK1, B=JUMP, X=SPECIAL, Y=ATTACK2, L1=ATTACK3, R1=ATTACK4
+O_UP=$(pac "$UP" "$NB" "$NA")
+O_DN=$(pac "$DN" "$NB" "$NA")
+O_LF=$(pac "$LF" "$NB" "$NA")
+O_RT=$(pac "$RT" "$NB" "$NA")
+O_A1=$(pac "$A" "$NB" "$NA")
+O_JP=$(pac "$B" "$NB" "$NA")
+O_SP=$(pac "$X" "$NB" "$NA")
+O_A2=$(pac "$Y" "$NB" "$NA")
+O_A3=$(pac "$L1" "$NB" "$NA")
+O_A4=$(pac "$R1" "$NB" "$NA")
+O_ST=$(pac "$ST" "$NB" "$NA")
+O_SC=$(pac "$SE" "$NB" "$NA")
+
+# Patch all existing cfg files in Saves/ (player 1, offsets 0x20-0x4C)
+for cfg in "$SAVES_DIR"/*.cfg; do
+    [ -f "$cfg" ] || continue
+    write_le32 "$cfg" 32 "$O_UP"   # MOVEUP
+    write_le32 "$cfg" 36 "$O_DN"   # MOVEDOWN
+    write_le32 "$cfg" 40 "$O_LF"   # MOVELEFT
+    write_le32 "$cfg" 44 "$O_RT"   # MOVERIGHT
+    write_le32 "$cfg" 48 "$O_A1"   # ATTACK1
+    write_le32 "$cfg" 52 "$O_A2"   # ATTACK2
+    write_le32 "$cfg" 56 "$O_A3"   # ATTACK3
+    write_le32 "$cfg" 60 "$O_A4"   # ATTACK4
+    write_le32 "$cfg" 64 "$O_JP"   # JUMP
+    write_le32 "$cfg" 68 "$O_SP"   # SPECIAL
+    write_le32 "$cfg" 72 "$O_ST"   # START
+    write_le32 "$cfg" 76 "$O_SC"   # SCREENSHOT
+done
