@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-#### MainsailOS Specific Tweaks for armbian images
-####
-#### Written by Stephan Wendel aka KwadFan <me@stephanwe.de>
-#### Copyright 2023 - till today
+#### RetroMi — Armbian base setup (SPI, groups, motd, security)
+#### Forked from MainsailOS by Stephan Wendel aka KwadFan
 #### https://github.com/mainsail-crew/MainsailOS
 ####
 #### This File is distributed under GPLv3
@@ -83,7 +81,7 @@ fi
 ## END Step 5
 
 ## Step 6: Enable SPI interface by default
-echo_green "Enable SPI interface on Orange Pi SBC's ..."
+echo_green "Enable SPI interface on Yumi SmartPi One ..."
 
 ### Substep 1: Copy default config to backup file
 cp "${ARMBIAN_CONFIG_TXT_FILE}" "${ARMBIAN_CONFIG_BAK_FILE}"
@@ -106,7 +104,7 @@ fi
 echo "spi-dev" >> "${ARMBIAN_MODULES_FILE}"
 ### END Substep 3
 
-echo_green "Enable SPI interface on Orange Pi SBC's ... DONE!"
+echo_green "Enable SPI interface on Yumi SmartPi One ... DONE!"
 ## END Step 6
 
 ## Step 7: Remove unattended-upgrades
