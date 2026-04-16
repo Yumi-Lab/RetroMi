@@ -12,6 +12,9 @@ install_cleanup_trap
 
 echo_green "Installing RetroPie (pre-compiled packages)..."
 
+# Deploy RetroMi overlay files (openbor-pad-config, openbor.sh)
+unpack /filesystem/root /
+
 # Runtime dependencies (no compiler needed)
 apt-get update
 # shellcheck disable=SC2086
@@ -144,26 +147,33 @@ bash retropie_packages.sh esthemes || true         # theme downloader from ES me
 false && bash retropie_packages.sh splashscreen || true     # boot splash screen configuration — !all rpi (RetroMi uses plymouth module)
 bash retropie_packages.sh resetromdirs || true     # reset/create ROM directory structure
 
-# Game scrapers (metadata + artwork)
-bash retropie_packages.sh scraper || true          # sselphs scraper
+# Extended packages (skipped in LIGHT mode — these compile from source and add ~3GB)
+if [ "${RETROMI_LIGHT}" != "yes" ]; then
+    echo_green "Full build — installing extended packages..."
 
-# Multiplayer & streaming
-bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer
+    # Game scrapers (metadata + artwork)
+    bash retropie_packages.sh scraper || true          # sselphs scraper
 
-# Controller drivers
-false && bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers — !all rpi (Broadcom GPIO only)
-false && bash retropie_packages.sh mkarcadejoystick || true # GPIO arcade joystick driver — !all rpi (Broadcom GPIO only)
-false && bash retropie_packages.sh snesdev || true          # GPIO SNES controller driver — !all rpi (Broadcom GPIO only)
-bash retropie_packages.sh steamcontroller || true  # Steam Controller support
-false && bash retropie_packages.sh xpad || true             # Xbox controller kernel driver — !mali (kernel module already in Armbian)
-bash retropie_packages.sh xpadneo || true          # Xbox One S/X wireless driver
-bash retropie_packages.sh sixaxis || true          # PS3/PS4 Sixaxis pairing via standard BlueZ
-false && bash retropie_packages.sh controlblock || true     # GPIO power/reset button (arcade builds) — !all rpi (Broadcom GPIO only)
-false && bash retropie_packages.sh powerblock || true       # GPIO power management — !all rpi (Broadcom GPIO only)
+    # Multiplayer & streaming
+    bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer
 
-# Virtual/mobile controllers
-bash retropie_packages.sh mobilegamepad || true    # phone as gamepad via WiFi
-bash retropie_packages.sh virtualgamepad || true   # web-based virtual gamepad
+    # Controller drivers
+    false && bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers — !all rpi (Broadcom GPIO only)
+    false && bash retropie_packages.sh mkarcadejoystick || true # GPIO arcade joystick driver — !all rpi (Broadcom GPIO only)
+    false && bash retropie_packages.sh snesdev || true          # GPIO SNES controller driver — !all rpi (Broadcom GPIO only)
+    bash retropie_packages.sh steamcontroller || true  # Steam Controller support
+    false && bash retropie_packages.sh xpad || true             # Xbox controller kernel driver — !mali (kernel module already in Armbian)
+    bash retropie_packages.sh xpadneo || true          # Xbox One S/X wireless driver
+    bash retropie_packages.sh sixaxis || true          # PS3/PS4 Sixaxis pairing via standard BlueZ
+    false && bash retropie_packages.sh controlblock || true     # GPIO power/reset button (arcade builds) — !all rpi (Broadcom GPIO only)
+    false && bash retropie_packages.sh powerblock || true       # GPIO power management — !all rpi (Broadcom GPIO only)
+
+    # Virtual/mobile controllers
+    bash retropie_packages.sh mobilegamepad || true    # phone as gamepad via WiFi
+    bash retropie_packages.sh virtualgamepad || true   # web-based virtual gamepad
+else
+    echo_green "LIGHT build — skipping extended packages"
+fi
 
 echo_green "RetroPie supplementary packages... [DONE]"
 
@@ -209,6 +219,10 @@ done
 if [ -f "/opt/retropie/ports/openbor/OpenBOR" ]; then
     echo_green "Registering OpenBOR port..."
     bash retropie_packages.sh openbor configure || true
+    # Override stock openbor.sh with RetroMi version (calls openbor-pad-config before launch)
+    cp /root/opt/retropie/ports/openbor/openbor.sh /opt/retropie/ports/openbor/openbor.sh
+    chmod +x /opt/retropie/ports/openbor/openbor.sh
+    echo_green "OpenBOR gamepad auto-config launcher installed"
 fi
 
 # Safety net: fix any wrong user paths in es_systems.cfg and emulators.cfg
