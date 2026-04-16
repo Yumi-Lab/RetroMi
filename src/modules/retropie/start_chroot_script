@@ -218,11 +218,16 @@ done
 # Register standalone ports (not libretro cores — separate configure step)
 if [ -f "/opt/retropie/ports/openbor/OpenBOR" ]; then
     echo_green "Registering OpenBOR port..."
+    # Backup RetroMi custom launcher before configure overwrites it
+    cp /opt/retropie/ports/openbor/openbor.sh /tmp/retromi-openbor.sh 2>/dev/null || true
     bash retropie_packages.sh openbor configure || true
-    # Override stock openbor.sh with RetroMi version (calls openbor-pad-config before launch)
-    cp /root/opt/retropie/ports/openbor/openbor.sh /opt/retropie/ports/openbor/openbor.sh
-    chmod +x /opt/retropie/ports/openbor/openbor.sh
-    echo_green "OpenBOR gamepad auto-config launcher installed"
+    # Restore RetroMi version (calls openbor-pad-config before launch)
+    if [ -f /tmp/retromi-openbor.sh ]; then
+        cp /tmp/retromi-openbor.sh /opt/retropie/ports/openbor/openbor.sh
+        chmod +x /opt/retropie/ports/openbor/openbor.sh
+        rm -f /tmp/retromi-openbor.sh
+        echo_green "OpenBOR gamepad auto-config launcher restored"
+    fi
 fi
 
 # Safety net: fix any wrong user paths in es_systems.cfg and emulators.cfg
