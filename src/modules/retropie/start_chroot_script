@@ -54,7 +54,7 @@ for sys in \
     vectrex coleco intellivision \
     virtualboy pokemini supervision megaduck uzebox arduboy \
     pc88 pc98 x68000 x1 \
-    ports; do
+    ports steam; do
     mkdir -p "${ROM_DIR}/${sys}"
 done
 chown -R "${BASE_USER}:${BASE_USER}" "${ROM_DIR}"
@@ -229,6 +229,14 @@ if [ -f "/opt/retropie/ports/openbor/OpenBOR" ]; then
         echo_green "OpenBOR gamepad auto-config launcher restored"
     fi
 fi
+
+# Configure supplementary packages (moonlight registers "steam" system in ES, skyscraper sets up config dirs)
+for suppl in moonlight skyscraper; do
+    if [ -d "/opt/retropie/supplementary/${suppl}" ]; then
+        echo_green "  → ${suppl} (supplementary)"
+        bash retropie_packages.sh "${suppl}" configure || true
+    fi
+done
 
 # Safety net: fix any wrong user paths in es_systems.cfg and emulators.cfg
 # (CI runner user, root, or literal ~user that wasn't expanded)
