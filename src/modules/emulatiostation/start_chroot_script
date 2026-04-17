@@ -69,3 +69,18 @@ cp /filesystem/opt/retropie/configs/all/emulationstation/es_settings.cfg \
 rm -f /home/pi/.emulationstation/.epicnoir_set
 chown -R pi:pi /home/pi/.emulationstation
 echo_green "Default ES theme configured. (DONE)"
+
+# SmartPad screen is physically mounted upside-down — rotate ES 180°
+if [ "${BASE_SBC}" = "smartpad" ]; then
+    echo_green "SmartPad detected — applying 180° screen rotation to ES..."
+    for cfg in /opt/retropie/configs/all/emulationstation/es_settings.cfg \
+               /home/pi/.emulationstation/es_settings.cfg; do
+        if [ -f "${cfg}" ]; then
+            # Remove existing ScreenRotate if any
+            sed -i '/name="ScreenRotate"/d' "${cfg}"
+            # Add ScreenRotate=2 (180°) before closing tag or at end
+            echo '<int name="ScreenRotate" value="2" />' >> "${cfg}"
+        fi
+    done
+    echo_green "ES 180° rotation configured. (DONE)"
+fi

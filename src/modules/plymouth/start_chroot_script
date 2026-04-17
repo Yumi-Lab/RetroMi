@@ -78,6 +78,27 @@ src="${src}/pack_yumi/retromi"
 if [[ -d "${src}" ]]; then
     sudo cp -vr "${src}" "${dest}"
 fi
+# SmartPad: rotate all Plymouth theme images 180° (screen physically upside-down)
+if [ "${BASE_SBC}" = "smartpad" ]; then
+    echo_green "SmartPad detected — rotating Plymouth images 180°..."
+    apt-get install -y --no-install-recommends python3-pil
+    python3 -c "
+import os, glob
+from PIL import Image
+theme_dir = '/usr/share/plymouth/themes/retromi'
+for ext in ('*.png', '*.jpg', '*.jpeg', '*.bmp'):
+    for img_path in glob.glob(os.path.join(theme_dir, '**', ext), recursive=True):
+        try:
+            img = Image.open(img_path)
+            img = img.rotate(180)
+            img.save(img_path)
+            print(f'  Rotated: {img_path}')
+        except Exception as e:
+            print(f'  Skip {img_path}: {e}')
+"
+    echo_green "Plymouth images rotated 180°. (DONE)"
+fi
+
 echo_green "Set default theme to ${SMARTPAD_PLYMOUTH_THEME} ..."
 #sudo plymouth-set-default-theme "${SMARTPAD_PLYMOUTH_THEME}"
 sudo plymouth-set-default-theme -R retromi

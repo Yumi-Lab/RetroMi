@@ -63,6 +63,10 @@ if [ -f "${GLOBAL_RA}" ]; then
     sed -i 's/^video_shader_enable = "true"/video_shader_enable = "false"/' "${GLOBAL_RA}"
     grep -q '^video_shader_enable' "${GLOBAL_RA}" || echo 'video_shader_enable = "false"' >> "${GLOBAL_RA}"
 
+    # Use Ozone menu driver (modern UI, better than RGUI)
+    sed -i '/^menu_driver/d' "${GLOBAL_RA}"
+    echo 'menu_driver = "ozone"' >> "${GLOBAL_RA}"
+
     echo_green "RetroArch gamepad plug & play configured (Batocera-style)."
 fi
 
@@ -84,6 +88,14 @@ echo_green "Downloading SDL_GameControllerDB (${SDLDB_COMMIT:0:7})..."
 curl -sSL \
   "https://raw.githubusercontent.com/gabomdq/SDL_GameControllerDB/${SDLDB_COMMIT}/gamecontrollerdb.txt" \
   -o /opt/retropie/configs/all/gamecontrollerdb.txt
+
+# SmartPad screen is physically mounted upside-down — rotate RetroArch 180°
+if [ "${BASE_SBC}" = "smartpad" ]; then
+    echo_green "SmartPad detected — applying 180° rotation to RetroArch..."
+    sed -i '/^video_rotation/d' "${GLOBAL_RA}"
+    echo 'video_rotation = "2"' >> "${GLOBAL_RA}"
+    echo_green "RetroArch 180° rotation configured."
+fi
 
 # Fix ownership
 chown -R pi:pi /home/pi/RetroPie
