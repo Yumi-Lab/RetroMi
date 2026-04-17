@@ -15,6 +15,15 @@ echo_green "Installing RetroPie (pre-compiled packages)..."
 # Deploy RetroMi overlay files (openbor-pad-config, openbor.sh)
 unpack /filesystem/root /
 
+# FFmpeg with V4L2 Request API — required for CedarX hardware decoding (moonlight-qt)
+# Standard Debian FFmpeg lacks v4l2_request; apt.undo.it provides a patched build
+# moonlight-qt links dynamically against libavcodec — the apt.undo.it version provides
+# v4l2_request_h264/hevc_set_controls needed for hardware decode on H3
+echo "deb [trusted=yes] https://apt.undo.it bookworm main" > /etc/apt/sources.list.d/undo-ffmpeg.list
+
+# Ensure sunxi_cedrus (CedarX hardware video decoder) loads at boot
+echo "sunxi_cedrus" > /etc/modules-load.d/retromi-cedrus.conf
+
 # Runtime dependencies (no compiler needed)
 apt-get update
 # shellcheck disable=SC2086
@@ -59,6 +68,31 @@ for sys in \
 done
 chown -R "${BASE_USER}:${BASE_USER}" "${ROM_DIR}"
 
+# Moonlight streaming — .ml ROM files for ES steam system
+# Format: line 1 = server IP, line 2 = app name (or __PAIRING__ for GUI)
+# ES suspend → moonlight-qt takes EGLFS → Ctrl+Alt+Shift+Q → ES resumes
+printf '%s\n' "0.0.0.0" "Desktop" > "${ROM_DIR}/steam/Desktop.ml"
+printf '%s\n' "0.0.0.0" "Steam Big Picture" > "${ROM_DIR}/steam/Steam.ml"
+printf '%s\n' "0.0.0.0" "__PAIRING__" > "${ROM_DIR}/steam/Pairing.ml"
+
+# Moonlight-qt settings — optimized for SmartPi One H3 (CedarX HEVC HW decode)
+# 800x480 native screen: 50fps render, zero frame drop, HEVC 15Mbps
+# Software decode = PI CRASH — always force hardware (videodec=0)
+MOONLIGHT_CONF="/home/${BASE_USER}/.config/moonlight-qt"
+mkdir -p "${MOONLIGHT_CONF}"
+cat > "${MOONLIGHT_CONF}/Moonlight.conf" << 'MOONLIGHT_CFG'
+[General]
+bitrate=15000
+fps=60
+height=480
+width=800
+videocfg=2
+videodec=0
+yuv444=false
+vsync=false
+MOONLIGHT_CFG
+chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/.config/moonlight-qt"
+
 # Download game data from Yumi-Lab/RetroMi-games
 # GitHub releases use 302 redirects — curl handles them better than wget in QEMU chroot
 ROM_PORTS="/home/${BASE_USER}/RetroPie/roms/ports"
@@ -98,10 +132,11 @@ else
     rm -f /tmp/homebrew-roms.zip
 fi
 
-# Deploy OpenBOR launcher + gamepad config script
+# Deploy OpenBOR launcher + gamepad config + moonlight wrapper
 unpack /filesystem/root /
 chmod +x /usr/local/bin/openbor-pad-config
 chmod +x /opt/retropie/ports/openbor/openbor.sh 2>/dev/null || true
+chmod +x /opt/retropie/supplementary/moonlight-qt-stream.sh
 
 # Clone RetroPie-Setup fork for post-install configuration only (no compilation)
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
@@ -238,9 +273,28 @@ for suppl in moonlight skyscraper; do
     fi
 done
 
+# Restore RetroMi moonlight wrapper — moonlight configure sets its own emulators.cfg
+# which doesn't use our .ml ROM format + CedarX pipeline
+if [ -f /opt/retropie/supplementary/moonlight-qt-stream.sh ]; then
+    mkdir -p /opt/retropie/configs/steam
+    cat > /opt/retropie/configs/steam/emulators.cfg << 'MOONLIGHT_EMU'
+moonlight-qt = "/opt/retropie/supplementary/moonlight-qt-stream.sh %ROM%"
+default = "moonlight-qt"
+MOONLIGHT_EMU
+    echo_green "Moonlight emulators.cfg restored (CedarX wrapper)"
+fi
+
 # Safety net: fix any wrong user paths in es_systems.cfg and emulators.cfg
 # (CI runner user, root, or literal ~user that wasn't expanded)
 ES_CFG="/etc/emulationstation/es_systems.cfg"
+
+# Ensure steam system in ES accepts .ml ROM files (moonlight configure may only set .sh)
+if [ -f "${ES_CFG}" ] && grep -q "<name>steam</name>" "${ES_CFG}"; then
+    if ! grep -A5 "<name>steam</name>" "${ES_CFG}" | grep -q "\.ml"; then
+        sed -i '/<name>steam<\/name>/,/<\/system>/ s|<extension>\(.*\)</extension>|<extension>\1 .ml</extension>|' "${ES_CFG}"
+        echo_green "Added .ml extension to steam system in es_systems.cfg"
+    fi
+fi
 if [ -f "${ES_CFG}" ]; then
     sed -i "s|/root/RetroPie|/home/${BASE_USER}/RetroPie|g;
             s|/root/Retropie-Setup|/home/${BASE_USER}/Retropie-Setup|g;
