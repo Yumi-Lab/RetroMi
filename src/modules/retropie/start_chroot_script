@@ -195,28 +195,25 @@ bash retropie_packages.sh sixaxis || true          # DualShock Bluetooth pairing
 # LAN/online multiplayer — lightweight, always installed
 bash retropie_packages.sh retronetplay || true
 
-# Extended packages (skipped in LIGHT mode — these compile from source and add ~3GB)
+# Extended packages (guarded packages are being migrated to always-install, one at a time)
+
+# Xbox One S/X wireless BT driver — lightweight kernel module, useful for all users
+bash retropie_packages.sh xpadneo || true
+
 if [ "${RETROMI_LIGHT}" != "yes" ]; then
-    echo_green "Full build — installing extended packages..."
+    echo_green "Full build — installing remaining extended packages..."
 
     # Game scrapers (metadata + artwork)
     bash retropie_packages.sh scraper || true          # sselphs scraper
 
     # Controller drivers
-    false && bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers — !all rpi (Broadcom GPIO only)
-    false && bash retropie_packages.sh mkarcadejoystick || true # GPIO arcade joystick driver — !all rpi (Broadcom GPIO only)
-    false && bash retropie_packages.sh snesdev || true          # GPIO SNES controller driver — !all rpi (Broadcom GPIO only)
     bash retropie_packages.sh steamcontroller || true  # Steam Controller support
-    false && bash retropie_packages.sh xpad || true             # Xbox controller kernel driver — !mali (kernel module already in Armbian)
-    bash retropie_packages.sh xpadneo || true          # Xbox One S/X wireless driver
-    false && bash retropie_packages.sh controlblock || true     # GPIO power/reset button (arcade builds) — !all rpi (Broadcom GPIO only)
-    false && bash retropie_packages.sh powerblock || true       # GPIO power management — !all rpi (Broadcom GPIO only)
 
     # Virtual/mobile controllers
     bash retropie_packages.sh mobilegamepad || true    # phone as gamepad via WiFi
     bash retropie_packages.sh virtualgamepad || true   # web-based virtual gamepad
 else
-    echo_green "LIGHT build — skipping extended packages"
+    echo_green "LIGHT build — skipping remaining extended packages"
 fi
 
 echo_green "RetroPie supplementary packages... [DONE]"
