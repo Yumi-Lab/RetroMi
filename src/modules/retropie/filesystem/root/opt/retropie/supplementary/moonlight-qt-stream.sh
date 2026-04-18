@@ -1,7 +1,8 @@
 #!/bin/bash
 # moonlight-stream.sh — Wrapper for moonlight-qt launched from ES via runcommand
-# Reads .ml ROM files: line 1 = app name (or __PAIRING__), line 2 = server IP (optional, auto-discover if absent)
+# Reads .ml ROM files: line 1 = app name (or __PAIRING__), line 2 = server IP (optional)
 #
+# If no IP in .ml file, auto-discovers Sunshine server via avahi mDNS (~100ms).
 # Pipeline: Sunshine HEVC → FFmpeg v4l2_request → CedarX cedrus → NV12 DRM → screen
 # Quit: Ctrl+Alt+Shift+Q → moonlight-qt exits → ES resumes
 
@@ -18,13 +19,16 @@ SERVER_IP=$(sed -n '2p' "${ROM_FILE}")
 export QT_QPA_PLATFORM=eglfs
 export HOME="/home/$(logname 2>/dev/null || echo pi)"
 
+# Auto-discover Sunshine server via avahi mDNS
+if [ -z "${SERVER_IP}" ] && [ "${APP_NAME}" != "__PAIRING__" ]; then
+    SERVER_IP=$(avahi-browse -t -r -p _nvstream._tcp 2>/dev/null | grep '^=' | head -1 | cut -d';' -f8)
+fi
+
 if [ "${APP_NAME}" = "__PAIRING__" ]; then
-    # Open moonlight-qt GUI for pairing / server discovery / settings
     exec moonlight-qt
 elif [ -n "${SERVER_IP}" ]; then
-    # Direct stream with explicit server IP
     exec moonlight-qt stream "${SERVER_IP}" "${APP_NAME}"
 else
-    # Direct stream — moonlight-qt auto-discovers server
-    exec moonlight-qt stream "${APP_NAME}"
+    # No Sunshine server found on network — open GUI
+    exec moonlight-qt
 fi
