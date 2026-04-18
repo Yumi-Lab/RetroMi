@@ -105,10 +105,7 @@ write_player_bindings() {
                     joystick1left|leftanalogleft)   echo "${p}_l_x_minus_axis = \"-${iid}\""; echo "${p}_l_x_plus_axis = \"+${iid}\"" ;;
                     joystick2up|rightanalogup)      echo "${p}_r_y_minus_axis = \"-${iid}\""; echo "${p}_r_y_plus_axis = \"+${iid}\"" ;;
                     joystick2left|rightanalogleft)  echo "${p}_r_x_minus_axis = \"-${iid}\""; echo "${p}_r_x_plus_axis = \"+${iid}\"" ;;
-                    leftanalogdown)     echo "${p}_l_y_plus_axis = \"+${iid}\"" ;;
-                    leftanalogright)    echo "${p}_l_x_plus_axis = \"+${iid}\"" ;;
-                    rightanalogdown)    echo "${p}_r_y_plus_axis = \"+${iid}\"" ;;
-                    rightanalogright)   echo "${p}_r_x_plus_axis = \"+${iid}\"" ;;
+                    leftanalogdown|leftanalogright|rightanalogdown|rightanalogright) ;; # covered by up/left
                 esac
                 ;;
             hat)

@@ -192,15 +192,15 @@ bash retropie_packages.sh resetromdirs || true     # reset/create ROM directory 
 # PS3/PS4 controller pairing — lightweight driver, always installed
 bash retropie_packages.sh sixaxis || true          # DualShock Bluetooth pairing via BlueZ
 
+# LAN/online multiplayer — lightweight, always installed
+bash retropie_packages.sh retronetplay || true
+
 # Extended packages (skipped in LIGHT mode — these compile from source and add ~3GB)
 if [ "${RETROMI_LIGHT}" != "yes" ]; then
     echo_green "Full build — installing extended packages..."
 
     # Game scrapers (metadata + artwork)
     bash retropie_packages.sh scraper || true          # sselphs scraper
-
-    # Multiplayer & streaming
-    bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer
 
     # Controller drivers
     false && bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers — !all rpi (Broadcom GPIO only)

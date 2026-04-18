@@ -67,7 +67,23 @@ if [ -f "${GLOBAL_RA}" ]; then
     sed -i '/^menu_driver/d' "${GLOBAL_RA}"
     echo 'menu_driver = "ozone"' >> "${GLOBAL_RA}"
 
-    echo_green "RetroArch gamepad plug & play configured (Batocera-style)."
+    # Netplay — peer-to-peer ready out-of-the-box
+    sed -i '/^netplay_nickname/d' "${GLOBAL_RA}"
+    sed -i '/^netplay_ip_port/d' "${GLOBAL_RA}"
+    sed -i '/^netplay_use_mitm_server/d' "${GLOBAL_RA}"
+    sed -i '/^netplay_check_frames/d' "${GLOBAL_RA}"
+    sed -i '/^netplay_delay_frames/d' "${GLOBAL_RA}"
+    sed -i '/^netplay_input_latency_frames_min/d' "${GLOBAL_RA}"
+    {
+        echo 'netplay_nickname = "RetroMi"'
+        echo 'netplay_ip_port = "55435"'
+        echo 'netplay_use_mitm_server = "false"'
+        echo 'netplay_check_frames = "2"'
+        echo 'netplay_delay_frames = "2"'
+        echo 'netplay_input_latency_frames_min = "1"'
+    } >> "${GLOBAL_RA}"
+
+    echo_green "RetroArch gamepad plug & play + netplay configured."
 fi
 
 # Remove conflicting built-in autoconfig presets
