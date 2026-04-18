@@ -201,6 +201,84 @@ EOF
     [ "$player" = "1" ] && echo "input_enable_hotkey_btn = \"8\""
 }
 
+# Write a joy2key-compatible .cfg file in retroarch-joypads/
+# joy2key_sdl.py reads these files to map gamepad inputs to keyboard in terminal menus
+write_joy2key_profile() {
+    local dev_name="$1" guid="$2" es_file="$3" profile="$4"
+    local safe_name cfg_file
+    safe_name=$(echo "$dev_name" | sed 's/[^a-zA-Z0-9_-]/_/g' | sed 's/__*/_/g' | sed 's/^_//;s/_$//')
+    cfg_file="${PROFILES_DIR}/${safe_name}.cfg"
+
+    # joy2key matches by SDL device name which is trimmed (no leading/trailing spaces)
+    local trimmed_name
+    trimmed_name=$(echo "$dev_name" | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
+
+    {
+        echo "input_device = \"${trimmed_name}\""
+        echo "input_driver = \"udev\""
+
+        if [ -n "$profile" ]; then
+            # Copy bindings from VID:PID profile
+            while IFS='=' read -r key val; do
+                [[ "$key" =~ ^# ]] && continue
+                key="${key%"${key##*[! ]}"}"
+                val="${val%"${val##*[! ]}"}"
+                [ -z "$key" ] && continue
+                case "$key" in
+                    analog_dpad_mode) echo "input_analog_dpad_mode = \"${val}\"" ;;
+                    *_btn)  echo "input_${key} = \"${val}\"" ;;
+                    *_axis) echo "input_${key} = \"${val}\"" ;;
+                esac
+            done < "$profile"
+        elif [ -n "$guid" ] && [ -n "$es_file" ]; then
+            # Generate from ES input mapping
+            while IFS='|' read -r iname itype iid ivalue; do
+                [ -z "$iname" ] && continue
+                local ra=""
+                case "$iname" in
+                    a) ra="a" ;; b) ra="b" ;; x) ra="x" ;; y) ra="y" ;;
+                    up) ra="up" ;; down) ra="down" ;; left) ra="left" ;; right) ra="right" ;;
+                    start) ra="start" ;; select) ra="select" ;;
+                    pageup|leftshoulder) ra="l" ;; pagedown|rightshoulder) ra="r" ;;
+                    l2|lefttrigger) ra="l2" ;; r2|righttrigger) ra="r2" ;;
+                esac
+                [ -z "$ra" ] && continue
+                case "$itype" in
+                    button) echo "input_${ra}_btn = \"${iid}\"" ;;
+                    axis)
+                        if [ "$ivalue" = "-1" ]; then
+                            echo "input_${ra}_axis = \"-${iid}\""
+                        else
+                            echo "input_${ra}_axis = \"+${iid}\""
+                        fi
+                        ;;
+                    hat)
+                        local hd=""
+                        case "$ivalue" in 1) hd="up" ;; 2) hd="right" ;; 4) hd="down" ;; 8) hd="left" ;; esac
+                        [ -n "$hd" ] && echo "input_${ra}_btn = \"h${iid}${hd}\""
+                        ;;
+                esac
+            done < <(xmlstarlet sel -t -m "//inputConfig[@deviceGUID='${guid}']/input" \
+                     -v "concat(@name,'|',@type,'|',@id,'|',@value)" -n "$es_file" 2>/dev/null)
+        else
+            # Generic fallback (axis D-pad)
+            echo 'input_a_btn = "1"'
+            echo 'input_b_btn = "2"'
+            echo 'input_x_btn = "0"'
+            echo 'input_y_btn = "3"'
+            echo 'input_l_btn = "4"'
+            echo 'input_r_btn = "5"'
+            echo 'input_select_btn = "8"'
+            echo 'input_start_btn = "9"'
+            echo 'input_up_axis = "-1"'
+            echo 'input_down_axis = "+1"'
+            echo 'input_left_axis = "-0"'
+            echo 'input_right_axis = "+0"'
+        fi
+    } > "$cfg_file"
+    log "  → joy2key profile: ${cfg_file}"
+}
+
 # Main: scan joysticks and inject player bindings
 configure_all() {
     local es_file
@@ -213,6 +291,9 @@ configure_all() {
     sed -i '/^input_enable_hotkey_btn/d' "$RETROARCH_CFG"
     sed -i '/^input_exit_emulator_btn/d' "$RETROARCH_CFG"
     sed -i '/^input_menu_toggle_btn/d' "$RETROARCH_CFG"
+
+    # Clean joy2key profiles (regenerated each run)
+    rm -f "${PROFILES_DIR}"/*.cfg
 
     # Scan joysticks and build bindings
     local bindings=""
@@ -242,14 +323,17 @@ configure_all() {
                     if [ -n "$profile" ]; then
                         log "  → profile $(basename "$profile")"
                         bindings+=$'\n'"$(write_player_from_profile "$player" "$js_index" "$profile")"
+                        write_joy2key_profile "$name" "" "" "$profile"
                     else
                         guid=$(find_best_es_guid "$vid_dec" "$pid_dec" "$es_file" 2>/dev/null)
                         if [ -n "$guid" ]; then
                             log "  → ES GUID=${guid}"
                             bindings+=$'\n'"$(write_player_bindings "$player" "$js_index" "$guid" "$es_file")"
+                            write_joy2key_profile "$name" "$guid" "$es_file" ""
                         else
                             log "  → generic"
                             bindings+=$'\n'"$(write_generic "$player" "$js_index")"
+                            write_joy2key_profile "$name" "" "" ""
                         fi
                     fi
                     player=$((player+1))
