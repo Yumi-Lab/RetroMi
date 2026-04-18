@@ -200,11 +200,11 @@ bash retropie_packages.sh retronetplay || true
 # Xbox One S/X wireless BT driver — lightweight kernel module, useful for all users
 bash retropie_packages.sh xpadneo || true
 
+# Game scrapers (metadata + artwork)
+bash retropie_packages.sh scraper || true
+
 if [ "${RETROMI_LIGHT}" != "yes" ]; then
     echo_green "Full build — installing remaining extended packages..."
-
-    # Game scrapers (metadata + artwork)
-    bash retropie_packages.sh scraper || true          # sselphs scraper
 
     # Controller drivers
     bash retropie_packages.sh steamcontroller || true  # Steam Controller support
