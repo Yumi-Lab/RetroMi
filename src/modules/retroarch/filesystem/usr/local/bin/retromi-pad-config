@@ -65,8 +65,8 @@ write_player_bindings() {
         local ra=""
 
         case "$iname" in
-            a)        ra="${p}_a" ;;
-            b)        ra="${p}_b" ;;
+            a)        ra="${p}_b" ;;  # ES 'a' (south/confirm) → RetroArch B (south/✕)
+            b)        ra="${p}_a" ;;  # ES 'b' (east/back) → RetroArch A (east/○)
             x)        ra="${p}_x" ;;
             y)        ra="${p}_y" ;;
             up)       ra="${p}_up" ;;
@@ -180,8 +180,8 @@ write_generic() {
     cat << EOF
 ${p}_joypad_index = "${js_index}"
 ${p}_analog_dpad_mode = "1"
-${p}_a_btn = "1"
-${p}_b_btn = "2"
+${p}_a_btn = "2"
+${p}_b_btn = "1"
 ${p}_x_btn = "0"
 ${p}_y_btn = "3"
 ${p}_l_btn = "4"
@@ -233,7 +233,7 @@ write_joy2key_profile() {
                 [ -z "$iname" ] && continue
                 local ra=""
                 case "$iname" in
-                    a) ra="a" ;; b) ra="b" ;; x) ra="x" ;; y) ra="y" ;;
+                    a) ra="b" ;; b) ra="a" ;; x) ra="x" ;; y) ra="y" ;;
                     up) ra="up" ;; down) ra="down" ;; left) ra="left" ;; right) ra="right" ;;
                     start) ra="start" ;; select) ra="select" ;;
                     pageup|leftshoulder) ra="l" ;; pagedown|rightshoulder) ra="r" ;;

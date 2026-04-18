@@ -67,6 +67,14 @@ if [ -f "${GLOBAL_RA}" ]; then
     sed -i '/^menu_driver/d' "${GLOBAL_RA}"
     echo 'menu_driver = "ozone"' >> "${GLOBAL_RA}"
 
+    # Per-system input remapping
+    sed -i '/^auto_remaps_enable/d' "${GLOBAL_RA}"
+    sed -i '/^remap_save_on_exit/d' "${GLOBAL_RA}"
+    {
+        echo 'auto_remaps_enable = "true"'
+        echo 'remap_save_on_exit = "true"'
+    } >> "${GLOBAL_RA}"
+
     # Netplay — peer-to-peer ready out-of-the-box
     sed -i '/^netplay_nickname/d' "${GLOBAL_RA}"
     sed -i '/^netplay_ip_port/d' "${GLOBAL_RA}"

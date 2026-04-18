@@ -14,7 +14,7 @@ install_cleanup_trap
 
 echo_green "install samba..."
 
-apt-get install -y --no-install-recommends samba samba-common-bin
+apt-get install -y --no-install-recommends samba samba-common-bin wsdd
 
 cat << 'EOF' | sudo tee /etc/samba/smb.conf
 [global]
@@ -71,6 +71,6 @@ EOF
 mkdir -p /home/"${BASE_USER}"/RetroPie/BIOS
 mkdir -p /home/"${BASE_USER}"/RetroPie/splashscreens
 
-sudo systemctl enable smbd nmbd
+sudo systemctl enable smbd nmbd wsdd
 
 echo_green "install samba...(DONE)"
