@@ -182,6 +182,9 @@ bash retropie_packages.sh esthemes || true         # theme downloader from ES me
 false && bash retropie_packages.sh splashscreen || true     # boot splash screen configuration — !all rpi (RetroMi uses plymouth module)
 bash retropie_packages.sh resetromdirs || true     # reset/create ROM directory structure
 
+# PS3/PS4 controller pairing — lightweight driver, always installed
+bash retropie_packages.sh sixaxis || true          # DualShock Bluetooth pairing via BlueZ
+
 # Extended packages (skipped in LIGHT mode — these compile from source and add ~3GB)
 if [ "${RETROMI_LIGHT}" != "yes" ]; then
     echo_green "Full build — installing extended packages..."
@@ -199,7 +202,6 @@ if [ "${RETROMI_LIGHT}" != "yes" ]; then
     bash retropie_packages.sh steamcontroller || true  # Steam Controller support
     false && bash retropie_packages.sh xpad || true             # Xbox controller kernel driver — !mali (kernel module already in Armbian)
     bash retropie_packages.sh xpadneo || true          # Xbox One S/X wireless driver
-    bash retropie_packages.sh sixaxis || true          # PS3/PS4 Sixaxis pairing via standard BlueZ
     false && bash retropie_packages.sh controlblock || true     # GPIO power/reset button (arcade builds) — !all rpi (Broadcom GPIO only)
     false && bash retropie_packages.sh powerblock || true       # GPIO power management — !all rpi (Broadcom GPIO only)
 
