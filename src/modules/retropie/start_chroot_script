@@ -83,7 +83,7 @@ echo "__PAIRING__" > "${ROM_DIR}/steam/Pairing.ml"
 
 # Moonlight-qt config — optimized for SmartPi One H3 (CedarX HEVC HW decode)
 # Deployed AFTER moonlight-qt apt install so it's pre-configured on first launch
-MOONLIGHT_CONF="/home/${BASE_USER}/.config/moonlight-qt"
+MOONLIGHT_CONF="/home/${BASE_USER}/.config/Moonlight Game Streaming Project"
 mkdir -p "${MOONLIGHT_CONF}"
 cat > "${MOONLIGHT_CONF}/Moonlight.conf" << 'MOONLIGHT_CFG'
 [General]
@@ -96,9 +96,9 @@ videodec=0
 vsync=true
 framepacing=true
 yuv444=false
-quitappafter=true
+quitAppAfter=true
 MOONLIGHT_CFG
-chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/.config/moonlight-qt"
+chown -R "${BASE_USER}:${BASE_USER}" "${MOONLIGHT_CONF}"
 
 # Download game data from Yumi-Lab/RetroMi-games
 # GitHub releases use 302 redirects — curl handles them better than wget in QEMU chroot
