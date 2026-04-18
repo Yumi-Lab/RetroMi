@@ -19,7 +19,13 @@ unpack /filesystem/root /
 # Standard Debian FFmpeg lacks v4l2_request; apt.undo.it provides a patched build
 # moonlight-qt links dynamically against libavcodec — the apt.undo.it version provides
 # v4l2_request_h264/hevc_set_controls needed for hardware decode on H3
-echo "deb [trusted=yes] https://apt.undo.it bookworm main" > /etc/apt/sources.list.d/undo-ffmpeg.list
+echo "deb [trusted=yes] http://apt.undo.it:7242 bookworm main" > /etc/apt/sources.list.d/undo-ffmpeg.list
+
+# Moonlight-qt GUI — official Cloudsmith repo (armhf builds available)
+curl -fsSL "https://dl.cloudsmith.io/public/moonlight-game-streaming/moonlight-qt/gpg.key" \
+    | gpg --dearmor -o /usr/share/keyrings/moonlight-game-streaming-moonlight-qt-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/moonlight-game-streaming-moonlight-qt-archive-keyring.gpg] https://dl.cloudsmith.io/public/moonlight-game-streaming/moonlight-qt/deb/debian bookworm main" \
+    > /etc/apt/sources.list.d/moonlight-qt.list
 
 # Ensure sunxi_cedrus (CedarX hardware video decoder) loads at boot
 echo "sunxi_cedrus" > /etc/modules-load.d/retromi-cedrus.conf
@@ -69,27 +75,28 @@ done
 chown -R "${BASE_USER}:${BASE_USER}" "${ROM_DIR}"
 
 # Moonlight streaming — .ml ROM files for ES steam system
-# Format: line 1 = server IP, line 2 = app name (or __PAIRING__ for GUI)
-# ES suspend → moonlight-qt takes EGLFS → Ctrl+Alt+Shift+Q → ES resumes
-printf '%s\n' "0.0.0.0" "Desktop" > "${ROM_DIR}/steam/Desktop.ml"
-printf '%s\n' "0.0.0.0" "Steam Big Picture" > "${ROM_DIR}/steam/Steam.ml"
-printf '%s\n' "0.0.0.0" "__PAIRING__" > "${ROM_DIR}/steam/Pairing.ml"
+# Format: line 1 = app name (or __PAIRING__), line 2 = server IP (optional, auto-discover if absent)
+# Quit: Ctrl+Alt+Shift+Q or Play+Back+LB+RB → moonlight exits → ES resumes
+echo "Desktop" > "${ROM_DIR}/steam/Desktop.ml"
+echo "Steam Big Picture" > "${ROM_DIR}/steam/Steam.ml"
+echo "__PAIRING__" > "${ROM_DIR}/steam/Pairing.ml"
 
-# Moonlight-qt settings — optimized for SmartPi One H3 (CedarX HEVC HW decode)
-# 800x480 native screen: 50fps render, zero frame drop, HEVC 15Mbps
-# Software decode = PI CRASH — always force hardware (videodec=0)
+# Moonlight-qt config — optimized for SmartPi One H3 (CedarX HEVC HW decode)
+# Deployed AFTER moonlight-qt apt install so it's pre-configured on first launch
 MOONLIGHT_CONF="/home/${BASE_USER}/.config/moonlight-qt"
 mkdir -p "${MOONLIGHT_CONF}"
 cat > "${MOONLIGHT_CONF}/Moonlight.conf" << 'MOONLIGHT_CFG'
 [General]
-bitrate=15000
-fps=60
-height=480
 width=800
+height=480
+fps=30
+bitrate=20000
 videocfg=2
 videodec=0
+vsync=true
+framepacing=true
 yuv444=false
-vsync=false
+quitappafter=true
 MOONLIGHT_CFG
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/.config/moonlight-qt"
 
@@ -280,8 +287,8 @@ done
 if [ -f /opt/retropie/supplementary/moonlight-qt-stream.sh ]; then
     mkdir -p /opt/retropie/configs/steam
     cat > /opt/retropie/configs/steam/emulators.cfg << 'MOONLIGHT_EMU'
-moonlight-qt = "/opt/retropie/supplementary/moonlight-qt-stream.sh %ROM%"
-default = "moonlight-qt"
+moonlight = "/opt/retropie/supplementary/moonlight-qt-stream.sh %ROM%"
+default = "moonlight"
 MOONLIGHT_EMU
     echo_green "Moonlight emulators.cfg restored (CedarX wrapper)"
 fi

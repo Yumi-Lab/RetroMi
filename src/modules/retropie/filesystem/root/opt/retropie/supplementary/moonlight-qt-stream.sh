@@ -1,9 +1,8 @@
 #!/bin/bash
-# moonlight-qt-stream.sh — Wrapper for moonlight-qt launched from ES via runcommand
-# Reads .ml ROM files: line 1 = server IP, line 2 = app name (or __PAIRING__ for GUI)
+# moonlight-stream.sh — Wrapper for moonlight-qt launched from ES via runcommand
+# Reads .ml ROM files: line 1 = app name (or __PAIRING__), line 2 = server IP (optional, auto-discover if absent)
 #
 # Pipeline: Sunshine HEVC → FFmpeg v4l2_request → CedarX cedrus → NV12 DRM → screen
-# ES suspends EGLFS before calling this → moonlight-qt takes DRM master
 # Quit: Ctrl+Alt+Shift+Q → moonlight-qt exits → ES resumes
 
 ROM_FILE="$1"
@@ -13,8 +12,8 @@ if [ ! -f "${ROM_FILE}" ]; then
     exit 1
 fi
 
-SERVER_IP=$(sed -n '1p' "${ROM_FILE}")
-APP_NAME=$(sed -n '2p' "${ROM_FILE}")
+APP_NAME=$(sed -n '1p' "${ROM_FILE}")
+SERVER_IP=$(sed -n '2p' "${ROM_FILE}")
 
 export QT_QPA_PLATFORM=eglfs
 export HOME="/home/$(logname 2>/dev/null || echo pi)"
@@ -22,7 +21,10 @@ export HOME="/home/$(logname 2>/dev/null || echo pi)"
 if [ "${APP_NAME}" = "__PAIRING__" ]; then
     # Open moonlight-qt GUI for pairing / server discovery / settings
     exec moonlight-qt
-else
-    # Direct stream — connect to server and launch app
+elif [ -n "${SERVER_IP}" ]; then
+    # Direct stream with explicit server IP
     exec moonlight-qt stream "${SERVER_IP}" "${APP_NAME}"
+else
+    # Direct stream — moonlight-qt auto-discovers server
+    exec moonlight-qt stream "${APP_NAME}"
 fi
