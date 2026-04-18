@@ -27,7 +27,7 @@ cat << 'EOF' | sudo tee /etc/samba/smb.conf
    map to guest = Bad User
    usershare allow guests = yes
 
-[ROMs]
+[roms]
    comment = RetroMi ROMs
    path = /home/pi/RetroPie/roms
    browseable = yes
@@ -36,7 +36,40 @@ cat << 'EOF' | sudo tee /etc/samba/smb.conf
    force user = pi
    create mask = 0664
    directory mask = 0775
+
+[bios]
+   comment = RetroMi BIOS
+   path = /home/pi/RetroPie/BIOS
+   browseable = yes
+   read only = no
+   guest ok = yes
+   force user = pi
+   create mask = 0664
+   directory mask = 0775
+
+[configs]
+   comment = RetroMi Configs
+   path = /opt/retropie/configs
+   browseable = yes
+   read only = no
+   guest ok = yes
+   force user = pi
+   create mask = 0664
+   directory mask = 0775
+
+[splashscreens]
+   comment = RetroMi Splashscreens
+   path = /home/pi/RetroPie/splashscreens
+   browseable = yes
+   read only = no
+   guest ok = yes
+   force user = pi
+   create mask = 0664
+   directory mask = 0775
 EOF
+
+mkdir -p /home/"${BASE_USER}"/RetroPie/BIOS
+mkdir -p /home/"${BASE_USER}"/RetroPie/splashscreens
 
 sudo systemctl enable smbd nmbd
 
