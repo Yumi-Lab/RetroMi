@@ -206,15 +206,9 @@ bash retropie_packages.sh scraper || true
 # Steam Controller user-mode driver
 bash retropie_packages.sh steamcontroller || true
 
-# Virtual/mobile controllers — phone as gamepad via WiFi
-bash retropie_packages.sh mobilegamepad || true
-
-if [ "${RETROMI_LIGHT}" != "yes" ]; then
-    echo_green "Full build — installing remaining extended packages..."
-    bash retropie_packages.sh virtualgamepad || true   # web-based virtual gamepad
-else
-    echo_green "LIGHT build — skipping remaining extended packages"
-fi
+# Virtual/mobile controllers
+bash retropie_packages.sh mobilegamepad || true    # phone as gamepad via WiFi
+bash retropie_packages.sh virtualgamepad || true   # web-based virtual gamepad
 
 echo_green "RetroPie supplementary packages... [DONE]"
 
