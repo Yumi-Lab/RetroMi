@@ -67,6 +67,10 @@ if [ -f "${GLOBAL_RA}" ]; then
     sed -i '/^menu_driver/d' "${GLOBAL_RA}"
     echo 'menu_driver = "ozone"' >> "${GLOBAL_RA}"
 
+    # Core info path — required for netplay to detect core capabilities
+    sed -i '/^libretro_info_path/d' "${GLOBAL_RA}"
+    echo 'libretro_info_path = "/opt/retropie/configs/all/retroarch/cores"' >> "${GLOBAL_RA}"
+
     # Per-system input remapping
     sed -i '/^auto_remaps_enable/d' "${GLOBAL_RA}"
     sed -i '/^remap_save_on_exit/d' "${GLOBAL_RA}"
