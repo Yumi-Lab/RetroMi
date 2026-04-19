@@ -19,7 +19,7 @@ RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One*
 
 | Feature | Details |
 |---------|---------|
-| **EmulationStation** | 17 themes pre-installed (EpicNoir default) |
+| **EmulationStation** | EpicNoir theme + 200+ downloadable themes |
 | **RetroArch** | 100+ libretro cores, Mali-400 GPU optimized |
 | **Pre-compiled packages** | 20 groups built for armhf — no compilation on device |
 | **237 gamepads** | PS3/PS4/PS5, Xbox, Switch Pro, 8BitDo, Logitech — plug & play |
@@ -31,12 +31,9 @@ RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One*
 | **USB auto-mount** | Plug a USB drive — ROMs detected automatically |
 | **Fast boot** | Custom Plymouth splash, ~45 min build |
 
-### Pre-installed themes (16)
+### Themes
 
-| Source | Themes |
-|--------|--------|
-| Bundled (7z) | EpicNoir (default), Carbon 2021, Switch, ArkOS Carbon, Epic, Freeplay, GBZ35 Mod, Magical Pixel, Minimal ArkOS, NES Box |
-| Community | Art Book Next, Elementerial (MIT), Chicuelo, Not-so-Epic, LCARS (CC0), Tronkyfran |
+**EpicNoir** pre-installed as default. 200+ additional themes available via the built-in theme downloader (ES menu → RetroPie → ES Themes).
 
 ### Supported systems (102 cores across 20 groups)
 
