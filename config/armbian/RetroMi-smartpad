@@ -7,9 +7,7 @@
 DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.7.0-oc/Yumi-smartpad-bookworm-debian12-server-2026-04-07-0034.img.xz.sha256"
 DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.7.0-oc/Yumi-smartpad-bookworm-debian12-server-2026-04-07-0034.img.xz"
 
-# SmartPad uses light mode — extended packages added progressively
 BASE_IMAGE_ENLARGEROOT=12000
-RETROMI_LIGHT="yes"
 
 # pkgupgrade temporarily removed — armbian-firmware 26.2.1 dpkg broken upstream
 MODULES="base(udev_fix,armbian(armbian_net,retropie,controllers,retroarch,bezels,yumios,plymouth,filebroswer,emulatiostation,usb-mount))"
@@ -21,7 +19,6 @@ BASE_OS_CODENAME="bookworm"
 BASE_OS_VERSION="debian12"
 
 # export Variables
-export RETROMI_LIGHT
 export BASE_ARCH
 export BASE_SBC
 export BASE_OS_CODENAME

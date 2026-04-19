@@ -20,7 +20,7 @@ buildtest:
   # - armbian/orangepi3lts
   # - armbian/orangepi4lts
   # - armbian/RetroMi  # full — deprecated, light replaces it
-  - armbian/RetroMi-light
+  - armbian/RetroMi-smartpi1
   - armbian/RetroMi-smartpad
   #- armbian/smartpi
   # Orange Pi OS based images
@@ -39,7 +39,7 @@ release:
   #- armbian/orangepi3lts
   #- armbian/orangepi4lts
   # - armbian/RetroMi  # full — deprecated, light replaces it
-  - armbian/RetroMi-light
+  - armbian/RetroMi-smartpi1
   - armbian/RetroMi-smartpad
   #- armbian/smartpi
   # Orange Pi OS based images

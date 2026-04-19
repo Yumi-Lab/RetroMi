@@ -7,16 +7,10 @@
 DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.6.0/Yumi-smartpi1-bookworm-debian12-server-2026-03-01-2139.img.xz.sha256"
 DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.6.0/Yumi-smartpi1-bookworm-debian12-server-2026-03-01-2139.img.xz"
 
-# Light build — smaller image, faster build (~45min vs 1h30)
 BASE_IMAGE_ENLARGEROOT=8000
-RETROMI_LIGHT="yes"
 
 # pkgupgrade temporarily removed — armbian-firmware 26.2.1 dpkg broken upstream
 MODULES="base(udev_fix,armbian(armbian_net,retropie,controllers,retroarch,bezels,yumios,plymouth,filebroswer,samba,emulatiostation,usb-mount))"
-
-# All extended packages now installed on all builds (RETROMI_LIGHT guard removed)
-
-export RETROMI_LIGHT
 
 # SmartPi One — AllWinner H3 — ARMv7 32-bit
 BASE_ARCH="armhf"
