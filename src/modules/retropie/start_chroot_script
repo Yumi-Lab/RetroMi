@@ -241,6 +241,35 @@ for system in arcade mame-libretro fba neogeo; do
     fi
 done
 
+# Dreamcast — lr-flycast (GLES2/Makefile) as default instead of lr-flycast-dev (GLES3/CMake)
+# lr-flycast-dev crashes on Mali-400 (SIGABRT — requires GLES 3.0)
+# lr-flycast compiled with FORCE_GLES=1 HAVE_GL3=0 MFLAGS='-marm' works on GLES 2.0
+DC_CFG="/opt/retropie/configs/dreamcast/emulators.cfg"
+if [ -f "${DC_CFG}" ] && grep -q "lr-flycast-dev" "${DC_CFG}" && grep -q "lr-flycast " "${DC_CFG}"; then
+    sed -i '/^default/d' "${DC_CFG}"
+    echo 'default = "lr-flycast"' >> "${DC_CFG}"
+    echo_green "Dreamcast: lr-flycast (GLES2) set as default"
+fi
+
+# Dreamcast BIOS — download from archive.org (optional, HLE BIOS enabled as fallback)
+BIOS_DC="/home/${BASE_USER}/RetroPie/BIOS/dc"
+mkdir -p "${BIOS_DC}"
+if [ ! -f "${BIOS_DC}/dc_boot.bin" ]; then
+    echo_green "Downloading Dreamcast BIOS..."
+    curl -fSL --retry 3 --connect-timeout 15 \
+        -o "${BIOS_DC}/dc_boot.bin" "https://archive.org/download/dc_boot/dc_boot.bin" || true
+    curl -fSL --retry 3 --connect-timeout 15 \
+        -o "${BIOS_DC}/dc_flash.bin" "https://archive.org/download/dc_boot/dc_flash.bin" || true
+    chown -R "${BASE_USER}:${BASE_USER}" "${BIOS_DC}"
+fi
+
+# Dreamcast retroarch.cfg — shared GL context required for HW-accelerated core
+DC_RA="/opt/retropie/configs/dreamcast/retroarch.cfg"
+if [ -f "${DC_RA}" ] && ! grep -q "video_shared_context" "${DC_RA}"; then
+    sed -i '1a\video_shared_context = "true"' "${DC_RA}"
+    echo_green "Dreamcast: video_shared_context enabled"
+fi
+
 # Register ports (non-libretro standalone engines)
 # shellcheck disable=SC2043
 for port in openbor; do
