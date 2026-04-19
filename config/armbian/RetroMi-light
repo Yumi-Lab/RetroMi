@@ -14,9 +14,7 @@ RETROMI_LIGHT="yes"
 # pkgupgrade temporarily removed — armbian-firmware 26.2.1 dpkg broken upstream
 MODULES="base(udev_fix,armbian(armbian_net,retropie,controllers,retroarch,bezels,yumios,plymouth,filebroswer,samba,emulatiostation,usb-mount))"
 
-# Light mode skips: attractmode, pegasus, mehstation, scrapers,
-# GPIO drivers, steamcontroller, mobilegamepad, virtualgamepad
-# Keeps: joy2key, wifi, audiosettings, configedit, esthemes, splashscreen
+# All extended packages now installed on all builds (RETROMI_LIGHT guard removed)
 
 export RETROMI_LIGHT
 

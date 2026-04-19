@@ -19,7 +19,7 @@ buildtest:
   # - armbian/bananapim2zero
   # - armbian/orangepi3lts
   # - armbian/orangepi4lts
-  - armbian/RetroMi
+  # - armbian/RetroMi  # full — deprecated, light replaces it
   - armbian/RetroMi-light
   - armbian/RetroMi-smartpad
   #- armbian/smartpi
@@ -38,7 +38,7 @@ release:
   # armbian based images
   #- armbian/orangepi3lts
   #- armbian/orangepi4lts
-  - armbian/RetroMi
+  # - armbian/RetroMi  # full — deprecated, light replaces it
   - armbian/RetroMi-light
   - armbian/RetroMi-smartpad
   #- armbian/smartpi
