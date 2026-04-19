@@ -9,9 +9,9 @@
 
 ---
 
-RetroMi is a ready-to-use Armbian Bookworm image for the **SmartPi One** (AllWinner H3 — ARMv7 32-bit), turning your nano-computer into a full retrogaming station with EmulationStation, RetroArch and over **80 pre-compiled emulators**.
+RetroMi is a ready-to-use Armbian Bookworm image for the **SmartPi One** (AllWinner H3 — ARMv7 32-bit), turning your nano-computer into a full retrogaming station with EmulationStation, RetroArch and over **100 pre-compiled emulators** — including Dreamcast, N64, PSP and PC game streaming via Moonlight.
 
-RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One** (AllWinner H3 — ARMv7 32-bit), transformant votre nano-ordinateur en station de retrogaming complète avec EmulationStation, RetroArch et plus de **80 émulateurs** pré-compilés.
+RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One** (AllWinner H3 — ARMv7 32-bit), transformant votre nano-ordinateur en station de retrogaming complète avec EmulationStation, RetroArch et plus de **100 émulateurs** pré-compilés — dont Dreamcast, N64, PSP et streaming PC via Moonlight.
 
 ---
 
@@ -20,41 +20,48 @@ RetroMi est une image Armbian Bookworm prête à l'emploi pour le **SmartPi One*
 | Feature | Details |
 |---------|---------|
 | **EmulationStation** | 17 themes pre-installed (EpicNoir default) |
-| **RetroArch** | 80+ libretro cores, Mali-400 GPU optimized |
-| **Pre-compiled packages** | 16 groups built for armhf — no compilation on device |
-| **235 gamepads** | PS3/PS4/PS5, Xbox, Switch Pro, 8BitDo, Logitech — auto-configured |
+| **RetroArch** | 100+ libretro cores, Mali-400 GPU optimized |
+| **Pre-compiled packages** | 20 groups built for armhf — no compilation on device |
+| **237 gamepads** | PS3/PS4/PS5, Xbox, Switch Pro, 8BitDo, Logitech — plug & play |
+| **Dreamcast** | Flycast GLES2 — Crazy Taxi playable on H3 |
+| **Moonlight** | PC game streaming via Sunshine (HEVC HW decode) |
+| **Samba shares** | ROMs, BIOS, configs, splashscreens — guest access |
 | **Bezels / Overlays** | Per-system decorative bezels from TheBezelProject (19 systems) |
 | **FileBrowser** | Web-based ROM manager on port 80 |
 | **USB auto-mount** | Plug a USB drive — ROMs detected automatically |
-| **Fast boot** | Custom Plymouth splash, ~25 min build |
+| **Fast boot** | Custom Plymouth splash, ~45 min build |
 
-### Pre-installed themes (17)
+### Pre-installed themes (16)
 
 | Source | Themes |
 |--------|--------|
-| Bundled (7z) | EpicNoir (default), Carbon 2021, Switch Black v2, Switch, ArkOS Carbon, Epic, Freeplay, GBZ35 Mod, Magical Pixel, Minimal ArkOS, NES Box |
+| Bundled (7z) | EpicNoir (default), Carbon 2021, Switch, ArkOS Carbon, Epic, Freeplay, GBZ35 Mod, Magical Pixel, Minimal ArkOS, NES Box |
 | Community | Art Book Next, Elementerial (MIT), Chicuelo, Not-so-Epic, LCARS (CC0), Tronkyfran |
 
-### Supported systems (80+ cores across 16 groups)
+### Supported systems (102 cores across 20 groups)
 
 | Group | Systems |
 |-------|---------|
-| `retroarch` | RetroArch frontend |
-| `arcade` | FBNeo |
+| `retroarch` | RetroArch frontend + assets |
+| `arcade` | FBNeo (Arcade / Neo Geo / CPS1-2-3) |
 | `arcade-compat` | MAME 2000/2003/2003+/2010, FBAlpha2012 |
 | `nintendo` | NES, SNES, GB/GBC, GBA (13 cores) |
 | `n64` | N64, PC Engine / TurboGrafx (5 cores) |
 | `sega` | Mega Drive, Sega CD, 32X, Master System, Game Gear, Neo Geo CD |
 | `sony` | PlayStation 1 |
 | `psp` | PlayStation Portable (PPSSPP) |
-| `misc` | Doom, Quake, Atari 2600, Pico-8, WASM-4, EasyRPG, Cave Story… |
+| `misc` | Doom, Quake, Atari 2600, Pico-8, WASM-4, TIC-80, EasyRPG, Cave Story, Java ME… |
+| `openbor` | OpenBOR (Beat 'em Up engine) |
 | `scummvm` | ScummVM — 250+ point & click adventures |
 | `dosbox` | DOSBox Pure |
-| `portables` | NGP, Lynx, VB, WonderSwan, Pokémon Mini, Arduboy… |
+| `portables` | NGP, Lynx, VB, WonderSwan, Pokémon Mini, Arduboy, Vectrex, Game & Watch… |
 | `computers` | C64, MSX, Atari 8-bit, ZX Spectrum, Amstrad CPC, Atari ST, Apple II, BBC Micro, Enterprise 128 |
 | `amiga` | Amiga (uae4arm, PUAE) |
 | `japan-computers` | PC-98, PC-88, X68000, Sharp X1 |
 | `heavy` | DS, Dreamcast, Saturn, 3DO, Jaguar |
+| `emulationstation` | EmulationStation frontend |
+| `moonlight` | Moonlight — PC game streaming (Sunshine / NVIDIA) |
+| `skyscraper` | Skyscraper — game metadata & artwork scraper |
 
 ---
 
@@ -141,8 +148,8 @@ sudo nmtui
 
 ```
 Layer 1 — Yumi-Lab/SmartPi-armbian   : Armbian Bookworm server base (armhf)
-Layer 2 — Yumi-Lab/RetroMi-packages  : 80+ pre-compiled libretro cores (16 groups)
-Layer 3 — Yumi-Lab/RetroMi           : EmulationStation themes, config, modules
+Layer 2 — Yumi-Lab/RetroMi-packages  : 102 pre-compiled libretro cores (20 groups)
+Layer 3 — Yumi-Lab/RetroMi           : themes, config, modules, controllers, bezels
 ```
 
 Layer 2 is built separately via QEMU armhf in Docker — no compilation on the device.
@@ -150,8 +157,9 @@ Layer 2 is built separately via QEMU armhf in Docker — no compilation on the d
 ### Build modules chain
 
 ```
-base → pkgupgrade → udev_fix → controllers → armbian → armbian_net → retropie
-     → retroarch → bezels → yumios → plymouth → filebroswer → emulatiostation → usb-mount
+base → udev_fix → controllers → armbian → armbian_net → retropie
+     → retroarch → bezels → yumios → plymouth → filebroswer → samba
+     → emulatiostation → usb-mount
 ```
 
 ---
