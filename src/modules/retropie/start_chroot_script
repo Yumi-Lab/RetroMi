@@ -195,8 +195,10 @@ bash retropie_packages.sh sixaxis || true          # DualShock Bluetooth pairing
 # LAN/online multiplayer — lightweight, always installed
 bash retropie_packages.sh retronetplay || true
 
-# Extended packages — disabled, re-adding one by one to find sed read-only bug
-# bash retropie_packages.sh xpadneo || true
+# Extended packages — re-adding one by one to find sed read-only bug
+# Xbox One S/X wireless BT driver — lightweight kernel module, useful for all users
+bash retropie_packages.sh xpadneo || true
+
 # bash retropie_packages.sh scraper || true
 # bash retropie_packages.sh steamcontroller || true
 # bash retropie_packages.sh mobilegamepad || true
