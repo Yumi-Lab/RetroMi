@@ -4,8 +4,8 @@
 # shellcheck disable=SC2034
 
 # Base image: SmartPad — Armbian Bookworm (Debian 12) server — OC 1.5GHz 4 cores
-DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.7.0-oc/Yumi-smartpad-bookworm-debian12-server-2026-04-07-0034.img.xz.sha256"
-DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.7.0-oc/Yumi-smartpad-bookworm-debian12-server-2026-04-07-0034.img.xz"
+DOWNLOAD_URL_CHECKSUM="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.7.0/Yumi-smartpad-bookworm-debian12-server-2026-04-23-0753.img.xz.sha256"
+DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/download/v1.7.0/Yumi-smartpad-bookworm-debian12-server-2026-04-23-0753.img.xz"
 
 BASE_IMAGE_ENLARGEROOT=12000
 

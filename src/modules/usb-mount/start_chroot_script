@@ -23,4 +23,23 @@ git clone https://github.com/Yumi-Lab/auto-mount-retromi.git
 cd auto-mount-retromi/
 sudo chmod +x ./CONFIGURE.sh
 sudo ./CONFIGURE.sh
+
+# Patch 10_retropie_mount: after USB bind mount, restore retropiemenu from SD
+# USB bind mount covers ~/RetroPie — retropiemenu lives in /opt/retropie/retropiemenu
+# and must be bind-mounted back so ES can see it (FAT32 doesn't support symlinks)
+MOUNT_HOOK="/etc/usbmount/mount.d/10_retropie_mount"
+if [ -f "${MOUNT_HOOK}" ] && ! grep -q "retropiemenu" "${MOUNT_HOOK}"; then
+    cat >> "${MOUNT_HOOK}" << 'RETROPIEMENU_FIX'
+
+# RetroMi: restore retropiemenu from SD after USB bind mount
+# retropiemenu is stored in /opt/retropie/retropiemenu/ (never on USB)
+if [ -d "/opt/retropie/retropiemenu" ]; then
+    mkdir -p "$retropie_path/retropiemenu"
+    mount -o bind /opt/retropie/retropiemenu "$retropie_path/retropiemenu"
+    log info "retropiemenu bind-mounted from SD"
+fi
+RETROPIEMENU_FIX
+    echo_green "Patched 10_retropie_mount for retropiemenu"
+fi
+
 echo_green "Enable USB Auto Mount...(DONE)"

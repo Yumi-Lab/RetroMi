@@ -501,6 +501,20 @@ cat > "${RETROPIEMENU}/gamelist.xml" << 'GAMELIST'
 GAMELIST
 echo_green "Devmode toggle script installed"
 
+# Move retropiemenu to /opt so it survives USB bind mounts on /home/pi/RetroPie
+# When a USB stick with retropie-mount/ is plugged in, usbmount bind-mounts it
+# over ~/RetroPie — the symlink is masked but /opt/retropie/retropiemenu stays intact.
+# The usb-mount module re-creates a bind mount for retropiemenu after the USB mount.
+RPMENU_PERM="/opt/retropie/retropiemenu"
+if [ -d "${RPMENU_DIR}" ] && [ ! -L "${RPMENU_DIR}" ]; then
+    mkdir -p "${RPMENU_PERM}"
+    cp -a "${RPMENU_DIR}"/* "${RPMENU_PERM}/" 2>/dev/null || true
+    rm -rf "${RPMENU_DIR}"
+    ln -s "${RPMENU_PERM}" "${RPMENU_DIR}"
+    chown -R "${BASE_USER}:${BASE_USER}" "${RPMENU_PERM}"
+    echo_green "retropiemenu moved to ${RPMENU_PERM} + symlink created"
+fi
+
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
 chown -R "${BASE_USER}:${BASE_USER}" "/opt/retropie/configs" 2>/dev/null || true
