@@ -149,3 +149,15 @@ if [[ "$(is_board_type)" == "bananapim2zero" ]] \
     echo "overlays=uart3" >> "${ARMBIAN_CONFIG_TXT_FILE}"
 fi
 ## END Step 9
+
+## Step 10: Ensure BRANCH and LINUXFAMILY in armbian-release
+# Required for RetroPie LINUX-HEADERS resolution (xpadneo DKMS at first boot)
+# Base image may have empty BRANCH= — force correct values
+if [ -f /etc/armbian-release ]; then
+    sed -i '/^BRANCH=/d' /etc/armbian-release
+    sed -i '/^LINUXFAMILY=/d' /etc/armbian-release
+    echo "BRANCH=current" >> /etc/armbian-release
+    echo "LINUXFAMILY=sunxi" >> /etc/armbian-release
+    echo_green "armbian-release: BRANCH=current LINUXFAMILY=sunxi"
+fi
+## END Step 10

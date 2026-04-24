@@ -172,8 +172,8 @@ runs:
 
         echo "=== Armbian base ==="
         check etc/armbian-release
-        grep -qP "BRANCH=.+" "$MNT/etc/armbian-release" && echo "  OK  BRANCH has value" || echo "  WARN  BRANCH empty in armbian-release (xpadneo needs it at first boot)"
-        grep -qP "LINUXFAMILY=.+" "$MNT/etc/armbian-release" && echo "  OK  LINUXFAMILY has value" || echo "  WARN  LINUXFAMILY empty in armbian-release"
+        grep -qP "BRANCH=.+" "$MNT/etc/armbian-release" && echo "  OK  BRANCH has value" || { echo "  FAIL  BRANCH empty in armbian-release"; FAIL=1; }
+        grep -qP "LINUXFAMILY=.+" "$MNT/etc/armbian-release" && echo "  OK  LINUXFAMILY has value" || { echo "  FAIL  LINUXFAMILY empty in armbian-release"; FAIL=1; }
 
         echo "=== RetroPie core ==="
         check_dir opt/retropie/configs/all
