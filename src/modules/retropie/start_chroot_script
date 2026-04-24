@@ -178,7 +178,9 @@ bash retropie_packages.sh sixaxis                  # DualShock Bluetooth pairing
 bash retropie_packages.sh retronetplay
 
 # Extended packages
-bash retropie_packages.sh xpadneo                  # Xbox One S/X wireless BT driver
+# xpadneo — DKMS module, cannot compile in QEMU chroot (kernel headers mismatch)
+# Installed at first boot via firstboot wizard when linux-headers are available
+# bash retropie_packages.sh xpadneo
 bash retropie_packages.sh scraper                  # sselphs scraper
 bash retropie_packages.sh steamcontroller          # Steam Controller support
 bash retropie_packages.sh mobilegamepad            # phone as gamepad via WiFi
