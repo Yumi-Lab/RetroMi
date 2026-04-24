@@ -138,8 +138,39 @@ runs:
         IMG=$(sudo find repository/src/workspace -name "*.img" | head -1)
         LOOP=$(sudo losetup -fP --show "$IMG")
         sleep 1
-        sudo e2fsck -fy "${LOOP}p2" || true
+        sudo e2fsck -fy "${LOOP}p2"
+        RET=$?
+        if [ $RET -gt 2 ]; then
+          echo "❌ e2fsck failed with code $RET — filesystem is corrupt"
+          sudo losetup -d "$LOOP"
+          exit 1
+        fi
+        echo "✅ e2fsck passed (code $RET)"
         sudo losetup -d "$LOOP"
+
+    - name: Smoke test — mount image and verify structure
+      shell: bash
+      run: |
+        IMG=$(sudo find repository/src/workspace -name "*.img" | head -1)
+        LOOP=$(sudo losetup -fP --show "$IMG")
+        sleep 1
+        MNT=$(mktemp -d)
+        sudo mount -o ro "${LOOP}p2" "$MNT"
+        echo "Checking critical files..."
+        FAIL=0
+        for f in etc/armbian-release opt/retropie/configs/all/retroarch.cfg home/pi/RetroPie; do
+          if [ ! -e "$MNT/$f" ]; then
+            echo "❌ MISSING: /$f"
+            FAIL=1
+          else
+            echo "✅ /$f"
+          fi
+        done
+        df -h "$MNT" | tail -1
+        sudo umount "$MNT"
+        rmdir "$MNT"
+        sudo losetup -d "$LOOP"
+        [ $FAIL -eq 0 ] || { echo "❌ Smoke test FAILED"; exit 1; }
 
     - name: Cleanup workspace & fix permissions
       if: success()
