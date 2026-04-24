@@ -100,26 +100,10 @@ quitAppAfter=true
 MOONLIGHT_CFG
 chown -R "${BASE_USER}:${BASE_USER}" "${MOONLIGHT_CONF}"
 
-# Download game data from Yumi-Lab/RetroMi-games
-# GitHub releases use 302 redirects — curl handles them better than wget in QEMU chroot
-ROM_PORTS="/home/${BASE_USER}/RetroPie/roms/ports"
-mkdir -p "${ROM_PORTS}"
-GAMES_URL="https://github.com/Yumi-Lab/RetroMi-games/releases/download/v1.0.0/ports-data.tar.gz"
-echo_green "Downloading ports game data (Doom, Quake, Cave Story, XRick, Dinothawr, Mr.Boom, DOSBox)..."
-if curl -fSL --retry 5 --retry-delay 10 --connect-timeout 30 \
-    -o /tmp/ports-data.tar.gz "${GAMES_URL}"; then
-    tar xzf /tmp/ports-data.tar.gz -C "${ROM_PORTS}/"
-    rm -f /tmp/ports-data.tar.gz
-    chown -R "${BASE_USER}:${BASE_USER}" "${ROM_PORTS}"
-    echo_green "Ports game data installed."
-else
-    echo_green "WARNING: ports-data.tar.gz not available — skipping"
-    rm -f /tmp/ports-data.tar.gz
-fi
-
-# Homebrew ROMs — 288 legally free ROMs across 11 systems
+# Download homebrew ROMs + ports data from Yumi-Lab/RetroMi-games
+# homebrew-roms.zip contains everything (ports + homebrew ROMs across all systems)
 HOMEBREW_URL="https://github.com/Yumi-Lab/RetroMi-games/releases/latest/download/homebrew-roms.zip"
-echo_green "Downloading homebrew ROMs (NES, SNES, Megadrive, SMS, GBA, Atari, ZX Spectrum, Arcade...)..."
+echo_green "Downloading homebrew ROMs + ports data..."
 if curl -fSL --retry 5 --retry-delay 10 --connect-timeout 30 \
     -o /tmp/homebrew-roms.zip "${HOMEBREW_URL}"; then
     apt-get install -y unzip -qq
