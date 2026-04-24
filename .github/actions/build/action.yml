@@ -156,21 +156,83 @@ runs:
         sleep 1
         MNT=$(mktemp -d)
         sudo mount -o ro "${LOOP}p2" "$MNT"
-        echo "Checking critical files..."
         FAIL=0
-        for f in etc/armbian-release opt/retropie/configs/all/retroarch.cfg home/pi/RetroPie; do
-          if [ ! -e "$MNT/$f" ]; then
-            echo "❌ MISSING: /$f"
-            FAIL=1
-          else
-            echo "✅ /$f"
-          fi
-        done
+        check() {
+          if [ -e "$MNT/$1" ]; then echo "  OK  $1"; else echo "  FAIL  $1"; FAIL=1; fi
+        }
+        check_dir() {
+          if [ -d "$MNT/$1" ]; then echo "  OK  $1/"; else echo "  FAIL  $1/"; FAIL=1; fi
+        }
+        check_link() {
+          if [ -L "$MNT/$1" ]; then echo "  OK  $1 -> $(readlink "$MNT/$1")"; else echo "  FAIL  $1 (not a symlink)"; FAIL=1; fi
+        }
+        check_exec() {
+          if [ -x "$MNT/$1" ]; then echo "  OK  $1 (exec)"; else echo "  FAIL  $1 (not executable)"; FAIL=1; fi
+        }
+
+        echo "=== Armbian base ==="
+        check etc/armbian-release
+        grep -q "BRANCH=" "$MNT/etc/armbian-release" && echo "  OK  BRANCH defined" || { echo "  FAIL  BRANCH missing in armbian-release"; FAIL=1; }
+        grep -q "LINUXFAMILY=" "$MNT/etc/armbian-release" && echo "  OK  LINUXFAMILY defined" || { echo "  FAIL  LINUXFAMILY missing in armbian-release"; FAIL=1; }
+
+        echo "=== RetroPie core ==="
+        check_dir opt/retropie/configs/all
+        check opt/retropie/configs/all/retroarch.cfg
+        check opt/retropie/configs/all/retroarch-core-options.cfg
+        check opt/retropie/configs/all/autostart.sh
+        check_dir home/pi/RetroPie/roms
+        check_dir home/pi/Retropie-Setup
+
+        echo "=== EmulationStation ==="
+        check opt/retropie/supplementary/emulationstation/emulationstation
+        check etc/emulationstation/es_systems.cfg
+
+        echo "=== retropiemenu (symlink to SD) ==="
+        check_link home/pi/RetroPie/retropiemenu
+        check_dir opt/retropie/retropiemenu
+        check opt/retropie/retropiemenu/zz-devmode.sh
+
+        echo "=== Controllers ==="
+        check_exec usr/local/bin/retromi-pad-config
+        check etc/udev/rules.d/80-retromi-pad-config.rules
+        check opt/retropie/configs/all/emulationstation/es_input.cfg
+
+        echo "=== Gamepad Plug and Play ==="
+        check opt/retropie/configs/all/runcommand-onstart.sh
+        check opt/retropie/configs/all/gamecontrollerdb.txt
+
+        echo "=== USB auto-mount ==="
+        check_exec usr/local/bin/usb-mount.sh
+
+        echo "=== Samba ==="
+        check etc/samba/smb.conf
+
+        echo "=== FileBrowser ==="
+        check_exec usr/local/bin/filebrowser
+
+        echo "=== Plymouth + firstboot ==="
+        check_exec usr/local/bin/firstboot
+        check etc/systemd/system/firstboot.service
+
+        echo "=== Moonlight ==="
+        check_exec opt/retropie/supplementary/moonlight-qt-stream.sh
+
+        echo "=== xpadneo (DKMS) ==="
+        check_dir opt/retropie/supplementary/xpadneo
+        ls "$MNT"/lib/modules/*/updates/dkms/hid-xpadneo.ko >/dev/null 2>&1 \
+          && echo "  OK  hid-xpadneo.ko compiled" \
+          || echo "  WARN  hid-xpadneo.ko not compiled (expected if no matching headers in chroot)"
+
+        echo "=== Themes ==="
+        check_dir etc/emulationstation/themes/epicnoir
+
+        echo "=== Disk usage ==="
         df -h "$MNT" | tail -1
+
         sudo umount "$MNT"
         rmdir "$MNT"
         sudo losetup -d "$LOOP"
-        [ $FAIL -eq 0 ] || { echo "❌ Smoke test FAILED"; exit 1; }
+        [ $FAIL -eq 0 ] || { echo ""; echo "SMOKE TEST FAILED — see above"; exit 1; }
 
     - name: Cleanup workspace & fix permissions
       if: success()
