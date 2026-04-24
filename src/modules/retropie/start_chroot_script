@@ -104,30 +104,38 @@ chown -R "${BASE_USER}:${BASE_USER}" "${MOONLIGHT_CONF}"
 # GitHub releases use 302 redirects — curl handles them better than wget in QEMU chroot
 ROM_PORTS="/home/${BASE_USER}/RetroPie/roms/ports"
 mkdir -p "${ROM_PORTS}"
-GAMES_URL="https://github.com/Yumi-Lab/RetroMi-games/releases/latest/download/ports-data.tar.gz"
+GAMES_URL="https://github.com/Yumi-Lab/RetroMi-games/releases/download/v1.0.0/ports-data.tar.gz"
 echo_green "Downloading ports game data (Doom, Quake, Cave Story, XRick, Dinothawr, Mr.Boom, DOSBox)..."
-curl -fSL --retry 5 --retry-delay 10 --connect-timeout 30 \
-    -o /tmp/ports-data.tar.gz "${GAMES_URL}"
-tar xzf /tmp/ports-data.tar.gz -C "${ROM_PORTS}/"
-rm -f /tmp/ports-data.tar.gz
-chown -R "${BASE_USER}:${BASE_USER}" "${ROM_PORTS}"
-echo_green "Ports game data installed."
+if curl -fSL --retry 5 --retry-delay 10 --connect-timeout 30 \
+    -o /tmp/ports-data.tar.gz "${GAMES_URL}"; then
+    tar xzf /tmp/ports-data.tar.gz -C "${ROM_PORTS}/"
+    rm -f /tmp/ports-data.tar.gz
+    chown -R "${BASE_USER}:${BASE_USER}" "${ROM_PORTS}"
+    echo_green "Ports game data installed."
+else
+    echo_green "WARNING: ports-data.tar.gz not available — skipping"
+    rm -f /tmp/ports-data.tar.gz
+fi
 
 # Homebrew ROMs — 288 legally free ROMs across 11 systems
 HOMEBREW_URL="https://github.com/Yumi-Lab/RetroMi-games/releases/latest/download/homebrew-roms.zip"
 echo_green "Downloading homebrew ROMs (NES, SNES, Megadrive, SMS, GBA, Atari, ZX Spectrum, Arcade...)..."
-curl -fSL --retry 5 --retry-delay 10 --connect-timeout 30 \
-    -o /tmp/homebrew-roms.zip "${HOMEBREW_URL}"
-apt-get install -y unzip -qq
-unzip -q -o /tmp/homebrew-roms.zip -d /tmp/homebrew-roms
-for dir in /tmp/homebrew-roms/*/; do
-    system=$(basename "${dir}")
-    target="/home/${BASE_USER}/RetroPie/roms/${system}"
-    [ -d "${target}" ] && cp -r "${dir}"* "${target}/"
-done
-rm -rf /tmp/homebrew-roms /tmp/homebrew-roms.zip
-chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/RetroPie/roms"
-echo_green "Homebrew ROMs installed."
+if curl -fSL --retry 5 --retry-delay 10 --connect-timeout 30 \
+    -o /tmp/homebrew-roms.zip "${HOMEBREW_URL}"; then
+    apt-get install -y unzip -qq
+    unzip -q -o /tmp/homebrew-roms.zip -d /tmp/homebrew-roms
+    for dir in /tmp/homebrew-roms/*/; do
+        system=$(basename "${dir}")
+        target="/home/${BASE_USER}/RetroPie/roms/${system}"
+        [ -d "${target}" ] && cp -r "${dir}"* "${target}/"
+    done
+    rm -rf /tmp/homebrew-roms /tmp/homebrew-roms.zip
+    chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/RetroPie/roms"
+    echo_green "Homebrew ROMs installed."
+else
+    echo_green "WARNING: homebrew-roms.zip not available — skipping"
+    rm -f /tmp/homebrew-roms.zip
+fi
 
 # Deploy OpenBOR launcher + gamepad config + moonlight wrapper
 unpack /filesystem/root /
