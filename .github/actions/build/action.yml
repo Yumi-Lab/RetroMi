@@ -217,11 +217,9 @@ runs:
         echo "=== Moonlight ==="
         check_exec opt/retropie/supplementary/moonlight-qt-stream.sh
 
-        echo "=== xpadneo (DKMS) ==="
-        check_dir opt/retropie/supplementary/xpadneo
-        ls "$MNT"/lib/modules/*/updates/dkms/hid-xpadneo.ko >/dev/null 2>&1 \
-          && echo "  OK  hid-xpadneo.ko compiled" \
-          || echo "  WARN  hid-xpadneo.ko not compiled (expected if no matching headers in chroot)"
+        echo "=== xpadneo (installed at first boot) ==="
+        check_dir home/pi/Retropie-Setup/scriptmodules/supplementary
+        echo "  INFO  xpadneo compiled at first boot via DKMS (not in chroot)"
 
         echo "=== Themes ==="
         check_dir etc/emulationstation/themes/epicnoir

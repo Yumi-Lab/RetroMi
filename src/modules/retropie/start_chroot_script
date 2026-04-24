@@ -178,14 +178,8 @@ bash retropie_packages.sh sixaxis                  # DualShock Bluetooth pairing
 bash retropie_packages.sh retronetplay
 
 # Extended packages
-# xpadneo — DKMS module, needs linux-headers matching target kernel
-# In QEMU chroot, /etc/armbian-release may have empty BRANCH — fix it
-# so RetroPie resolves LINUX-HEADERS to the correct package name
-if [ -f /etc/armbian-release ]; then
-    grep -q "^BRANCH=" /etc/armbian-release || echo "BRANCH=current" >> /etc/armbian-release
-    grep -q "^LINUXFAMILY=" /etc/armbian-release || echo "LINUXFAMILY=sunxi" >> /etc/armbian-release
-fi
-bash retropie_packages.sh xpadneo
+# xpadneo — DKMS module, CANNOT compile in QEMU chroot (uname -r = host azure kernel)
+# Compiled at first boot by firstboot wizard on real hardware
 # 4 packages disabled — re-enable one by one to find which breaks boot
 # bash retropie_packages.sh scraper
 # bash retropie_packages.sh steamcontroller
