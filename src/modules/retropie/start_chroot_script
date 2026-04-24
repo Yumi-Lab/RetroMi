@@ -239,6 +239,15 @@ if [ ! -f "${BIOS_DC}/dc_boot.bin" ]; then
     chown -R "${BASE_USER}:${BASE_USER}" "${BIOS_DC}"
 fi
 
+# Famicom Disk System BIOS — required for FDS ROMs
+BIOS_DIR="/home/${BASE_USER}/RetroPie/BIOS"
+if [ ! -f "${BIOS_DIR}/disksys.rom" ]; then
+    echo_green "Downloading Famicom Disk System BIOS..."
+    curl -fSL --retry 3 --connect-timeout 15 \
+        -o "${BIOS_DIR}/disksys.rom" "https://archive.org/download/disksys/disksys.rom" || true
+    chown "${BASE_USER}:${BASE_USER}" "${BIOS_DIR}/disksys.rom"
+fi
+
 # Dreamcast retroarch.cfg — shared GL context required for HW-accelerated core
 DC_RA="/opt/retropie/configs/dreamcast/retroarch.cfg"
 if [ -f "${DC_RA}" ] && ! grep -q "video_shared_context" "${DC_RA}"; then
