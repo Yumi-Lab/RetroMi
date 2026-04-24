@@ -8,6 +8,7 @@ on:
       - "src/build_dist"
       - "config/**"
       - ".github/workflows/BuildImages.yml"
+      - ".github/actions/**"
       - ".github/workflow_config.yml"
       - ".github/scripts/setup_matrix.py"
     tags-ignore:
