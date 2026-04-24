@@ -60,16 +60,11 @@ mkdir -p "${ROM_PORTS}"
 GAMES_URL="https://github.com/Yumi-Lab/RetroMi-games/releases/latest/download/ports-data.tar.gz"
 echo_green "Downloading ports game data (Doom, Quake, Cave Story, XRick, Dinothawr, Mr.Boom, DOSBox)..."
 curl -fSL --retry 5 --retry-delay 10 --connect-timeout 30 \
-    -o /tmp/ports-data.tar.gz "${GAMES_URL}" || true
-if [ -f /tmp/ports-data.tar.gz ] && [ "$(stat -c%s /tmp/ports-data.tar.gz 2>/dev/null)" -gt 1000 ]; then
-    tar xzf /tmp/ports-data.tar.gz -C "${ROM_PORTS}/"
-    rm -f /tmp/ports-data.tar.gz
-    chown -R "${BASE_USER}:${BASE_USER}" "${ROM_PORTS}"
-    echo_green "Ports game data installed."
-else
-    echo_green "WARNING: ports-data.tar.gz download failed or empty — skipping"
-    rm -f /tmp/ports-data.tar.gz
-fi
+    -o /tmp/ports-data.tar.gz "${GAMES_URL}"
+tar xzf /tmp/ports-data.tar.gz -C "${ROM_PORTS}/"
+rm -f /tmp/ports-data.tar.gz
+chown -R "${BASE_USER}:${BASE_USER}" "${ROM_PORTS}"
+echo_green "Ports game data installed."
 
 # Clone YUMI-RETROPIE for post-install configuration only (no compilation)
 pushd "/home/${BASE_USER}" &>/dev/null || exit 1
@@ -103,45 +98,45 @@ bash retropie_packages.sh retroarch
 echo_green "Installing RetroPie supplementary packages..."
 
 # Core utilities (always installed — lightweight scripts)
-bash retropie_packages.sh joy2key || true          # gamepad-to-keyboard in terminal menus
-bash retropie_packages.sh wifi || true             # WiFi configuration menu
-bash retropie_packages.sh audiosettings || true    # audio output configuration
-bash retropie_packages.sh configedit || true       # RetroArch/ES config editor
-bash retropie_packages.sh esthemes || true         # theme downloader from ES menu
-bash retropie_packages.sh splashscreen || true     # boot splash screen configuration
-bash retropie_packages.sh resetromdirs || true     # reset/create ROM directory structure
+bash retropie_packages.sh joy2key                  # gamepad-to-keyboard in terminal menus
+bash retropie_packages.sh wifi                     # WiFi configuration menu
+bash retropie_packages.sh audiosettings            # audio output configuration
+bash retropie_packages.sh configedit               # RetroArch/ES config editor
+bash retropie_packages.sh esthemes                 # theme downloader from ES menu
+bash retropie_packages.sh splashscreen             # boot splash screen configuration
+bash retropie_packages.sh resetromdirs             # reset/create ROM directory structure
 
 # Extended packages (skipped in LIGHT mode — these compile from source and add ~3GB)
 if [ "${RETROMI_LIGHT}" != "yes" ]; then
     echo_green "Full build — installing extended packages..."
 
     # Alternative frontends
-    bash retropie_packages.sh attractmode || true      # Attract Mode frontend
-    bash retropie_packages.sh mehstation || true       # mehstation frontend
-    bash retropie_packages.sh pegasus-fe || true       # Pegasus frontend
+    bash retropie_packages.sh attractmode              # Attract Mode frontend
+    bash retropie_packages.sh mehstation               # mehstation frontend
+    bash retropie_packages.sh pegasus-fe               # Pegasus frontend
 
     # Game scrapers (metadata + artwork)
-    bash retropie_packages.sh scraper || true          # sselphs scraper
-    bash retropie_packages.sh skyscraper || true       # ScreenScraper API scraper
+    bash retropie_packages.sh scraper                  # sselphs scraper
+    bash retropie_packages.sh skyscraper               # ScreenScraper API scraper
 
     # Multiplayer & streaming
-    bash retropie_packages.sh retronetplay || true     # LAN/online multiplayer
-    bash retropie_packages.sh moonlight || true        # PC game streaming (NVIDIA/Sunshine)
+    bash retropie_packages.sh retronetplay             # LAN/online multiplayer
+    bash retropie_packages.sh moonlight                # PC game streaming (NVIDIA/Sunshine)
 
     # Controller drivers (GPIO arcade builds + special controllers)
-    bash retropie_packages.sh gamecondriver || true    # GPIO wired NES/SNES/N64/PSX controllers
-    bash retropie_packages.sh mkarcadejoystick || true # GPIO arcade joystick driver
-    bash retropie_packages.sh snesdev || true          # GPIO SNES controller driver
-    bash retropie_packages.sh steamcontroller || true  # Steam Controller support
-    bash retropie_packages.sh xpad || true             # Xbox controller kernel driver
-    bash retropie_packages.sh xpadneo || true          # Xbox One S/X wireless driver
-    bash retropie_packages.sh sixaxis || true          # PS3/PS4 Sixaxis pairing via standard BlueZ
-    bash retropie_packages.sh controlblock || true     # GPIO power/reset button (arcade builds)
-    bash retropie_packages.sh powerblock || true       # GPIO power management
+    bash retropie_packages.sh gamecondriver            # GPIO wired NES/SNES/N64/PSX controllers
+    bash retropie_packages.sh mkarcadejoystick         # GPIO arcade joystick driver
+    bash retropie_packages.sh snesdev                  # GPIO SNES controller driver
+    bash retropie_packages.sh steamcontroller          # Steam Controller support
+    bash retropie_packages.sh xpad                     # Xbox controller kernel driver
+    bash retropie_packages.sh xpadneo                  # Xbox One S/X wireless driver
+    bash retropie_packages.sh sixaxis                  # PS3/PS4 Sixaxis pairing via standard BlueZ
+    bash retropie_packages.sh controlblock             # GPIO power/reset button (arcade builds)
+    bash retropie_packages.sh powerblock               # GPIO power management
 
     # Virtual/mobile controllers
-    bash retropie_packages.sh mobilegamepad || true    # phone as gamepad via WiFi
-    bash retropie_packages.sh virtualgamepad || true   # web-based virtual gamepad
+    bash retropie_packages.sh mobilegamepad            # phone as gamepad via WiFi
+    bash retropie_packages.sh virtualgamepad           # web-based virtual gamepad
 else
     echo_green "LIGHT build — skipping extended packages"
 fi
@@ -321,6 +316,20 @@ cat > "${RETROPIEMENU}/gamelist.xml" << 'GAMELIST'
 </gameList>
 GAMELIST
 echo_green "Devmode toggle script installed"
+
+# Move retropiemenu to /opt so it survives USB bind mounts on /home/pi/RetroPie
+# When a USB stick with retropie-mount/ is plugged in, usbmount bind-mounts it
+# over ~/RetroPie — the symlink is masked but /opt/retropie/retropiemenu stays intact.
+# The usb-mount module re-creates a bind mount for retropiemenu after the USB mount.
+RPMENU_PERM="/opt/retropie/retropiemenu"
+if [ -d "${RPMENU_DIR}" ] && [ ! -L "${RPMENU_DIR}" ]; then
+    mkdir -p "${RPMENU_PERM}"
+    cp -a "${RPMENU_DIR}"/* "${RPMENU_PERM}/" 2>/dev/null || true
+    rm -rf "${RPMENU_DIR}"
+    ln -s "${RPMENU_PERM}" "${RPMENU_DIR}"
+    chown -R "${BASE_USER}:${BASE_USER}" "${RPMENU_PERM}"
+    echo_green "retropiemenu moved to ${RPMENU_PERM} + symlink created"
+fi
 
 # Fix ownership
 chown -R "${BASE_USER}:${BASE_USER}" "/home/${BASE_USER}/Retropie-Setup"
