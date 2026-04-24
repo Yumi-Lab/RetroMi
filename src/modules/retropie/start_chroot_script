@@ -186,10 +186,11 @@ if [ -f /etc/armbian-release ]; then
     grep -q "^LINUXFAMILY=" /etc/armbian-release || echo "LINUXFAMILY=sunxi" >> /etc/armbian-release
 fi
 bash retropie_packages.sh xpadneo
-bash retropie_packages.sh scraper                  # sselphs scraper
-bash retropie_packages.sh steamcontroller          # Steam Controller support
-bash retropie_packages.sh mobilegamepad            # phone as gamepad via WiFi
-bash retropie_packages.sh virtualgamepad           # web-based virtual gamepad
+# 4 packages disabled — re-enable one by one to find which breaks boot
+# bash retropie_packages.sh scraper
+# bash retropie_packages.sh steamcontroller
+# bash retropie_packages.sh mobilegamepad
+# bash retropie_packages.sh virtualgamepad
 
 echo_green "RetroPie supplementary packages... [DONE]"
 
