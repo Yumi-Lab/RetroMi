@@ -17,7 +17,8 @@ APP_NAME=$(sed -n '1p' "${ROM_FILE}")
 SERVER_IP=$(sed -n '2p' "${ROM_FILE}")
 
 export QT_QPA_PLATFORM=eglfs
-export HOME="/home/$(logname 2>/dev/null || echo pi)"
+HOME="/home/$(logname 2>/dev/null || echo pi)"
+export HOME
 
 # Auto-discover Sunshine server via avahi mDNS
 if [ -z "${SERVER_IP}" ] && [ "${APP_NAME}" != "__PAIRING__" ]; then

@@ -1,5 +1,5 @@
 #!/bin/bash
 /usr/local/bin/openbor-pad-config
-pushd "/opt/retropie/ports/openbor"
+pushd "/opt/retropie/ports/openbor" || exit 1
 ./OpenBOR "$@"
-popd
+popd || exit 1

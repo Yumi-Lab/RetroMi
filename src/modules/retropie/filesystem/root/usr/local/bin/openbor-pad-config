@@ -110,6 +110,7 @@ calc_obr_code() {
 # Write 4-byte little-endian int at offset in file
 write_le32() {
     local file="$1" offset="$2" value="$3"
+    # shellcheck disable=SC2059
     printf "\\x$(printf '%02x' $((value & 0xFF)))\\x$(printf '%02x' $(((value >> 8) & 0xFF)))\\x$(printf '%02x' $(((value >> 16) & 0xFF)))\\x$(printf '%02x' $(((value >> 24) & 0xFF)))" | \
         dd of="$file" bs=1 seek="$offset" conv=notrunc 2>/dev/null
 }
@@ -134,7 +135,6 @@ DEV_NAME=$(get_js0_name)
 CAPS=$(get_js0_caps)
 NB=$(echo "$CAPS" | cut -d'|' -f1)
 NA=$(echo "$CAPS" | cut -d'|' -f2)
-NH=$(echo "$CAPS" | cut -d'|' -f3)
 
 # Get D-pad and button mappings from es_input.cfg
 UP=$(get_input_info "$DEV_NAME" "up")
