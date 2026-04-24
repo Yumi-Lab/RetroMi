@@ -43,6 +43,14 @@ fi
 systemctl_if_exists disable armbian-firstrun-config.service
 ## END
 
+## Step 3.1: Disable resize-filesystem (CustomPiOS handles partition size via BASE_IMAGE_ENLARGEROOT)
+systemctl_if_exists disable armbian-resize-filesystem.service
+## END
+
+## Step 3.2: Mask console-setup (not needed for headless RetroMi, fails on minimal server images)
+systemctl_if_exists mask console-setup.service
+## END
+
 ## Step 4: Copy original script to /usr/local/bin/network-configurator
 if [[ -f "${ARMBIAN_NET_FIRSTRUN_SCRIPT}" ]]; then
     sudo cp -p "${ARMBIAN_NET_FIRSTRUN_SCRIPT}" "${ARMBIAN_NET_NC_PATH}"
