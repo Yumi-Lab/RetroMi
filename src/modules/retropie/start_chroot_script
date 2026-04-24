@@ -217,6 +217,22 @@ for system in arcade mame-libretro fba neogeo; do
     fi
 done
 
+# Set default emulators for systems that don't auto-select one
+declare -A DEFAULT_EMUS=(
+    ["sega32x"]="lr-picodrive"
+    ["mame-mame4all"]="lr-mame2000"
+    ["nds"]="lr-desmume2015"
+    ["pc"]="lr-dosbox-pure"
+    ["scummvm"]="lr-scummvm"
+)
+for system in "${!DEFAULT_EMUS[@]}"; do
+    cfg="/opt/retropie/configs/${system}/emulators.cfg"
+    if [ -f "${cfg}" ] && ! grep -q "^default" "${cfg}"; then
+        echo "default = \"${DEFAULT_EMUS[$system]}\"" >> "${cfg}"
+        echo_green "${system}: default set to ${DEFAULT_EMUS[$system]}"
+    fi
+done
+
 # Dreamcast — lr-flycast (GLES2/Makefile) as default instead of lr-flycast-dev (GLES3/CMake)
 # lr-flycast-dev crashes on Mali-400 (SIGABRT — requires GLES 3.0)
 # lr-flycast compiled with FORCE_GLES=1 HAVE_GL3=0 MFLAGS='-marm' works on GLES 2.0
