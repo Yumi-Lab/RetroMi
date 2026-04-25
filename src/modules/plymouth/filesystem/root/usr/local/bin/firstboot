@@ -167,11 +167,12 @@ sed -i 's/menu_swap_ok_cancel_buttons = "false"/menu_swap_ok_cancel_buttons = "t
 # Default to Dev Mode OFF (clean black screen between ES and games)
 sed -i 's/disable_menu = "0"/disable_menu = "1"/' /opt/retropie/configs/all/runcommand.cfg 2>/dev/null
 
-# xpadneo — compile DKMS module on real hardware (can't compile in QEMU chroot)
+# xpadneo — compile DKMS module on real hardware (sources + deps pre-installed in chroot)
 if [ -d /home/"${BASE_USER}"/Retropie-Setup ]; then
     (
         cd /home/"${BASE_USER}"/Retropie-Setup
-        bash retropie_packages.sh xpadneo 2>&1 | tee -a /var/log/retromi-firstboot.log
+        bash retropie_packages.sh xpadneo build 2>&1 | tee -a /var/log/retromi-firstboot.log
+        bash retropie_packages.sh xpadneo configure 2>&1 | tee -a /var/log/retromi-firstboot.log
     ) &
     XPADNEO_PID=$!
     sleep 30 | "${DIALOG[@]}" --clear --gauge "Installing Xbox controller driver (xpadneo)..." "${RESOLUTION[@]}" 92

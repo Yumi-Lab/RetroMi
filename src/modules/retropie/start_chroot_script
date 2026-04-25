@@ -179,7 +179,11 @@ bash retropie_packages.sh retronetplay
 
 # Extended packages
 # xpadneo — DKMS module, CANNOT compile in QEMU chroot (uname -r = host azure kernel)
-# Compiled at first boot by firstboot wizard on real hardware
+# Pre-install dependencies + download sources here, compile at firstboot on real hardware
+apt-get install -y dkms rsync
+bash retropie_packages.sh xpadneo depends
+bash retropie_packages.sh xpadneo sources
+git config --global --add safe.directory "/home/${BASE_USER}/Retropie-Setup"
 # 4 packages disabled — re-enable one by one to find which breaks boot
 # bash retropie_packages.sh scraper
 # bash retropie_packages.sh steamcontroller
@@ -249,9 +253,9 @@ mkdir -p "${BIOS_DC}"
 if [ ! -f "${BIOS_DC}/dc_boot.bin" ]; then
     echo_green "Downloading Dreamcast BIOS..."
     curl -fSL --retry 3 --connect-timeout 15 \
-        -o "${BIOS_DC}/dc_boot.bin" "https://archive.org/download/dc_boot/dc_boot.bin" || true
+        -o "${BIOS_DC}/dc_boot.bin" "https://archive.org/download/dc_boot/dc_boot.bin"
     curl -fSL --retry 3 --connect-timeout 15 \
-        -o "${BIOS_DC}/dc_flash.bin" "https://archive.org/download/dc_boot/dc_flash.bin" || true
+        -o "${BIOS_DC}/dc_flash.bin" "https://archive.org/download/dc_boot/dc_flash.bin"
     chown -R "${BASE_USER}:${BASE_USER}" "${BIOS_DC}"
 fi
 
@@ -260,8 +264,16 @@ BIOS_DIR="/home/${BASE_USER}/RetroPie/BIOS"
 if [ ! -f "${BIOS_DIR}/disksys.rom" ]; then
     echo_green "Downloading Famicom Disk System BIOS..."
     curl -fSL --retry 3 --connect-timeout 15 \
-        -o "${BIOS_DIR}/disksys.rom" "https://archive.org/download/disksys/disksys.rom" || true
+        -o "${BIOS_DIR}/disksys.rom" "https://archive.org/download/disksys/disksys.rom"
     chown "${BASE_USER}:${BASE_USER}" "${BIOS_DIR}/disksys.rom"
+fi
+
+# NeoGeo BIOS — required by lr-fbneo for full compatibility (HLE fallback otherwise)
+if [ ! -f "${BIOS_DIR}/neogeo.zip" ]; then
+    echo_green "Downloading NeoGeo BIOS..."
+    curl -fSL --retry 3 --connect-timeout 15 \
+        -o "${BIOS_DIR}/neogeo.zip" "https://archive.org/download/neogeo-bios/neogeo/mame_0251b/roms/neogeo.zip"
+    chown "${BASE_USER}:${BASE_USER}" "${BIOS_DIR}/neogeo.zip"
 fi
 
 # Dreamcast retroarch.cfg — shared GL context required for HW-accelerated core
