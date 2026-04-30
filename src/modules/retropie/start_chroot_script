@@ -184,6 +184,7 @@ apt-get install -y dkms rsync
 bash retropie_packages.sh xpadneo depends
 bash retropie_packages.sh xpadneo sources
 git config --global --add safe.directory "/home/${BASE_USER}/Retropie-Setup"
+git config --global --add safe.directory "/home/${BASE_USER}/RetroPie-Setup/tmp/build/xpadneo"
 # 4 packages disabled — re-enable one by one to find which breaks boot
 # bash retropie_packages.sh scraper
 # bash retropie_packages.sh steamcontroller
