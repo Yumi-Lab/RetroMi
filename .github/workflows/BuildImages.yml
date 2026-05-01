@@ -119,8 +119,13 @@ jobs:
           path: ${{ steps.move-image.outputs.image }}.img.sha256
 
       - name: Deploy to dl.yumi-lab.com
+        env:
+          FR_SSH_KEY: ${{ secrets.FR_SSH_KEY }}
         shell: bash
         run: |
-          rm -f /mnt/usb-build/retromi/retromi/*-${{ steps.build.outputs.sbc }}-*.img.xz
-          cp ${{ steps.move-image.outputs.image }}.img.xz /mnt/usb-build/retromi/retromi/
+          echo "$FR_SSH_KEY" > /tmp/fr_key && chmod 600 /tmp/fr_key
+          mkdir -p ~/.ssh && ssh-keyscan -p 22 vpn.yumi-lab.com >> ~/.ssh/known_hosts 2>/dev/null
+          ssh -i /tmp/fr_key pi@vpn.yumi-lab.com "rm -f /mnt/usb-build/retromi/retromi/*-${{ steps.build.outputs.sbc }}-*.img.xz"
+          scp -i /tmp/fr_key ${{ steps.move-image.outputs.image }}.img.xz pi@vpn.yumi-lab.com:/mnt/usb-build/retromi/retromi/
+          rm /tmp/fr_key
           echo "✅ https://dl.yumi-lab.com/retromi/${{ steps.move-image.outputs.image }}.img.xz"
