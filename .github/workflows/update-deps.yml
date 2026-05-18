@@ -1,9 +1,9 @@
+name: Update upstream dependencies
+
 on:
   schedule:
     - cron: '0 8 * * 1'   # Chaque lundi 8h UTC
   workflow_dispatch:
-
-name: Update upstream dependencies
 
 jobs:
   check-sdldb:
