@@ -1,0 +1,39 @@
+#!/bin/bash
+# retromi-bt-hotplug — Called by udev when a BT joystick connects
+#
+# Detects if the new joystick is Bluetooth (ID_BUS=bluetooth).
+# Runs retromi-pad-config to generate RetroArch bindings.
+# Restarts ES if running (ES doesn't support SDL joystick hot-plug).
+#
+# Triggered by udev rule: ACTION=="add", SUBSYSTEM=="input",
+#   ENV{ID_INPUT_JOYSTICK}=="1", ENV{ID_BUS}=="bluetooth"
+
+LOG="/tmp/retromi-bt-hotplug.log"
+LOCKFILE="/tmp/retromi-bt-hotplug.lock"
+
+# Prevent concurrent execution (multiple udev events fire at once)
+exec 9>"$LOCKFILE"
+flock -n 9 || exit 0
+
+log() { echo "[$(date '+%H:%M:%S')] $*" >> "$LOG" 2>/dev/null; }
+
+log "=== BT joystick hotplug: ${DEVNAME:-unknown} ==="
+
+# Small delay for device to stabilize
+sleep 2
+
+# Regenerate RetroArch bindings
+if [ -x /usr/local/bin/retromi-pad-config ]; then
+    /usr/local/bin/retromi-pad-config
+    log "retromi-pad-config done"
+fi
+
+# Restart ES so it detects the new BT joystick
+# ES uses SDL which only enumerates joysticks at startup
+if pgrep -f '/emulationstation$' &>/dev/null; then
+    touch /tmp/es-restart
+    kill "$(pgrep -f '/emulationstation$')" 2>/dev/null
+    log "ES restart triggered"
+fi
+
+log "=== done ==="

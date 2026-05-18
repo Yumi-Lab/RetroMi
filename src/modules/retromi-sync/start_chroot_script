@@ -1,0 +1,51 @@
+#!/usr/bin/env bash
+#### retromi-sync — cloud agent daemon + OTA update
+####
+#### Clones retromi-sync, installs Python deps, enables service + menu entry
+####
+#### This File is distributed under GPLv3
+
+# shellcheck enable=require-variable-braces
+# Source error handling, leave this in place
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+
+echo_green "Installing retromi-sync agent..."
+
+# Clone the repo
+git clone --depth 1 https://github.com/Yumi-Lab/retromi-sync.git /opt/retromi-sync
+
+# Python dependencies
+pip3 install --break-system-packages -r /opt/retromi-sync/requirements.txt
+
+# Default config
+mkdir -p /etc/retromi-sync
+cp /opt/retromi-sync/config.json.example /etc/retromi-sync/config.json
+
+# Systemd service (nice 19, CPUWeight=10 — emulation is priority)
+cp /opt/retromi-sync/retromi-sync.service /etc/systemd/system/
+systemctl enable retromi-sync
+
+# Menu entry
+cp /opt/retromi-sync/retromi-update.sh /opt/retropie/retropiemenu/retromi-update.sh
+chmod +x /opt/retropie/retropiemenu/retromi-update.sh
+
+# State directory + initial hash
+mkdir -p /var/lib/retromi-sync
+cd /opt/retromi-sync
+git rev-parse HEAD > /var/lib/retromi-sync/current_hash
+
+# Add to gamelist.xml for RetroPie menu
+RPMENU="/opt/retropie/retropiemenu"
+GAMELIST="${RPMENU}/gamelist.xml"
+if [ -f "${GAMELIST}" ] && ! grep -q "retromi-update" "${GAMELIST}"; then
+    sed -i '/<\/gameList>/i\  <game>\n    <path>./retromi-update.sh</path>\n    <name>RetroMi Update</name>\n    <desc>Check for updates and apply them (OTA).</desc>\n  </game>' "${GAMELIST}"
+    echo_green "RetroMi Update added to retropiemenu"
+fi
+
+echo_green "Installing retromi-sync agent...(DONE)"

@@ -1,0 +1,134 @@
+#!/bin/sh
+
+# Package manager wrapper around pacman
+# Provides install/remove/list/refresh/update/clean
+
+DEST_PKG=/userdata/system/pacman/pkg
+DB_FILE=/userdata/system/pacman/db/db.lck
+
+do_help() {
+	echo "$0 install <package>" >&2
+	echo "$0 remove  <package>" >&2
+	echo "$0 list" >&2
+	echo "$0 list-repositories" >&2
+	echo "$0 clean" >&2
+	echo "$0 clean-all" >&2
+	echo "$0 refresh" >&2
+	echo "$0 update" >&2
+}
+
+do_bepatient() {
+	local COUNT=0
+	while kill -0 $PID 2>/dev/null; do
+		COUNT=$((COUNT+5))
+		[ $COUNT -gt 100 ] && COUNT=0
+		echo "$USER_INFO_INSIZE to extract ...>>>$COUNT"
+		sleep 0.1
+	done
+}
+
+do_getPer() {
+	local TARFILE="$1"
+	local TARVAL="$2"
+	local PER; local CURVAL
+	until [ -f "$TARFILE" ]; do
+		sleep 0.1
+		kill -0 $PID 2>/dev/null || return
+	done
+	while [ -f "$TARFILE" ]; do
+		CURVAL=$(stat "$TARFILE" | grep -E '^[ ]*Size:' | sed -e s+'^[ ]*Size: \([0-9][0-9]*\) .*$'+'\1'+)
+		PER=$(expr ${CURVAL} '*' 100 / ${TARVAL})
+		echo "[${USER_INFO_DLSIZE}] - '${NAME}' >>>${PER}"
+		sleep 0.5
+		kill -0 $PID 2>/dev/null || break
+	done
+}
+
+do_clean () {
+	if ! lsof | grep ${DB_FILE}; then
+		rm -f ${DB_FILE}
+	fi
+}
+
+if [ $# -eq 0 ]; then
+	do_help
+	exit 1
+fi
+
+ACTION=$1
+PKG=$2
+do_clean
+
+[ -t 1 ] && TERMINAL=1 || TERMINAL=0
+
+case "${ACTION}" in
+    "install")
+	if [ $TERMINAL -eq 1 ]; then
+		pacman --noconfirm -Sw "${PKG}" --overwrite 'userdata/*'
+		RET=$?
+		if [ ${RET} -eq 1 ]; then
+			echo "Download error!"
+		else
+			pacman --noconfirm -S "${PKG}" --overwrite 'userdata/*'
+			RET=$?
+		fi
+	else
+		SIZE=$(pacman -Sw --print-format "%s" "${PKG}")
+		FILE=$(basename $(pacman -Sw --print-format "%l" "${PKG}"))
+		NAME=$(pacman -Si "${PKG}" | grep "Description" | awk '{print substr($0, index($0, $3))}' | cut -c 1-20)
+		USER_INFO_DLSIZE=$(pacman -Si "${PKG}" | grep "Download Size" | awk '{print $4$5}')
+		USER_INFO_INSIZE=$(pacman -Si "${PKG}" | grep "Installed Size" | awk '{print $4$5}')
+		pacman --noconfirm -Sw "${PKG}" --overwrite 'userdata/*' 2>&1 >/dev/null &
+		PID=$!
+		do_getPer "${DEST_PKG}/${FILE}.part" "$SIZE"
+		wait "$PID"
+		RET=$?
+		if [ ${RET} -eq 0 ]; then
+			pacman --noconfirm -S "${PKG}" --overwrite 'userdata/*' 2>&1 >/dev/null &
+			PID=$!; RET=$?
+			do_bepatient
+		else
+			echo "Download error!"
+			sleep 5
+		fi
+	fi
+	exit ${RET}
+	;;
+    "remove")
+	pacman --noconfirm -R "${PKG}"
+	exit $?
+	;;
+    "list")
+	if test ! -e /userdata/system/pacman/db/sync/batocera.db; then
+		pacman --noconfirm -Sy
+	fi
+	if [ $TERMINAL -eq 1 ]; then
+		pacman --noconfirm -Ss
+	else
+		pacman --noconfirm -Ss --xml
+	fi
+	exit $?
+	;;
+    "refresh")
+	pacman --noconfirm -Sy
+	exit $?
+	;;
+    "clean")
+	pacman --noconfirm -Sc
+	exit $?
+	;;
+    "clean-all")
+	rm -f "${DEST_PKG}/"*
+        exit $?
+	;;
+    "update")
+	pacman --noconfirm -Syu --overwrite 'userdata/*'
+	exit $?
+	;;
+    "list-repositories")
+	# python script to parse pacman-conf
+	;;
+	*)
+		do_help
+		exit 1
+esac

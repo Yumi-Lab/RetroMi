@@ -1,0 +1,82 @@
+#!/bin/sh
+
+# ConnMan init script — WiFi network manager
+# Reads wifi.enabled, wifi.ssid, wifi.key from batocera.conf
+# Creates connman config files in /var/lib/connman/
+# Supports multiple SSIDs (wifi, wifi2, wifi3, wifi.hidden)
+# Uses connmanctl for wifi enable/disable/scan
+
+BATOCONF="/userdata/system/batocera.conf"
+BOOTCONF="/boot/batocera-boot.conf"
+
+if ! [ -f "$BATOCONF" ]; then
+    BATOCONF="$BOOTCONF"
+fi
+
+settingsWlan="$(/usr/bin/batocera-settings-get -f "$BATOCONF" wifi.enabled)"
+
+batocera_wifi_configure() {
+    X=$1
+    settings_hide=false; settings_name="${X}"
+    [ "$X" = "1" ] && { X=; settings_name=default; }
+    [ "$X" = ".hidden" ] && { settings_name=hidden_AP; settings_hide=true; }
+
+    settings_ssid="$(/usr/bin/batocera-settings-get -f "$BATOCONF" wifi${X}.ssid)"
+    settings_key="$(/usr/bin/batocera-settings-get -f "$BATOCONF" wifi${X}.key)"
+    settings_file="/var/lib/connman/batocera_wifi${X}.config"
+
+    if [ -n "$settings_ssid" -a "$settingsWlan" = "1" ];then
+        mkdir -p "/var/lib/connman"
+        cat > "${settings_file}" <<-_EOF_
+		[global]
+		Name=batocera
+		[service_batocera_${settings_name}]
+		Type=wifi
+		Name=${settings_ssid}
+		Hidden=${settings_hide}
+		Passphrase=${settings_key}
+		Autoconnect=true
+	_EOF_
+    else
+        rm "${settings_file}" 2>/dev/null
+    fi
+}
+
+wifi_configure_all() {
+    for i in 1 2 3 .hidden; do
+	batocera_wifi_configure $i
+    done
+}
+
+wifi_enable() {
+    settingsCountry="$(/usr/bin/batocera-settings-get -f "$BATOCONF" wifi.country)"
+    [ -n "$settingsCountry" ] && /usr/sbin/iw reg set "$settingsCountry"
+    if [ "$settingsWlan" != "1" ];then
+	connmanctl disable wifi 2>/dev/null
+	return
+    fi
+    connmanctl enable wifi 2>/dev/null
+    connmanctl scan wifi 2>/dev/null
+}
+
+case "$1" in
+	start)
+	        wifi_configure_all
+	        start-stop-daemon -S -q -m -b -p /var/run/connmand.pid --exec /usr/sbin/connmand -- -n -r
+		N=0
+		connmanctl state 2>/dev/null | grep -qE '^[ ]*State[ ]='
+		while test $? -ne 0 -a $N -lt 5; do
+		    N=$((N+1))
+		    sleep 1
+		    connmanctl state 2>/dev/null | grep -qE '^[ ]*State[ ]='
+		done
+		sleep 0.5
+		wifi_enable &
+		;;
+	stop)
+		start-stop-daemon -K -q -p /var/run/connmand.pid
+		;;
+	restart|reload)
+		$0 stop; sleep 1; $0 start
+		;;
+esac

@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# Central config management script
+# Commands: overscan, canupdate, update, storage, setRootPassword,
+#           getRootPassword, tz, forgetBT, lsoutputs, module, gpiocontrollers
+
+if [ ! "$1" ];then
+	printf "usage : batocera-config [command] [args]\n"
+	exit 1
+fi
+
+configFile="/boot/config.txt"
+storageFile="/boot/batocera-boot.conf"
+command="$1"
+mode="$2"
+board=$(cat /boot/boot/batocera.board)
+updateurl="https://updates.batocera.org"
+
+preBootConfig() { mount -o remount,rw /boot; }
+postBootConfig() { mount -o remount,ro /boot; }
+
+# getRootPassword: returns "linux" if security disabled, else decodes from storageFile
+# setRootPassword: generates random password if none provided, encodes via batocera-encode
+# overscan: enable/disable/set overscan values in config.txt
+# canupdate: checks update server for new version
+# update: calls batocera-upgrade
+# storage: manage INTERNAL/ANYEXTERNAL/RAM/DEV storage in batocera-boot.conf
+# forgetBT: wipes all bluetooth pairings
+# tz: get/set timezone
+# module: load/unload kernel modules
+# gpiocontrollers: shortcut for mk_arcade_joystick_rpi module
+
+# See full script in original for complete implementation

@@ -10,7 +10,7 @@ DOWNLOAD_URL_IMAGE="https://github.com/Yumi-Lab/SmartPi-armbian/releases/downloa
 BASE_IMAGE_ENLARGEROOT=12000
 
 # pkgupgrade temporarily removed — armbian-firmware 26.2.1 dpkg broken upstream
-MODULES="base(udev_fix,armbian(armbian_net,retropie,controllers,retroarch,bezels,yumios,plymouth,filebroswer,samba,emulatiostation,usb-mount))"
+MODULES="base(udev_fix,armbian(armbian_net,retropie,controllers,retroarch,bezels,yumios,plymouth,filebroswer,samba,emulatiostation,usb-mount,retromi-sync))"
 
 # SmartPi One — AllWinner H3 — ARMv7 32-bit
 BASE_ARCH="armhf"

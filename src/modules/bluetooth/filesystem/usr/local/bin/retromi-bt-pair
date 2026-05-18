@@ -1,0 +1,96 @@
+#!/bin/bash
+# retromi-bt-pair — On-demand Bluetooth gamepad pairing (Recalbox-style)
+#
+# Scans for BT gamepads in pairing mode for 60 seconds.
+# Filters by BlueZ Icon: input-gaming (same as Recalbox/Batocera).
+# Automatically pairs, trusts, and connects detected gamepads.
+# Then runs retromi-pad-config + restarts ES.
+#
+# Usage: retromi-bt-pair [timeout_seconds]
+
+SCAN_TIMEOUT="${1:-60}"
+LOG="/tmp/retromi-bt-pair.log"
+PAIRED=0
+
+log() { echo "[$(date '+%H:%M:%S')] $*" | tee -a "$LOG"; }
+
+cleanup() {
+    bluetoothctl scan off &>/dev/null
+    bluetoothctl pairable off &>/dev/null
+    bluetoothctl discoverable off &>/dev/null
+}
+trap cleanup EXIT
+
+: > "$LOG"
+log "=== retromi-bt-pair (${SCAN_TIMEOUT}s) ==="
+
+# Enable pairing mode
+bluetoothctl pairable on &>/dev/null
+bluetoothctl discoverable on &>/dev/null
+
+# Start scanning in background
+bluetoothctl scan on &>/dev/null &
+SCAN_PID=$!
+log "Scanning for gamepads..."
+
+# Poll for new gamepads every 5 seconds
+ELAPSED=0
+while [ "$ELAPSED" -lt "$SCAN_TIMEOUT" ]; do
+    sleep 5
+    ELAPSED=$((ELAPSED + 5))
+
+    # List all discovered devices
+    while IFS= read -r line; do
+        MAC=$(echo "$line" | awk '{print $2}')
+        [ -z "$MAC" ] && continue
+
+        # Skip already paired devices
+        if bluetoothctl info "$MAC" 2>/dev/null | grep -q "Paired: yes"; then
+            continue
+        fi
+
+        # Filter: only gamepads (Icon: input-gaming)
+        ICON=$(bluetoothctl info "$MAC" 2>/dev/null | grep "Icon:" | awk '{print $2}')
+        if [ "$ICON" != "input-gaming" ]; then
+            continue
+        fi
+
+        NAME=$(bluetoothctl info "$MAC" 2>/dev/null | grep "Name:" | sed 's/.*Name: //')
+        log "Gamepad found: ${NAME} (${MAC})"
+
+        # Pair + trust + connect
+        log "Pairing ${MAC}..."
+        if bluetoothctl pair "$MAC" 2>&1 | tee -a "$LOG" | grep -q "Pairing successful"; then
+            bluetoothctl trust "$MAC" &>/dev/null
+            bluetoothctl connect "$MAC" &>/dev/null
+            log "Paired and connected: ${NAME}"
+            PAIRED=$((PAIRED + 1))
+        else
+            log "Pairing failed for ${MAC}"
+        fi
+    done < <(bluetoothctl devices 2>/dev/null)
+done
+
+# Stop scan
+kill "$SCAN_PID" 2>/dev/null
+wait "$SCAN_PID" 2>/dev/null
+
+log "Scan complete. ${PAIRED} gamepad(s) paired."
+
+if [ "$PAIRED" -gt 0 ]; then
+    # Regenerate RetroArch bindings
+    if [ -x /usr/local/bin/retromi-pad-config ]; then
+        log "Running retromi-pad-config..."
+        /usr/local/bin/retromi-pad-config
+    fi
+
+    # Restart ES so it sees the new gamepad(s)
+    if pgrep -f '/emulationstation$' &>/dev/null; then
+        log "Restarting EmulationStation..."
+        touch /tmp/es-restart
+        kill "$(pgrep -f '/emulationstation$')" 2>/dev/null
+    fi
+fi
+
+log "=== done ==="
+exit 0

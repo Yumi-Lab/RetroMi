@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+# Shebang for better file detection
+#### retromi-sync — OTA update service
+####
+#### This File is distributed under GPLv3
+
+# shellcheck disable=all

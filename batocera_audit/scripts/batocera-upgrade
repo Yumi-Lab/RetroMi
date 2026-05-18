@@ -1,0 +1,45 @@
+#!/bin/bash
+
+# OTA upgrade script for Batocera
+# Downloads boot.tar.xz from update server, verifies md5, extracts to /boot
+# Preserves config.txt and batocera-boot.conf during upgrade
+
+do_clean() {
+    test -n "${GETPERPID}" && kill -9 "${GETPERPID}"
+    rm -f "/userdata/system/upgrade/upgrade_message.txt"
+    rm -f "/userdata/system/upgrade/boot.tar.xz"
+    rm -f "/userdata/system/upgrade/boot.tar.xz.md5"
+    if test $# -eq 1; then
+        [ "$1" = "0" ] && echo "Finally syncing of disk ...>>>100"
+        [ "$1" = "1" ] && echo "removed downloaded files, sync disk now"
+    fi
+}
+trap do_clean EXIT
+
+do_upgmsg() {
+    if [ $TERMINAL -eq 0 ]; then
+        echo "$1" > /userdata/system/upgrade/upgrade_message.txt
+        [ -n "$2" ] && sleep $2
+    else
+        echo "$1"
+    fi
+}
+
+echo "Starting the upgrade..."
+
+updateurl="https://updates.batocera.org"
+board=$(cat /boot/boot/batocera.board)
+updatetype="$(/usr/bin/batocera-settings-get updates.type)"
+settingsupdateurl="$(/usr/bin/batocera-settings-get updates.url)"
+test -n "${settingsupdateurl}" && updateurl="${settingsupdateurl}"
+test "${updatetype}" != "stable" -a "${updatetype}" != "unstable" -a "${updatetype}" != "butterfly" && updatetype="stable"
+
+DWD_HTTP_DIR="${updateurl}/${board}/${updatetype}/last"
+test $# -eq 1 && DWD_HTTP_DIR="$1"
+
+[ -t 1 ] && TERMINAL=1 || TERMINAL=0
+
+mkdir -p /userdata/system/upgrade || exit 1
+
+url="${DWD_HTTP_DIR}/boot.tar.xz"
+# ... download, verify md5, extract to /boot, restore config files ...

@@ -1,0 +1,30 @@
+#!/bin/bash
+#
+# Manage timezones
+#
+
+function detect_tz() {
+	TZ="$(curl -sfL https://ipapi.co/json/ | grep timezone | sed 's/.*: *"\(.*\)",/\1/')"
+	[[ -z "$TZ" ]] || echo "$TZ"
+}
+
+function tz_get() {
+	TZ="$(/usr/bin/batocera-settings-get system.timezone)"
+	[[ -z "$TZ" ]] || echo "$TZ"
+}
+
+function tz_set() {
+	/usr/bin/batocera-settings-set system.timezone "$1"
+}
+
+command="$1"
+tz="$2"
+if [ x"$command" == "xdetect" ]; then
+	detect_tz
+elif [ x"$command" == "xset" ]; then
+	[ x"$tz" != "x" ] && tz_set "$tz" || usage
+elif [ x"$command" == "xget" ]; then
+	tz_get
+else
+	echo "Usage: $0 {detect|get|set <TZ>}"
+fi

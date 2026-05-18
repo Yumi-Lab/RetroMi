@@ -1,0 +1,123 @@
+#!/usr/bin/env bash
+#### RetroMi — Bluetooth gamepad configuration
+#### Tunes BlueZ for fast gamepad reconnection and prepares hid-playstation DKMS.
+#### Manettes BT supportées : DS4/DS5 (hid-playstation), Xbox (xpadneo), Switch Pro (hid-nintendo), 8BitDo.
+
+# shellcheck enable=require-variable-braces
+set -Ee
+
+# Source CustomPIOS common.sh
+# shellcheck disable=SC1091
+source /common.sh
+install_cleanup_trap
+
+echo_green "Configuring Bluetooth for gamepad support..."
+
+# --- BlueZ main.conf tuning for fast gamepad reconnection ---
+BLUEZ_CONF="/etc/bluetooth/main.conf"
+
+if [ -f "${BLUEZ_CONF}" ]; then
+    # FastConnectable — reduces reconnection latency for gamepads
+    if grep -q "^#.*FastConnectable" "${BLUEZ_CONF}"; then
+        sed -i 's/^#.*FastConnectable.*/FastConnectable = true/' "${BLUEZ_CONF}"
+    elif ! grep -q "^FastConnectable" "${BLUEZ_CONF}"; then
+        sed -i '/^\[General\]/a FastConnectable = true' "${BLUEZ_CONF}"
+    fi
+
+    # JustWorksRepairing — allow re-pairing without PIN (all gamepads use JustWorks)
+    if grep -q "^#.*JustWorksRepairing" "${BLUEZ_CONF}"; then
+        sed -i 's/^#.*JustWorksRepairing.*/JustWorksRepairing = always/' "${BLUEZ_CONF}"
+    elif ! grep -q "^JustWorksRepairing" "${BLUEZ_CONF}"; then
+        sed -i '/^\[General\]/a JustWorksRepairing = always' "${BLUEZ_CONF}"
+    fi
+
+    # ReconnectAttempts — retry connecting to trusted gamepads after boot
+    if grep -q "^#.*ReconnectAttempts" "${BLUEZ_CONF}"; then
+        sed -i 's/^#.*ReconnectAttempts.*/ReconnectAttempts=7/' "${BLUEZ_CONF}"
+    elif ! grep -q "^ReconnectAttempts" "${BLUEZ_CONF}"; then
+        sed -i '/^\[Policy\]/a ReconnectAttempts=7' "${BLUEZ_CONF}"
+    fi
+
+    # ReconnectIntervals — exponential backoff for reconnection attempts
+    if grep -q "^#.*ReconnectIntervals" "${BLUEZ_CONF}"; then
+        sed -i 's/^#.*ReconnectIntervals.*/ReconnectIntervals=1,2,4,8,16,32,64/' "${BLUEZ_CONF}"
+    elif ! grep -q "^ReconnectIntervals" "${BLUEZ_CONF}"; then
+        sed -i '/^ReconnectAttempts/a ReconnectIntervals=1,2,4,8,16,32,64' "${BLUEZ_CONF}"
+    fi
+
+    # AutoEnable — ensure BT adapter is powered on at boot (should already be set)
+    if ! grep -q "^AutoEnable=true" "${BLUEZ_CONF}"; then
+        sed -i '/^\[Policy\]/a AutoEnable=true' "${BLUEZ_CONF}"
+    fi
+
+    echo_green "BlueZ main.conf tuned for gamepad reconnection"
+fi
+
+# --- Deploy config files and scripts ---
+unpack /filesystem/etc/modules-load.d /etc/modules-load.d
+unpack /filesystem/etc/modprobe.d /etc/modprobe.d
+unpack /filesystem/usr/local/bin /usr/local/bin
+chmod +x /usr/local/bin/retromi-bt-pair
+chmod +x /usr/local/bin/retromi-bt-hotplug
+
+# --- Deploy pairing menu entry to retropiemenu ---
+RPMENU="/opt/retropie/retropiemenu"
+if [ -d "${RPMENU}" ]; then
+    unpack /filesystem/opt/retropie/retropiemenu "${RPMENU}"
+    chmod +x "${RPMENU}/bluetooth-pair.sh"
+
+    # Add to gamelist.xml if not already present
+    GAMELIST="${RPMENU}/gamelist.xml"
+    if [ -f "${GAMELIST}" ] && ! grep -q "bluetooth-pair" "${GAMELIST}"; then
+        sed -i '/<\/gameList>/i\  <game>\n    <path>./bluetooth-pair.sh</path>\n    <name>Pair Bluetooth Controller</name>\n    <desc>Scan and pair Bluetooth gamepads (DS4, Xbox, Switch Pro, 8BitDo).</desc>\n  </game>' "${GAMELIST}"
+        echo_green "Bluetooth pairing added to retropiemenu"
+    fi
+fi
+
+# --- Add udev rule for BT joystick hotplug → ES restart ---
+BT_UDEV="/etc/udev/rules.d/81-retromi-bt-hotplug.rules"
+cat > "${BT_UDEV}" << 'UDEV_BT'
+# RetroMi — Restart ES when a Bluetooth joystick connects (ES has no SDL hot-plug)
+ACTION=="add", SUBSYSTEM=="input", ENV{ID_INPUT_JOYSTICK}=="1", ENV{ID_BUS}=="bluetooth", KERNEL=="js*", RUN+="/usr/local/bin/retromi-bt-hotplug"
+UDEV_BT
+echo_green "BT hotplug udev rule installed"
+
+# --- hid-playstation DKMS — DS4 v2 BT/USB + DualSense support ---
+# The Armbian kernel 6.18 has CONFIG_HID_SONY=m but NOT CONFIG_HID_PLAYSTATION
+# because CONFIG_LEDS_CLASS_MULTICOLOR is not set. We compile both modules via DKMS.
+# Sources are downloaded here (chroot has internet), compiled at firstboot (real hardware).
+# Same pattern as xpadneo.
+
+DKMS_NAME="hid-playstation"
+DKMS_VERSION="1.0"
+DKMS_SRC="/usr/src/${DKMS_NAME}-${DKMS_VERSION}"
+KERNEL_TAG="v6.18"
+KERNEL_RAW="https://raw.githubusercontent.com/torvalds/linux/${KERNEL_TAG}"
+
+mkdir -p "${DKMS_SRC}"
+
+echo_green "Downloading hid-playstation kernel sources (${KERNEL_TAG})..."
+
+# Main driver source
+curl -fSL --retry 3 --connect-timeout 15 \
+    -o "${DKMS_SRC}/hid-playstation.c" \
+    "${KERNEL_RAW}/drivers/hid/hid-playstation.c"
+
+# Dependency: led-class-multicolor (not compiled in Armbian sunxi kernel)
+curl -fSL --retry 3 --connect-timeout 15 \
+    -o "${DKMS_SRC}/led-class-multicolor.c" \
+    "${KERNEL_RAW}/drivers/leds/led-class-multicolor.c"
+
+# Internal header required by hid-playstation.c
+curl -fSL --retry 3 --connect-timeout 15 \
+    -o "${DKMS_SRC}/hid-ids.h" \
+    "${KERNEL_RAW}/drivers/hid/hid-ids.h"
+
+# Deploy DKMS config and Makefile from filesystem/
+unpack /filesystem/usr/src/${DKMS_NAME}-${DKMS_VERSION} "${DKMS_SRC}"
+
+# Register DKMS source (compilation happens at firstboot on real hardware)
+dkms add "${DKMS_NAME}/${DKMS_VERSION}" 2>/dev/null || true
+
+echo_green "hid-playstation DKMS sources prepared (build at firstboot)"
+echo_green "Bluetooth gamepad configuration installed. (DONE)"

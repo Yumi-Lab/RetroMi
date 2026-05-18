@@ -1,0 +1,89 @@
+#!/bin/sh
+
+f_usage() {
+	echo "$0 list" >&2
+	echo "$0 set <VALUE>" >&2
+}
+
+ARCH="$(cat /usr/share/batocera/batocera.arch)"
+GRPICONFFILE="/boot/config.txt"
+GODROIDCONFFILE="/boot/batocera-boot.conf"
+
+if test "${ARCH}" = "bcm2836" || test "${ARCH}" = "bcm2837"
+then
+	RPIMODEL="/proc/device-tree/model"
+	if grep -q "^Raspberry Pi 2" ${RPIMODEL}; then ARCH="bcm2836"
+	elif grep -q "^Raspberry Pi 3 Model [A-Z] Plus" ${RPIMODEL}; then ARCH="rpi3+"
+	elif grep -q "^Raspberry Pi 3" ${RPIMODEL}; then ARCH="rpi3"
+	elif grep -q "^Raspberry Pi Zero 2" ${RPIMODEL}; then ARCH="rpizero2"
+	fi
+fi
+
+preBootRWConfig() { mount -o remount,rw /boot; }
+postBootRWConfig() { mount -o remount,ro /boot; }
+
+doList() {
+    case "${ARCH}" in
+    "bcm2835")
+	    echo "none NONE"
+	    echo "high HIGH (950Mhz)"
+	    echo "turbo TURBO (1000Mhz)"
+	    echo "extreme EXTREME (1100Mhz)"
+	;;
+	"bcm2836")
+	    echo "none NONE (900Mhz)"
+	    echo "high HIGH (1050Mhz)"
+	;;
+	"rpi3")
+	    echo "none NONE (1200Mhz)"
+	    echo "high HIGH (1300Mhz)"
+	    echo "turbo TURBO (1325Mhz)"
+	    echo "extreme EXTREME (1350Mhz)"
+	    ;;
+	"rpi3+")
+	    echo "none NONE (1400Mhz)"
+	    echo "high HIGH (1425Mhz)"
+	    echo "turbo TURBO (1450Mhz)"
+	    echo "extreme EXTREME (1500Mhz)"
+	    ;;
+	"bcm2711")
+	    echo "none NONE (B0 - 1500Mhz or C0 - 1800MHz)"
+	    echo "high HIGH (B0 HEATSINK - 1700Mhz)"
+	    echo "turbo TURBO (B0 HEATSINK - 1800Mhz)"
+		echo "extreme EXTREME (HEATSINK & FAN 1950Mhz)"
+		echo "ruinsane INSANE (HEATSINK & FAN 2100Mhz)"
+		echo "cm4 CAUTION (C0 stepping only - HEATSINK & FAN 2275Mhz)"
+	    ;;
+    "rpizero2")
+	    echo "none NONE (1000Mhz)"
+	;;
+	*)
+	    echo "none NONE"
+    esac
+}
+
+# ... (setValue functions same as original) ...
+
+if [ $# -eq 0 ]; then
+	f_usage
+	exit 1
+fi
+
+ACTION=$1
+shift
+
+case "${ACTION}" in
+    "list")
+	if ! doList; then exit 1; fi
+	;;
+    "set")
+	VALUE=$1
+	if ! setValue "${VALUE}"; then exit 1; fi
+	;;
+	*)
+		f_usage
+		>&2 echo "error: invalid command ${ACTION}"
+		exit 1
+esac
+
+exit 0

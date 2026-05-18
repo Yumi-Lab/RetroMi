@@ -1,0 +1,43 @@
+#!/bin/bash
+
+# DRM-based resolution management
+# Uses batocera-drminfo to enumerate outputs and modes
+# Stores current connector in /var/run/drmConn, mode in /var/run/drmMode
+# Supports: listModes, setMode, currentMode, currentResolution,
+#           listOutputs, setOutput, minTomaxResolution
+
+ACTION=$1
+shift
+
+f_usage() {
+    echo "${0} listModes" >&2
+    echo "${0} setMode <MODE>" >&2
+    echo "${0} currentMode" >&2
+    echo "${0} currentResolution" >&2
+    echo "${0} listOutputs" >&2
+    echo "${0} setOutput <output>" >&2
+    echo "${0} minTomaxResolution" >&2
+    echo "${0} minTomaxResolution-secure" >&2
+    echo "${0} getDisplayMode" >&2
+}
+
+f_getConnectors() {
+    for GPU in /dev/dri/card*
+    do
+	batocera-drminfo "${GPU}" 2>/dev/null
+    done | cut -d '.' -f 1 | sort -u
+}
+
+f_checkVals() {
+    CONN=$(cat /var/run/drmConn 2>/dev/null)
+    if echo "${CONN}" | grep -qE '^[0-9]+$'; then
+	if ! f_getConnectors | grep -qE "^${CONN}$"; then
+	    echo f_getConnectors | head -1 > /var/run/drmMode
+	fi
+    else
+	f_getConnectors | head -1 > /var/run/drmConn
+	echo 0 > /var/run/drmMode
+    fi
+}
+
+# ... (full implementation in original) ...
