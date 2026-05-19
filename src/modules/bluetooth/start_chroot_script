@@ -117,7 +117,7 @@ curl -fSL --retry 3 --connect-timeout 15 \
 unpack /filesystem/usr/src/${DKMS_NAME}-${DKMS_VERSION} "${DKMS_SRC}"
 
 # Register DKMS source (compilation happens at firstboot on real hardware)
-dkms add "${DKMS_NAME}/${DKMS_VERSION}" 2>/dev/null || true
+dkms add "${DKMS_NAME}/${DKMS_VERSION}"
 
 echo_green "hid-playstation DKMS sources prepared (build at firstboot)"
 echo_green "Bluetooth gamepad configuration installed. (DONE)"
