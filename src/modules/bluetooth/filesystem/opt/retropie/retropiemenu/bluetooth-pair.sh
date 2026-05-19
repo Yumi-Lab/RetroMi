@@ -4,12 +4,10 @@
 
 DIALOG="$(which dialog)"
 
-"$DIALOG" --backtitle "RetroMi — Bluetooth" \
+if ! "$DIALOG" --backtitle "RetroMi — Bluetooth" \
     --title "Pair Bluetooth Controller" \
     --yes-label "Start" --no-label "Cancel" \
-    --yesno "\nPut your controller in pairing mode:\n\n  DS4/DS5:  PS + Share (3 seconds)\n  Xbox:     Sync button (top)\n  Switch:   Sync button (side)\n  8BitDo:   Power on + pairing combo\n\nRetroMi will scan for 60 seconds.\nES will restart after pairing.\n" 16 50
-
-if [ $? -ne 0 ]; then
+    --yesno "\nPut your controller in pairing mode:\n\n  DS4/DS5:  PS + Share (3 seconds)\n  Xbox:     Sync button (top)\n  Switch:   Sync button (side)\n  8BitDo:   Power on + pairing combo\n\nRetroMi will scan for 60 seconds.\nES will restart after pairing.\n" 16 50; then
     exit 0
 fi
 

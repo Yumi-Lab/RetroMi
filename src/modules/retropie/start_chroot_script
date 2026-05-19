@@ -233,8 +233,8 @@ declare -A DEFAULT_EMUS=(
 for system in "${!DEFAULT_EMUS[@]}"; do
     cfg="/opt/retropie/configs/${system}/emulators.cfg"
     if [ -f "${cfg}" ] && ! grep -q "^default" "${cfg}"; then
-        echo "default = \"${DEFAULT_EMUS[$system]}\"" >> "${cfg}"
-        echo_green "${system}: default set to ${DEFAULT_EMUS[$system]}"
+        echo "default = \"${DEFAULT_EMUS[${system}]}\"" >> "${cfg}"
+        echo_green "${system}: default set to ${DEFAULT_EMUS[${system}]}"
     fi
 done
 
