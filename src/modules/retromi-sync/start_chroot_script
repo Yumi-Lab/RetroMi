@@ -17,6 +17,10 @@ install_cleanup_trap
 
 echo_green "Installing retromi-sync agent..."
 
+# Ensure pip is available
+apt-get update
+apt-get install -y python3-pip
+
 # Clone the repo
 git clone --depth 1 https://github.com/Yumi-Lab/retromi-sync.git /opt/retromi-sync
 
