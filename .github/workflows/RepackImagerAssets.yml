@@ -1,0 +1,73 @@
+name: Repack imager assets
+
+# Converts the split-7z release image into split .img.xz parts that
+# SmartPi Imager can flash directly. Each part is a complete xz stream;
+# concatenated they decode to the full image, and every part stays under
+# the GitHub 2 GiB release asset limit.
+#
+#   <base>.img.7z.001/.002  ->  <base>.01.img.xz + <base>.02.img.xz + ...
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag to repack (ex: 1.0.4)"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+jobs:
+  repack:
+    name: Repack ${{ github.event.inputs.version }} as split xz
+    runs-on: ubuntu-latest
+    steps:
+      - name: Repack and upload
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ github.event.inputs.version }}
+          REPO: ${{ github.repository }}
+        run: |
+          set -e
+          sudo apt-get update && sudo apt-get install -y p7zip-full
+
+          # /mnt has far more free space than / on the runners
+          sudo mkdir -p /mnt/work && sudo chown "$(id -u)" /mnt/work
+          cd /mnt/work
+
+          echo "== Downloading 7z parts"
+          gh release download "$VERSION" --repo "$REPO" --pattern "*.img.7z.*" --pattern "*.img.sha256"
+          ls -la
+
+          echo "== Extracting"
+          7z x -y ./*.img.7z.001
+          rm -f ./*.img.7z.0*
+          IMG=$(ls ./*.img | head -n1)
+          echo "Image: $IMG ($(stat -c%s "$IMG") bytes)"
+
+          echo "== Verifying against released image checksum"
+          EXPECTED=$(awk '{print $1}' ./*.img.sha256 | head -n1)
+          ACTUAL=$(sha256sum "$IMG" | cut -d' ' -f1)
+          if [ "$EXPECTED" != "$ACTUAL" ]; then
+            echo "ERROR: extracted image sha256 mismatch ($ACTUAL != $EXPECTED)" >&2
+            exit 1
+          fi
+
+          echo "== Splitting and compressing"
+          BASE="${IMG%.img}"
+          split -b 3584M -d -a 2 --additional-suffix=.chunk "$IMG" "${BASE}."
+          rm -f "$IMG"
+          for CHUNK in "${BASE}".*.chunk; do
+            NUM=$(echo "$CHUNK" | sed -E 's/.*\.([0-9]+)\.chunk/\1/')
+            # xz numbers from 01 for natural sort order
+            OUT="${BASE}.$(printf '%02d' $((10#$NUM + 1))).img.xz"
+            echo "  $CHUNK -> $OUT"
+            xz -T0 -6 -c "$CHUNK" > "$OUT"
+            rm -f "$CHUNK"
+          done
+          ls -la ./*.img.xz
+          sha256sum ./*.img.xz > "${BASE}.img.xz.parts.sha256"
+
+          echo "== Uploading to release"
+          gh release upload "$VERSION" --repo "$REPO" --clobber ./*.img.xz "${BASE}.img.xz.parts.sha256"
